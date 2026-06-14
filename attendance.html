@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Attendance System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap');
+        body { font-family: 'IBM Plex Sans Thai', sans-serif; background-color: #F8F9FC; -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
+        .input-modern { border: 2px solid #E2E8F0; border-radius: 18px; padding: 16px; width: 100%; text-align: center; font-weight: 700; outline: none; transition: all 0.2s; background: white; appearance: none; }
+        .input-modern:focus { border-color: #0056FF; box-shadow: 0 0 0 4px rgba(0, 86, 255, 0.1); }
+        .input-error { border-color: #EF4444 !important; background-color: #FEF2F2 !important; color: #991B1B !important; }
+        .btn-toggle { border-radius: 20px; font-weight: 800; border: 2px solid #E2E8F0; background: white; padding: 16px; width: 100%; transition: all 0.2s; }
+        .btn-blue-active { background: #0056FF !important; color: #fff !important; border-color: #0056FF !important; }
+        .btn-red-active { background: #DC2626 !important; color: #fff !important; border-color: #DC2626 !important; }
+        .shift-chip { background: white; border-radius: 14px; border: 2px solid #E2E8F0; padding: 12px; font-weight: 700; font-size: 14px; transition: 0.2s; }
+        .shift-chip-active { background: #1E293B !important; color: #fff !important; border-color: #1E293B !important; }
+        .warning-box { background: #FFFBEB; border: 3px solid #F59E0B; border-radius: 9999px; padding: 12px 24px; }
+        .duplicate-box { background: #FEF2F2; border: 3px solid #EF4444; border-radius: 9999px; padding: 12px 24px; }
+        .modal-overlay { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(10px); display: none; position: fixed; inset: 0; z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+        .modal-card { background: white; border-radius: 32px; padding: 32px; width: 100%; max-width: 400px; }
+        .modal-success #summary-content { display: none !important; }
+        .btn-ok-success { background: #1E293B !important; color: white !important; border: none !important; }
+        .step-hidden { display: none !important; }
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+    <script src="local-backend.js"></script>
+</head>
+<body class="text-slate-900 bg-[#F8F9FC] m-0 p-0">
+    <div id="summary-modal" class="modal-overlay">
+        <div id="modal-card" class="modal-card shadow-2xl space-y-6 text-center transition-all">
+            <h3 id="modal-title" class="text-2xl font-black tracking-tight text-slate-950">แจ้งเตือน</h3>
+            <div id="summary-content" class="border-y border-slate-100 py-6 text-sm w-full text-slate-800"></div>
+            <div id="admin-login-area" class="hidden space-y-4 pt-2">
+                <input type="password" id="admin-pass-input" class="input-modern" placeholder="ใส่รหัสผ่าน 5 หลัก" maxlength="5">
+                <p id="admin-login-error" class="text-xs text-red-500 font-bold hidden italic">✘ รหัสผ่านไม่ถูกต้อง</p>
+            </div>
+            <div id="modal-actions" class="flex gap-3 w-full">
+                <button id="btn-modal-close" onclick="closeModal()" class="flex-1 py-4 bg-slate-100 text-slate-900 rounded-2xl font-bold active:scale-95 transition">ยกเลิก</button>
+                <button id="btn-confirm-final" onclick="executeSave()" class="hidden flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-bold active:scale-95 transition">ยืนยันบันทึก</button>
+                <button id="btn-admin-login-submit" onclick="checkAdminPass()" class="hidden flex-1 py-4 bg-slate-800 text-white rounded-2xl font-bold active:scale-95 transition">ตกลง</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="add-user-modal" class="modal-overlay">
+        <div class="modal-card shadow-2xl space-y-6 text-center transition-all">
+            <h3 class="text-2xl font-black tracking-tight text-slate-950">เพิ่มรายชื่อใหม่</h3>
+            <div id="add-user-step-1" class="space-y-4 pt-2">
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="text-left space-y-1">
+                        <label class="text-[10px] font-bold text-slate-500 ml-2">ชื่อเล่น</label>
+                        <input type="text" id="new-name-nick" placeholder="ระบุชื่อเล่น" class="input-modern" style="padding: 12px;" oninput="checkNewNameFilled()">
+                    </div>
+                    <div class="text-left space-y-1">
+                        <label class="text-[10px] font-bold text-slate-500 ml-2">ชื่อจริง</label>
+                        <input type="text" id="new-name-first" placeholder="ระบุชื่อจริง" class="input-modern" style="padding: 12px;" oninput="checkNewNameFilled()">
+                    </div>
+                </div>
+                <div class="flex gap-3 w-full mt-4">
+                    <button onclick="closeAddUserModal()" class="flex-1 py-4 bg-slate-100 text-slate-900 rounded-2xl font-bold active:scale-95 transition">ยกเลิก</button>
+                    <button id="btn-add-user-next" onclick="nextAddUserStep()" class="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-bold active:scale-95 transition opacity-30" disabled>ยืนยัน</button>
+                </div>
+            </div>
+            <div id="add-user-step-2" class="hidden space-y-4 pt-2">
+                <p class="text-sm font-bold text-slate-500 mb-2">พิมพ์ยืนยันอีกครั้ง</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="text-left space-y-1">
+                        <label class="text-[10px] font-bold text-slate-500 ml-2">ยืนยันชื่อเล่น</label>
+                        <input type="text" id="new-name-nick-confirm" placeholder="ยืนยันชื่อเล่น" class="input-modern" style="padding: 12px;" oninput="checkNewNameMatch()">
+                    </div>
+                    <div class="text-left space-y-1">
+                        <label class="text-[10px] font-bold text-slate-500 ml-2">ยืนยันชื่อจริง</label>
+                        <input type="text" id="new-name-first-confirm" placeholder="ยืนยันชื่อจริง" class="input-modern" style="padding: 12px;" oninput="checkNewNameMatch()">
+                    </div>
+                </div>
+                <p id="new-match-error" class="text-[11px] font-bold text-red-500 hidden text-center mt-1 italic">✘ ชื่อที่พิมพ์ไม่ตรงกัน</p>
+                <div class="flex gap-3 w-full mt-4">
+                    <button onclick="prevAddUserStep()" class="flex-1 py-4 bg-slate-100 text-slate-900 rounded-2xl font-bold active:scale-95 transition">กลับ</button>
+                    <button id="btn-add-user-confirm" onclick="addNewUser()" class="flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-bold active:scale-95 transition opacity-30" disabled>บันทึกรายชื่อ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed top-5 left-5 z-50">
+        <button onclick="showAdminLogin()" class="bg-white/50 p-3 rounded-2xl text-slate-400 border border-slate-200 shadow-sm transition-all active:scale-90">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
+        </button>
+    </div>
+
+    <div id="cancel-area" class="hidden fixed top-5 right-5 z-50">
+        <button onclick="resetForm()" class="bg-slate-800 px-5 py-3 text-white rounded-2xl font-bold shadow-md active:scale-95 transition-all text-sm border border-slate-700">ยกเลิกบันทึก</button>
+    </div>
+
+    <div class="sticky top-0 z-40 bg-[#F8F9FC] shadow-sm pb-4 rounded-b-3xl">
+        <div class="px-5 pt-10 max-w-md mx-auto space-y-6">
+            <header class="text-center mb-6">
+                <h1 id="clock" class="text-6xl font-black tabular-nums tracking-tighter" style="font-family: 'Inter';">--:--:--</h1>
+                <p id="date-display" class="text-sm font-bold text-slate-400 mt-2 tracking-widest uppercase"></p>
+            </header>
+
+            <section id="step-1" class="space-y-4">
+                <h2 class="text-[10px] font-black text-slate-400 tracking-widest uppercase text-center">01. ระบุพนักงาน</h2>
+                <div class="relative">
+                    <input list="user-datalist" id="user-input" class="input-modern shadow-md border-slate-300" placeholder="พิมพ์ชื่อ หรือกดเลือก" oninput="handleNameInput()">
+                    <datalist id="user-datalist"></datalist>
+                    <p id="name-error" class="text-[11px] font-bold text-red-500 hidden text-center mt-2 italic">✘ ไม่พบชื่อที่ขึ้นต้นด้วยคำนี้ในระบบ</p>
+                </div>
+                <div id="confirm-area" class="hidden space-y-3 pt-2">
+                    <input type="text" id="user-confirm" placeholder="..." class="input-modern" oninput="checkConfirmMatch()">
+                    <p id="confirm-error" class="text-[11px] font-bold text-red-500 hidden text-center mt-1 italic">✘ ตัวอักษรที่พิมพ์ไม่ตรงกับชื่อที่เลือก</p>
+                </div>
+            </section>
+
+            <section id="step-2" class="step-hidden space-y-4 border-t pt-6 text-center">
+                <h2 class="text-[10px] font-black text-slate-400 tracking-widest uppercase">02. เลือกสถานะ</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="setMode('in')" id="btn-in" class="btn-toggle text-blue-600 shadow-sm">เข้า (IN)</button>
+                    <button onclick="setMode('out')" id="btn-out" class="btn-toggle text-red-600 shadow-sm">ออก (OUT)</button>
+                </div>
+            </section>
+
+            <section id="step-3" class="step-hidden space-y-4 border-t pt-6 text-center">
+                <h2 class="text-[10px] font-black text-slate-400 tracking-widest uppercase">03. เลือกเวลาตามตาราง</h2>
+                <div id="shift-area" class="grid grid-cols-3 gap-3"></div>
+                <div id="custom-time-area" class="hidden mt-4 p-5 bg-white rounded-[24px] border-2 border-dashed border-slate-200">
+                    <p class="text-[10px] font-bold text-slate-500 mb-2 italic text-center text-blue-600 tracking-widest uppercase">ระบุเวลาเอง (11:30 - 24:00)</p>
+                    <input type="text" id="custom-time" placeholder="HH:MM" maxlength="5" class="input-modern text-3xl font-black shadow-inner" oninput="formatTimeInput(this); checkCustomTimeRealtime(); validateFinal();">
+                    <p id="custom-time-error" class="text-[11px] font-bold text-red-500 hidden text-center mt-3 italic">✘ เวลาไม่ถูกต้อง (ระบุ 11:30-24:00 นาทีเป็น 00 หรือ 30)</p>
+                </div>
+            </section>
+
+            <section id="step-remark" class="step-hidden space-y-5 border-t pt-6">
+                <div id="time-warning" class="hidden warning-box"><div class="flex items-center gap-4"><input type="checkbox" id="time-confirm" class="w-7 h-7 rounded-lg text-orange-500 shadow-sm" onchange="validateFinal()"><label for="time-confirm" class="text-sm font-black text-orange-800">เวลาห่างเกิน 30 นาที ยืนยันว่าถูกต้อง</label></div></div>
+                <div id="duplicate-warning" class="hidden duplicate-box"><div class="flex items-center gap-4"><input type="checkbox" id="duplicate-confirm" class="w-7 h-7 rounded-lg text-red-500 shadow-sm" onchange="validateFinal()"><label for="duplicate-confirm" class="text-sm font-black text-red-800 italic" id="duplicate-label">บันทึกไปแล้ว ยืนยันว่าถูกต้อง</label></div></div>
+                <div class="bg-white rounded-[28px] p-6 border border-slate-200 shadow-sm transition-all" id="remark-card">
+                    <h2 class="text-[11px] font-black text-slate-500 tracking-widest uppercase mb-3 text-center transition-all" id="remark-title">04. หมายเหตุ <span id="remark-req-text" class="text-red-500 hidden">(บังคับกรอก)</span></h2>
+                    <textarea id="remark" rows="2" placeholder="ระบุหมายเหตุหากมี" class="input-modern text-sm w-full font-normal border-slate-300" oninput="validateFinal()"></textarea>
+                    <p id="remark-error" class="text-[10px] font-bold text-red-500 hidden text-center mt-2 italic tracking-tight">✘ กรุณาระบุข้อมูลอย่างน้อย 3 ตัวอักษร</p>
+                </div>
+            </section>
+
+            <div id="save-btn-container" class="step-hidden pt-4">
+                <button id="btn-save" disabled onclick="confirmData()" class="w-full py-5 bg-emerald-600 text-white rounded-[28px] font-black text-xl shadow-xl disabled:opacity-20 transition-all active:scale-95">ตรวจสอบข้อมูล 📋</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="px-5 max-w-md mx-auto pb-10">
+        <section id="history-section" class="pt-6 relative z-10">
+            <h2 class="text-sm font-black uppercase text-slate-700 text-center tracking-widest mb-4">ประวัติล่าสุด</h2>
+            <div class="relative">
+                <div id="history-list" class="space-y-3 max-h-[310px] overflow-y-auto custom-scroll pb-16 px-1"></div>
+                <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#F8F9FC] to-transparent pointer-events-none rounded-b-2xl"></div>
+            </div>
+        </section>
+    </div>
+
+    <div style="position: fixed; bottom: 10px; right: 10px; z-index: 100;" class="opacity-50 hover:opacity-100 transition-opacity">
+        <a class='flex items-center justify-center w-12 h-12 bg-white rounded-full shadow-lg text-2xl no-underline border border-slate-200' href='/payroll' title='เข้าระบบเงินเดือน'>⚙️</a>
+    </div>
+
+    <script>
+        let mode = '', shift = '', pendingEntry = null, isSuccessState = false; 
+        let userList = ["เมย์", "จอย", "มานี"]; let historyData = [];
+        const validCustomTimes = ["11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30","19:00","19:30","20:00","20:30","21:00","21:30","22:00","22:30","23:00","23:30","24:00"];
+        try {
+            const savedU = localStorage.getItem('att_saved_users'); if(savedU) { const p = JSON.parse(savedU); if(Array.isArray(p)) userList = p; }
+            
+            if (typeof google === 'undefined') {
+                const savedH = localStorage.getItem('att_v27_final'); if(savedH) { const pH = JSON.parse(savedH); if(Array.isArray(pH)) historyData = pH; }
+            } else {
+                google.script.run.withSuccessHandler(function(res) {
+                    if (res.history) { historyData = res.history; } else if (Array.isArray(res)) { historyData = res; }
+                    if (res.master && Array.isArray(res.master)) {
+                        userList = res.master.filter(function(m) { return m.status === 'active'; }).map(function(m) { return m.name; });
+                        renderDatalist();
+                    }
+                    renderHistory();
+                }).getInitPayrollData();
+            }
+        } catch (e) { console.log("Storage error"); }
+        function updateClock() {
+            const now = new Date(); let disp = new Date(now.getTime()); if (disp.getHours() < 5) disp.setDate(disp.getDate() - 1);
+            document.getElementById('clock').innerText = now.toLocaleTimeString('en-GB');
+            const d = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'], m = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+            document.getElementById('date-display').innerText = `วัน${d[disp.getDay()]}ที่ ${disp.getDate()} ${m[disp.getMonth()]} ${disp.getFullYear()}`;
+        }
+        setInterval(updateClock, 1000); updateClock();
+        function renderDatalist() {
+            const dl = document.getElementById('user-datalist'); dl.innerHTML = '';
+            userList.sort().forEach(function(n) { let o = document.createElement('option'); o.value = n; dl.appendChild(o); });
+            let add = document.createElement('option'); add.value = "+ เพิ่มรายชื่อใหม่"; dl.appendChild(add);
+        }
+        renderDatalist();
+        
+        function handleNameInput() {
+            const val = document.getElementById('user-input').value.trim(); 
+            const err = document.getElementById('name-error'); const inputEl = document.getElementById('user-input');
+            const historySec = document.getElementById('history-section'); const cancelArea = document.getElementById('cancel-area');
+            if (val === "+ เพิ่มรายชื่อใหม่") { 
+                err.classList.add('hidden'); inputEl.classList.remove('input-error'); 
+                document.getElementById('user-input').value = ""; hideFrom(2); 
+                historySec.classList.remove('hidden'); cancelArea.classList.add('hidden');
+                openAddUserModal(); return; 
+            }
+            if (val === "") { err.classList.add('hidden'); inputEl.classList.remove('input-error'); hideFrom(2); historySec.classList.remove('hidden'); cancelArea.classList.add('hidden'); return; }
+            historySec.classList.add('hidden'); cancelArea.classList.remove('hidden');
+            const hasMatch = userList.some(function(name) { return name.indexOf(val) === 0; });
+            if (hasMatch) {
+                err.classList.add('hidden'); inputEl.classList.remove('input-error');
+                if (userList.indexOf(val) !== -1) { 
+                    document.getElementById('confirm-area').classList.remove('hidden'); 
+                    const nickname = val.split(' ')[0]; document.getElementById('user-confirm').placeholder = `พิมพ์ "${nickname}" เพื่อยืนยัน`; 
+                } 
+                else { document.getElementById('confirm-area').classList.add('hidden'); hideFrom(2); }
+            } else { err.classList.remove('hidden'); inputEl.classList.add('input-error'); document.getElementById('confirm-area').classList.add('hidden'); hideFrom(2); }
+            checkDuplicateLocal();
+        }
+
+        function openAddUserModal() {
+            document.getElementById('add-user-modal').style.display = 'flex';
+            document.getElementById('new-name-nick').value = ""; document.getElementById('new-name-first').value = "";
+            document.getElementById('new-name-nick-confirm').value = ""; document.getElementById('new-name-first-confirm').value = "";
+            document.getElementById('new-name-nick-confirm').classList.remove('input-error'); document.getElementById('new-name-first-confirm').classList.remove('input-error');
+            document.getElementById('new-match-error').classList.add('hidden');
+            document.getElementById('add-user-step-1').classList.remove('hidden'); document.getElementById('add-user-step-2').classList.add('hidden');
+            checkNewNameFilled();
+        }
+        function closeAddUserModal() { document.getElementById('add-user-modal').style.display = 'none'; }
+        function nextAddUserStep() {
+            document.getElementById('add-user-step-1').classList.add('hidden');
+            document.getElementById('add-user-step-2').classList.remove('hidden');
+            document.getElementById('new-name-nick-confirm').focus();
+            checkNewNameMatch();
+        }
+        function prevAddUserStep() { document.getElementById('add-user-step-1').classList.remove('hidden'); document.getElementById('add-user-step-2').classList.add('hidden'); }
+
+        function checkConfirmMatch() {
+            const sel = document.getElementById('user-input').value, conf = document.getElementById('user-confirm').value, err = document.getElementById('confirm-error'), inputEl = document.getElementById('user-confirm');
+            const nickname = sel.split(' ')[0] || ""; 
+            const isCorrectPrefix = (nickname.indexOf(conf) === 0);
+            if (isCorrectPrefix) {
+                err.classList.add('hidden'); inputEl.classList.remove('input-error');
+                if (nickname === conf && conf !== "") { document.getElementById('step-2').classList.remove('step-hidden'); scrollToSection('step-2'); } else { hideFrom(2); }
+            } else { err.classList.remove('hidden'); inputEl.classList.add('input-error'); hideFrom(2); }
+            validateFinal();
+        }
+
+        function checkNewNameFilled() {
+            const n1 = document.getElementById('new-name-nick').value.trim(), n2 = document.getElementById('new-name-first').value.trim(), btn = document.getElementById('btn-add-user-next');
+            const isFilled = (n1 !== "" && n2 !== ""); 
+            btn.disabled = !isFilled;
+            if(!isFilled) btn.classList.add('opacity-30'); else btn.classList.remove('opacity-30');
+        }
+
+        function checkNewNameMatch() {
+            const nNick = document.getElementById('new-name-nick').value.trim(), nFirst = document.getElementById('new-name-first').value.trim(), cNick = document.getElementById('new-name-nick-confirm').value, cFirst = document.getElementById('new-name-first-confirm').value;
+            const btn = document.getElementById('btn-add-user-confirm'), err = document.getElementById('new-match-error'), iNickConf = document.getElementById('new-name-nick-confirm'), iFirstConf = document.getElementById('new-name-first-confirm');
+            const isFilled = (nNick !== "" && nFirst !== "" && cNick !== "" && cFirst !== "");
+            const isMatch = (nNick === cNick && nFirst === cFirst);
+            btn.disabled = !(isFilled && isMatch);
+            if(btn.disabled) btn.classList.add('opacity-30'); else btn.classList.remove('opacity-30');
+            const nickOk = (nNick.indexOf(cNick) === 0), firstOk = (nFirst.indexOf(cFirst) === 0);
+            if (!nickOk && cNick !== "") { iNickConf.classList.add('input-error'); } else { iNickConf.classList.remove('input-error'); }
+            if (!firstOk && cFirst !== "") { iFirstConf.classList.add('input-error'); } else { iFirstConf.classList.remove('input-error'); }
+            if ((!nickOk && cNick !== "") || (!firstOk && cFirst !== "")) { err.classList.remove('hidden'); } else { err.classList.add('hidden'); }
+        }
+
+        function addNewUser() {
+            const fullName = document.getElementById('new-name-nick').value.trim() + " " + document.getElementById('new-name-first').value.trim();
+            userList.push(fullName); localStorage.setItem('att_saved_users', JSON.stringify(userList)); renderDatalist(); 
+            closeAddUserModal(); document.getElementById('user-input').value = fullName; handleNameInput(); 
+        }
+
+        function setMode(m) {
+            mode = m; document.getElementById('btn-in').className = "btn-toggle " + (m==='in' ? 'btn-blue-active' : 'text-blue-600 shadow-sm');
+            document.getElementById('btn-out').className = "btn-toggle " + (m==='out' ? 'btn-red-active' : 'text-red-600 shadow-sm');
+            const s = m === 'in' ? ['11:30','13:30','14:30','16:30','18:00','อื่นๆ'] : ['20:20','23:30','อื่นๆ'];
+            let html = ''; for(let i=0; i<s.length; i++) { html += `<button onclick="setShift(this, '${s[i]}')" class="shift-chip shadow-sm">${s[i]}</button>`; }
+            document.getElementById('shift-area').innerHTML = html; document.getElementById('step-3').classList.remove('step-hidden'); scrollToSection('step-3'); checkDuplicateLocal();
+        }
+
+        function setShift(btn, s) {
+            shift = s; const chips = document.querySelectorAll('.shift-chip'); for(let i=0; i<chips.length; i++) { chips[i].classList.remove('shift-chip-active'); } btn.classList.add('shift-chip-active');
+            if(s !== 'อื่นๆ') { document.getElementById('custom-time-area').classList.add('hidden'); } else { document.getElementById('custom-time-area').classList.remove('hidden'); }
+            document.getElementById('step-remark').classList.remove('step-hidden'); document.getElementById('save-btn-container').classList.remove('step-hidden');
+            const title = document.getElementById('remark-title'), reqText = document.getElementById('remark-req-text'), remarkInput = document.getElementById('remark');
+            if(s === 'อื่นๆ') { title.classList.add('text-red-600'); reqText.classList.remove('hidden'); remarkInput.placeholder = "ระบุเหตุผล (บังคับ 3 ตัวอักษรขึ้นไป)"; } 
+            else { title.classList.remove('text-red-600'); reqText.classList.add('hidden'); remarkInput.placeholder = "ระบุหมายเหตุหากมี"; document.getElementById('remark-error').classList.add('hidden'); document.getElementById('custom-time').value = ''; document.getElementById('custom-time-error').classList.add('hidden'); document.getElementById('custom-time').classList.remove('input-error'); }
+            if(s !== 'อื่นๆ') { checkTimeDiff(s); scrollToSection('step-remark'); } else scrollToSection('custom-time-area');
+            validateFinal();
+        }
+
+        function formatTimeInput(i) { let v = i.value.replace(/\D/g, ''); if (v.length >= 3) { v = v.slice(0, 2) + ':' + v.slice(2, 4); } i.value = v; }
+        
+        function checkCustomTimeRealtime() {
+            const inputEl = document.getElementById('custom-time'), errEl = document.getElementById('custom-time-error'), val = inputEl.value;
+            if (val === "") { errEl.classList.add('hidden'); inputEl.classList.remove('input-error'); return; }
+            const isValidPrefix = validCustomTimes.some(function(t) { return t.indexOf(val) === 0; });
+            if (!isValidPrefix) { errEl.classList.remove('hidden'); inputEl.classList.add('input-error'); } else { errEl.classList.add('hidden'); inputEl.classList.remove('input-error'); }
+            if(val.length === 5 && validCustomTimes.indexOf(val) !== -1) { checkTimeDiff(val); }
+        }
+
+        function validateFinal() {
+            const name = document.getElementById('user-input').value, conf = document.getElementById('user-confirm').value, rem = document.getElementById('remark').value.trim(), customT = document.getElementById('custom-time').value.trim();
+            const tOk = !document.getElementById('time-warning').classList.contains('hidden') ? document.getElementById('time-confirm').checked : true;
+            const dOk = !document.getElementById('duplicate-warning').classList.contains('hidden') ? document.getElementById('duplicate-confirm').checked : true;
+            const nickname = name.split(' ')[0] || ""; 
+            let isTimeValid = (shift === 'อื่นๆ') ? validCustomTimes.indexOf(customT) !== -1 : true;
+            const isRemarkValid = (shift !== 'อื่นๆ' || rem.length >= 3);
+            if(shift === 'อื่นๆ') { if(rem.length >= 3 || rem.length === 0) document.getElementById('remark-error').classList.add('hidden'); else document.getElementById('remark-error').classList.remove('hidden'); }
+            const ok = (name !== "" && nickname === conf && conf !== "" && mode !== "" && shift !== "" && tOk && dOk && isRemarkValid && isTimeValid);
+            document.getElementById('btn-save').disabled = !ok;
+        }
+
+        function checkTimeDiff(s) {
+            const now = new Date(), parts = s.split(':'), target = new Date(); target.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), 0);
+            const isDiff = (Math.abs(now - target) / 60000) > 30;
+            if(isDiff) { document.getElementById('time-warning').classList.remove('hidden'); document.getElementById('time-confirm').checked = false; } 
+            else { document.getElementById('time-warning').classList.add('hidden'); document.getElementById('time-confirm').checked = true; }
+            validateFinal();
+        }
+
+        function checkDuplicateLocal() {
+            const name = document.getElementById('user-input').value.trim(); if (!name || !mode) return;
+            const now = new Date(); let rd = new Date(now.getTime()); if (rd.getHours() < 5) rd.setDate(rd.getDate() - 1);
+            const today = `${rd.getDate()}/${rd.getMonth() + 1}/${rd.getFullYear().toString().slice(-2)}`;
+            let isDup = false; for(let i=0; i<historyData.length; i++) { if(historyData[i].name.trim() === name && historyData[i].mode === mode && historyData[i].displayDate === today) { isDup = true; break; } }
+            if(isDup) { document.getElementById('duplicate-warning').classList.remove('hidden'); document.getElementById('duplicate-confirm').checked = false; } 
+            else { document.getElementById('duplicate-warning').classList.add('hidden'); document.getElementById('duplicate-confirm').checked = true; }
+            document.getElementById('duplicate-label').innerText = `บันทึก${mode==='in'?'เข้า':'ออก'}งานไปแล้ว ยืนยันว่าถูกต้อง`;
+            validateFinal();
+        }
+
+        function showAlert(title, content, showConfirm = false, isSuccess = false) {
+            isSuccessState = isSuccess; const t = document.getElementById('modal-title'), c = document.getElementById('modal-card'), b = document.getElementById('btn-modal-close'), sc = document.getElementById('summary-content');
+            t.innerText = title; if(isSuccess) c.classList.add('modal-success'); else c.classList.remove('modal-success');
+            sc.style.display = isSuccess ? 'none' : 'block'; document.getElementById('admin-login-area').classList.add('hidden'); document.getElementById('btn-admin-login-submit').classList.add('hidden');
+            if(isSuccess) { t.className = "text-3xl font-black text-emerald-600"; b.innerText = "ตกลง"; b.className = "w-full py-4 btn-ok-success rounded-2xl font-bold active:scale-95 transition shadow-md mt-4"; } 
+            else { t.className = "text-2xl font-bold text-slate-800"; b.innerText = "ยกเลิก"; b.className = "flex-1 py-4 bg-slate-100 text-slate-900 rounded-2xl font-bold active:scale-95 transition"; }
+            sc.innerHTML = content; if(isSuccess || !showConfirm) document.getElementById('btn-confirm-final').classList.add('hidden'); else document.getElementById('btn-confirm-final').classList.remove('hidden');
+            document.getElementById('summary-modal').style.display = 'flex';
+        }
+        function closeModal() { document.getElementById('summary-modal').style.display = 'none'; if (isSuccessState) { resetForm(); isSuccessState = false; } }
+        
+        function resetForm() {
+            mode = ''; shift = ''; pendingEntry = null; 
+            document.getElementById('user-input').value = ""; document.getElementById('user-confirm').value = ""; document.getElementById('remark').value = ""; document.getElementById('custom-time').value = "";
+            document.getElementById('btn-in').className = "btn-toggle text-blue-600 shadow-sm"; document.getElementById('btn-out').className = "btn-toggle text-red-600 shadow-sm";
+            document.getElementById('time-confirm').checked = false; document.getElementById('duplicate-confirm').checked = false;
+            document.getElementById('time-warning').classList.add('hidden'); document.getElementById('duplicate-warning').classList.add('hidden');
+            document.getElementById('remark-error').classList.add('hidden'); document.getElementById('remark-req-text').classList.add('hidden'); document.getElementById('remark-title').classList.remove('text-red-600');
+            document.getElementById('name-error').classList.add('hidden'); document.getElementById('user-input').classList.remove('input-error'); 
+            document.getElementById('confirm-error').classList.add('hidden'); document.getElementById('user-confirm').classList.remove('input-error'); 
+            document.getElementById('history-section').classList.remove('hidden'); document.getElementById('cancel-area').classList.add('hidden');
+            hideFrom(2); document.getElementById('confirm-area').classList.add('hidden'); window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        function hideFrom(n) { for(let i=n; i<=3; i++) { let el = document.getElementById('step-' + i); if(el) el.classList.add('step-hidden'); } let btn = document.getElementById('save-btn-container'); if(btn) btn.classList.add('step-hidden'); let rem = document.getElementById('step-remark'); if(rem) rem.classList.add('step-hidden'); }
+        function scrollToSection(id) { setTimeout(function() { document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 100); }
+        
+        function confirmData() {
+            const now = new Date(); let rd = new Date(now.getTime()); if (rd.getHours() < 5) rd.setDate(rd.getDate() - 1);
+            const dateStr = `${rd.getDate()}/${rd.getMonth() + 1}/${rd.getFullYear().toString().slice(-2)}`, timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const dupWarnVisible = !document.getElementById('duplicate-warning').classList.contains('hidden'), timeWarnVisible = !document.getElementById('time-warning').classList.contains('hidden');
+            pendingEntry = { name: document.getElementById('user-input').value.trim(), mode: mode, shift: shift, actualTime: shift==='อื่นๆ'?document.getElementById('custom-time').value:shift, time: timeStr, displayDate: dateStr, fullDateTime: `${dateStr} | ${timeStr}`, remark: document.getElementById('remark').value.trim() || "-", isDuplicate: dupWarnVisible ? "ซ้ำ" : "ไม่ซ้ำ", isTimeWarn: timeWarnVisible ? "ใช่" : "ไม่" };
+            const html = `<div class="space-y-4 text-left"><div class="pt-1"><span class="text-slate-400 text-xs block mb-1">หมายเหตุ:</span><p class="font-semibold text-slate-800 bg-slate-50 p-3 rounded-xl border border-slate-100 break-words italic">"${pendingEntry.remark}"</p></div><div class="flex justify-between border-b pb-2"><span>พนักงาน:</span><span class="font-bold text-slate-900">${pendingEntry.name}</span></div><div class="flex justify-between border-b pb-2"><span>สถานะ:</span><span class="font-bold ${pendingEntry.mode==='in'?'text-blue-600':'text-red-600'}">${pendingEntry.mode==='in'?'เข้างาน (IN)':'ออกงาน (OUT)'}</span></div><div class="flex justify-between border-b pb-2"><span>เวลาตาราง:</span><span class="text-xl font-black text-slate-950">${pendingEntry.actualTime}</span></div><div class="flex justify-between border-b pb-2"><span>เวลาบันทึก:</span><span class="font-bold text-slate-700">${pendingEntry.fullDateTime}</span></div></div>`;
+            showAlert("ยืนยันข้อมูลอีกครั้ง", html, true, false);
+        }
+        function executeSave() {
+            const btn = document.getElementById('btn-confirm-final'); btn.disabled = true; btn.innerText = "กำลังบันทึก...";
+            if (typeof google !== 'undefined' && google.script && google.script.run && google.script.run.processData) {
+                google.script.run.withSuccessHandler(function(res) { if(res && res.status === "success") { historyData.unshift(pendingEntry); localStorage.setItem('att_v27_final', JSON.stringify(historyData.slice(0, 50))); renderHistory(); showAlert("บันทึกสำเร็จเรียบร้อย!", "", false, true); } else alert("Error: " + (res?res.message:"Unknown")); btn.innerText = "ยืนยันบันทึก"; btn.disabled = false; }).processData(pendingEntry);
+            } else {
+                setTimeout(function() { historyData.unshift(pendingEntry); localStorage.setItem('att_v27_final', JSON.stringify(historyData.slice(0, 50))); renderHistory(); showAlert("บันทึกสำเร็จเรียบร้อย!", "", false, true); btn.innerText = "ยืนยันบันทึก"; btn.disabled = false; }, 800);
+            }
+        }
+        function renderHistory() {
+            let displayData = historyData.slice(0, 20); let html = '';
+            for(let i=0; i<displayData.length; i++) { let r = displayData[i]; html += `<div class="px-5 py-4 rounded-[22px] border shadow-sm space-y-2 transition-all ${r.mode==='in'?'bg-blue-50 border-blue-100':'bg-red-50 border-red-100'}"><div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="px-2 py-0.5 border-2 rounded-lg font-black text-[10px] ${r.mode==='in'?'border-blue-500 text-blue-600':'border-red-500 text-red-600'}">${r.mode==='in'?'เข้า':'ออก'}</span><span class="font-black text-slate-800 text-lg">${r.name}</span></div><div class="text-right"><span class="text-[10px] text-slate-500 font-bold block leading-none mb-1">เวลาตาราง</span><p class="text-[26px] font-black text-slate-900 tracking-tighter leading-none">${r.actualTime}</p></div></div><p class="text-sm font-bold text-slate-500">บันทึกเมื่อ: <span class="font-bold text-slate-700">${r.fullDateTime}</span></p>${r.remark !== '-' && r.remark !== '' ? `<div class="pt-1 border-t border-black/5 text-xs text-slate-600 font-medium break-words whitespace-pre-wrap leading-tight">หมายเหตุ: ${r.remark}</div>` : ''}</div>`; }
+            document.getElementById('history-list').innerHTML = html;
+        }
+        function showAdminLogin() { showAlert("ระบบผู้ดูแลระบบ", "", false, false); document.getElementById('admin-login-area').classList.remove('hidden'); document.getElementById('btn-admin-login-submit').classList.remove('hidden'); document.getElementById('summary-content').style.display='none'; }
+        function checkAdminPass() { if (document.getElementById('admin-pass-input').value === "34531") renderAdminView(); else document.getElementById('admin-login-error').classList.remove('hidden'); }
+        function renderAdminView() {
+            let html = '<div class="text-left space-y-4 max-h-[300px] overflow-y-auto custom-scroll">'; let sortedUsers = userList.sort();
+            for(let i=0; i<sortedUsers.length; i++) { html += `<div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100"><span>${sortedUsers[i]}</span><button onclick="deleteUser('${sortedUsers[i]}')" class="text-red-500 font-bold p-2 hover:bg-white rounded-xl transition">ลบ</button></div>`; }
+            html += '</div>'; showAlert("จัดการพนักงาน", html, false, false);
+        }
+        function deleteUser(n) { if(confirm(`ลบ ${n}?`)) { userList = userList.filter(function(u) { return u!==n; }); localStorage.setItem('att_saved_users', JSON.stringify(userList)); renderDatalist(); renderAdminView(); } }
+        renderHistory();
+
+        // 🔄 ระบบ Auto-Sync สแกนเช็ค Google Sheets ทุกๆ 1 วินาที (Real-time)
+        setInterval(function() {
+            if (typeof google !== 'undefined' && mode === '') { // หยุดเช็คชั่วคราวถ้ากำลังกรอกข้อมูลเข้างาน
+                google.script.run.withSuccessHandler(function(res) {
+                    if (res.history) { historyData = res.history; } else if (Array.isArray(res)) { historyData = res; }
+                    if (res.master && Array.isArray(res.master)) {
+                        userList = res.master.filter(function(m) { return m.status === 'active'; }).map(function(m) { return m.name; });
+                        if(document.getElementById('user-input').value === "") renderDatalist();
+                    }
+                    renderHistory(); // อัปเดตคิวประวัติล่าสุด
+                }).getInitPayrollData();
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
