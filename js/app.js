@@ -28,65 +28,106 @@ document.addEventListener('DOMContentLoaded', () => {
 async function initData() {
     const overlay = document.getElementById('loading-overlay');
     const loadingText = document.getElementById('loading-text');
-    overlay.classList.remove('hidden');
     
-    try {
-        loadingText.innerText = "กำลังเชื่อมต่อระบบ...";
-        
-        // Fetch all data in a single GET request
-        const res = await fetch(`${WEB_APP_URL}?action=getInitPayrollData`);
-
-        const json = await res.json();
-
-        if (json.status === "success") {
-            rawAttendance = json.data.attendance;
-            employees = json.data.employees.map(emp => {
-                if (String(emp.employeeType).trim().toLowerCase() === "part time") {
-                    let dailyRate = Number(emp.dailyRate) || 0;
-                    emp.normalRate = dailyRate / 8;
-                    emp.otRate = emp.normalRate * 1.5;
+    // Check local storage for cached data
+    const cachedStr = localStorage.getItem('snk_payroll_data');
+    if (cachedStr) {
+        try {
+            const cachedJson = JSON.parse(cachedStr);
+            if (cachedJson.status === "success") {
+                applyInitData(cachedJson.data);
+                // Hide overlay immediately since we have cached data
+                if (!isAdmin && !loggedInEmployee) {
+                    overlay.classList.add('hidden');
                 }
-                return emp;
-            });
-            deductions = json.data.deductions;
-        }
-
-        // Auto-register missing names
-        let attendanceNames = new Set(rawAttendance.map(r => r.name).filter(n => n));
-        let employeeNames = new Set(employees.map(e => e.name));
-        let missingNames = [...attendanceNames].filter(n => !employeeNames.has(n));
-
-        if (missingNames.length > 0) {
-            missingNames.forEach(name => {
-                employees.push({ name: name, pin: "1234", normalRate: 46.88, otRate: 8.79, deductionType: "3%" });
-            });
-            fetch(WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: "autoRegister", names: missingNames })
-            }).catch(e => console.error("Auto register error", e));
-        }
-
-        processData();
-        populateLoginNames();
-        
-        if (isAdmin) {
-            showAdminDashboard();
-        } else if (loggedInEmployee) {
-            // Verify they still exist and update their rates
-            const updatedEmp = employees.find(e => e.name === loggedInEmployee.name);
-            if (updatedEmp) {
-                loggedInEmployee = updatedEmp;
-                showEmployeeDashboard();
-            } else {
-                logout();
+                // Fetch fresh data in the background silently
+                fetchFreshDataSilently();
+                return;
             }
+        } catch(e) {
+            console.error("Cache parsing error", e);
+        }
+    }
+    
+    // No cache or cache error, do a normal fetch with loading screen
+    overlay.classList.remove('hidden');
+    loadingText.innerText = "กำลังเชื่อมต่อระบบ...";
+    try {
+        const res = await fetch(`${WEB_APP_URL}?action=getInitPayrollData`);
+        const json = await res.json();
+        if (json.status === "success") {
+            localStorage.setItem('snk_payroll_data', JSON.stringify(json));
+            applyInitData(json.data);
         } else {
             overlay.classList.add('hidden');
         }
-
     } catch (e) {
         console.error(e);
         alert("เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาลองใหม่อีกครั้ง");
+        overlay.classList.add('hidden');
+    }
+}
+
+async function fetchFreshDataSilently() {
+    try {
+        const res = await fetch(`${WEB_APP_URL}?action=getInitPayrollData`);
+        const json = await res.json();
+        if (json.status === "success") {
+            localStorage.setItem('snk_payroll_data', JSON.stringify(json));
+            applyInitData(json.data); // Update with fresh data
+        }
+    } catch (e) {
+        console.error("Silent fetch error", e);
+    }
+}
+
+function applyInitData(data) {
+    const overlay = document.getElementById('loading-overlay');
+    rawAttendance = data.attendance;
+    employees = data.employees.map(emp => {
+        if (String(emp.employeeType).trim().toLowerCase() === "part time") {
+            let dailyRate = Number(emp.dailyRate) || 0;
+            emp.normalRate = dailyRate / 8;
+            emp.otRate = emp.normalRate * 1.5;
+        }
+        return emp;
+    });
+    deductions = data.deductions;
+
+    // Auto-register missing names
+    let attendanceNames = new Set(rawAttendance.map(r => r.name).filter(n => n));
+    let employeeNames = new Set(employees.map(e => e.name));
+    let missingNames = [...attendanceNames].filter(n => !employeeNames.has(n));
+
+    if (missingNames.length > 0) {
+        missingNames.forEach(name => {
+            employees.push({ name: name, pin: "1234", normalRate: 46.88, otRate: 8.79, deductionType: "3%" });
+        });
+        fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: "autoRegister", names: missingNames })
+        }).catch(e => console.error("Auto register error", e));
+    }
+
+    processData();
+    
+    // Remember current selection if any
+    const select = document.getElementById('login-name');
+    const currentSelection = select ? select.value : "";
+    populateLoginNames();
+    if (currentSelection && select) select.value = currentSelection;
+    
+    if (isAdmin) {
+        showAdminDashboard();
+    } else if (loggedInEmployee) {
+        const updatedEmp = employees.find(e => e.name === loggedInEmployee.name);
+        if (updatedEmp) {
+            loggedInEmployee = updatedEmp;
+            showEmployeeDashboard();
+        } else {
+            logout();
+        }
+    } else {
         overlay.classList.add('hidden');
     }
 }
