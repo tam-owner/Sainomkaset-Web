@@ -58,6 +58,43 @@
             66% { transform: translate(25vw, -35vh) scale(0.5); }
             100% { transform: translate(0, 0) scale(1); }
         }
+
+        /* SweetAlert2 Customizations */
+        div.swal2-popup {
+            border-radius: 24px !important;
+            padding: 1.2rem 1rem !important;
+            width: 300px !important;
+            font-family: 'IBM Plex Sans Thai', sans-serif !important;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+        }
+        h2.swal2-title {
+            font-size: 1.15rem !important;
+            font-weight: 700 !important;
+            padding: 0 1rem !important;
+        }
+        div.swal2-html-container {
+            font-size: 0.95rem !important;
+            margin: 0.5rem 0 1rem !important;
+        }
+        button.swal2-confirm, button.swal2-cancel, button.swal2-deny {
+            border-radius: 12px !important;
+            font-weight: 700 !important;
+            padding: 10px 24px !important;
+            font-size: 0.95rem !important;
+            transition: all 0.2s !important;
+        }
+        button.swal2-confirm:active, button.swal2-cancel:active, button.swal2-deny:active {
+            transform: scale(0.95) !important;
+        }
+        .swal2-actions {
+            margin-top: 0.5rem !important;
+            gap: 8px;
+        }
+        .swal2-icon {
+            transform: scale(0.7) !important;
+            margin: 0.5rem auto !important;
+        }
+
         .animate-blob-1 { animation: float 3s ease-in-out infinite; }
         .animate-blob-2 { animation: float-reverse 4s ease-in-out infinite; }
         .animate-blob-3 { animation: float 5s ease-in-out infinite reverse; }
@@ -808,7 +845,7 @@
 
     <script>sessionStorage.setItem('snk_payroll_user', 'ADMIN');</script>
     <script src="js/customSelect.js?v=1"></script>
-    <script src="js/app.js?v=20260616_9"></script>
+    <script src="js/app.js?v=20260616_10"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
