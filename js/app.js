@@ -287,7 +287,12 @@ function populateLoginNames() {
         return lastAtt >= fifteenDaysAgo;
     });
 
-    const sortedEmp = activeEmployees.sort((a, b) => a.name.localeCompare(b.name, 'th'));
+    const sortedEmp = activeEmployees.sort((a, b) => {
+        const lastA = lastAttendanceMap[a.name] ? lastAttendanceMap[a.name].getTime() : Infinity;
+        const lastB = lastAttendanceMap[b.name] ? lastAttendanceMap[b.name].getTime() : Infinity;
+        if (lastA === lastB) return a.name.localeCompare(b.name, 'th');
+        return lastB - lastA; // Descending order
+    });
     sortedEmp.forEach(emp => {
         let opt = document.createElement('option');
         opt.value = emp.name;
