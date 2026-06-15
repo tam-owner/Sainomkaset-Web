@@ -346,7 +346,7 @@ function logout() {
 // ----------------------------------------------------
 // Views Routing
 // ----------------------------------------------------
-function showView(viewId) {
+function showView(viewId, pushToHistory = true) {
     const views = ['view-login', 'view-dashboard', 'view-employee', 'view-profile', 'view-leave', 'view-stock', 'view-checklist', 'view-qa', 'view-admin-dashboard', 'view-admin-employees'];
     views.forEach(v => {
         let el = document.getElementById(v);
@@ -357,10 +357,31 @@ function showView(viewId) {
     if (target) target.classList.remove('hidden');
     
     document.getElementById('loading-overlay').classList.add('hidden');
+    
+    if (pushToHistory) {
+        history.pushState({ view: viewId }, '', `#${viewId}`);
+    }
 }
 
-function showEmployeeDashboard() {
-    showView('view-dashboard');
+window.addEventListener('popstate', function(event) {
+    if (event.state && event.state.view) {
+        const viewId = event.state.view;
+        if (viewId === 'view-dashboard') showEmployeeDashboard(false);
+        else if (viewId === 'view-employee') openTimesheet(false);
+        else if (viewId === 'view-profile') openProfile(false);
+        else if (viewId === 'view-leave') openLeave(false);
+        else showView(viewId, false);
+    } else {
+        if (loggedInEmployee) {
+            showEmployeeDashboard(false);
+        } else {
+            showView('view-login', false);
+        }
+    }
+});
+
+function showEmployeeDashboard(pushToHistory = true) {
+    showView('view-dashboard', pushToHistory);
     
     // Update header info in dashboard
     const initialSpan = document.getElementById('dash-user-initial');
@@ -377,8 +398,8 @@ function showEmployeeDashboard() {
     }
 }
 
-function openTimesheet() {
-    showView('view-employee');
+function openTimesheet(pushToHistory = true) {
+    showView('view-employee', pushToHistory);
     
     const initialSpan = document.getElementById('emp-user-initial');
     const photoImg = document.getElementById('emp-user-photo');
@@ -1590,8 +1611,8 @@ async function confirmDeleteEmployee() {
 // ----------------------------------------------------
 let monthlySlips = [];
 
-function openProfile() {
-    showView('view-profile');
+function openProfile(pushToHistory = true) {
+    showView('view-profile', pushToHistory);
     
     // Setup Profile Header
     const initialSpan = document.getElementById('profile-user-initial');
@@ -1820,8 +1841,8 @@ function printSlip(idx) {
     printWindow.document.close();
 }
 
-function openLeave() {
-    showView('view-leave');
+function openLeave(pushToHistory = true) {
+    showView('view-leave', pushToHistory);
     renderEmployeeLeaves();
 }
 
