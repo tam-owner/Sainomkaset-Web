@@ -14,7 +14,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700;900&display=swap');
-        body { font-family: 'IBM Plex Sans Thai', sans-serif; background-color: #f8fafc; color: #333; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'IBM Plex Sans Thai', sans-serif; background-color: #E2E8F0; color: #333; -webkit-tap-highlight-color: transparent; }
         
         select.modern-select { border: 1px solid #E2E8F0; border-radius: 10px; padding: 12px 14px; font-weight: 600; width: 100%; outline: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.2em; background-color: white; }
         select.modern-select:focus { border-color: #4F46E5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
@@ -63,14 +63,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="pb-10 pt-4 max-w-md mx-auto relative min-h-screen">
-    <!-- Decorative Background -->
-    <div class="fixed inset-0 z-[-1] bg-[#eef2f6] overflow-hidden pointer-events-none">
-        <div class="absolute -top-[10%] -left-[10%] w-[350px] h-[350px] rounded-full bg-blue-400/30 blur-[70px] animate-blob-1"></div>
-        <div class="absolute top-[35%] -right-[15%] w-[400px] h-[400px] rounded-full bg-cyan-300/30 blur-[70px] animate-blob-2"></div>
-        <div class="absolute -bottom-[10%] left-[10%] w-[450px] h-[450px] rounded-full bg-indigo-400/20 blur-[80px] animate-blob-3"></div>
-        <div class="absolute top-[20%] left-[30%] w-[300px] h-[300px] rounded-full bg-white/70 blur-[60px] animate-blob-4"></div>
-    </div>
-    
+
     <!-- Global Loading Overlay -->
     <div id="loading-overlay" class="fixed inset-0 bg-white/90 z-[999] flex flex-col items-center justify-center transition-all duration-300 backdrop-blur-sm">
         <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mb-3"></div>
@@ -81,6 +74,13 @@
     <!-- VIEW: LOGIN                           -->
     <!-- ===================================== -->
     <div id="view-login" class="px-4 flex flex-col justify-center min-h-[80vh]">
+        <!-- Decorative Background -->
+        <div class="fixed inset-0 z-[-1] bg-[#eef2f6] overflow-hidden pointer-events-none">
+            <div class="absolute -top-[10%] -left-[10%] w-[350px] h-[350px] rounded-full bg-blue-400/30 blur-[70px] animate-blob-1"></div>
+            <div class="absolute top-[35%] -right-[15%] w-[400px] h-[400px] rounded-full bg-cyan-300/30 blur-[70px] animate-blob-2"></div>
+            <div class="absolute -bottom-[10%] left-[10%] w-[450px] h-[450px] rounded-full bg-indigo-400/20 blur-[80px] animate-blob-3"></div>
+            <div class="absolute top-[20%] left-[30%] w-[300px] h-[300px] rounded-full bg-white/70 blur-[60px] animate-blob-4"></div>
+        </div>
         <div class="text-center mb-8">
             <div class="w-24 h-24 mx-auto mb-4 overflow-hidden rounded-full shadow-lg border-2 border-slate-100 bg-slate-50 flex items-center justify-center">
                 <img src="logo.jpg" alt="Sainom Kaset Logo" class="w-full h-full object-cover">
@@ -414,7 +414,7 @@
         </div>
     </div>
 
-    <script src="js/app.js?v=1781541159"></script>
+    <script src="js/app.js?v=1781541288"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
