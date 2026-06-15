@@ -1416,15 +1416,15 @@ function switchEmpTab(tab) {
     const btnInactive = document.getElementById('tab-emp-inactive');
     
     if (tab === 'active') {
-        btnActive.classList.add('bg-white', 'shadow-sm', 'text-slate-800');
-        btnActive.classList.remove('text-slate-500');
-        btnInactive.classList.remove('bg-white', 'shadow-sm', 'text-slate-800');
-        btnInactive.classList.add('text-slate-500');
+        btnActive.classList.add('bg-slate-700', 'shadow-sm', 'text-white');
+        btnActive.classList.remove('text-slate-400');
+        btnInactive.classList.remove('bg-slate-700', 'shadow-sm', 'text-white');
+        btnInactive.classList.add('text-slate-400');
     } else {
-        btnInactive.classList.add('bg-white', 'shadow-sm', 'text-slate-800');
-        btnInactive.classList.remove('text-slate-500');
-        btnActive.classList.remove('bg-white', 'shadow-sm', 'text-slate-800');
-        btnActive.classList.add('text-slate-500');
+        btnInactive.classList.add('bg-slate-700', 'shadow-sm', 'text-white');
+        btnInactive.classList.remove('text-slate-400');
+        btnActive.classList.remove('bg-slate-700', 'shadow-sm', 'text-white');
+        btnActive.classList.add('text-slate-400');
     }
     
     renderAdminEmployees();
