@@ -159,7 +159,7 @@ function getEmployeesData() {
         dailyRate: Number(row[3]) || 0,
         normalRate: Number(row[4]) || 0,
         otRate: Number(row[5]) || 0,
-        deductionType: String(row[6] || "None").trim(),
+        deductionType: String(row[6] || "3%").trim(),
         bankAccount: String(row[7] || "").trim(),
         employeeType: String(row[8] || "").trim(),
         photo: String(row[9] || "").trim()

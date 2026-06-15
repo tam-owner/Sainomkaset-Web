@@ -1314,7 +1314,7 @@ function openEmployeeModal() {
     document.getElementById('emp-dailyrate').value = "";
     document.getElementById('emp-hourlyrate').value = "";
     document.getElementById('emp-otrate').value = "";
-    document.getElementById('emp-deductiontype').value = "None";
+    document.getElementById('emp-deductiontype').value = "3%";
     document.getElementById('emp-bank').value = "";
     document.getElementById('emp-type').value = "Full Time";
 
@@ -1344,7 +1344,7 @@ function editEmployee(emp) {
     document.getElementById('emp-dailyrate').value = emp.dailyRate || "";
     document.getElementById('emp-hourlyrate').value = emp.normalRate || "";
     document.getElementById('emp-otrate').value = emp.otRate || "";
-    document.getElementById('emp-deductiontype').value = emp.deductionType || "None";
+    document.getElementById('emp-deductiontype').value = emp.deductionType || "3%";
     document.getElementById('emp-bank').value = emp.bankAccount || "";
     document.getElementById('emp-type').value = emp.employeeType || "Full Time";
 
