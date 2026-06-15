@@ -14,26 +14,25 @@ function doGet(e) {
 
 function doPost(e) {
   try {
-    var postData = JSON.parse(e.postData.contents);
-    var action = postData.action;
+    var p = JSON.parse(e.postData.contents);
+    var action = p.action;
 
-    // From old payroll admin
-    if (action == "updatePin") return createJsonResponse(handleUpdatePin(postData.name, postData.oldPin, postData.newPin));
-    if (action == "saveDeduction") return createJsonResponse(handleSaveDeduction(postData.deduction));
-    if (action == "deleteDeduction") return createJsonResponse(handleDeleteDeduction(postData.id));
-    if (action == "autoRegister") return createJsonResponse(handleAutoRegister(postData.names));
-    
-    // Leaves
-    if (action == "requestLeave") return createJsonResponse(handleRequestLeave(postData.leave));
-    if (action == "updateLeaveStatus") return createJsonResponse(handleUpdateLeaveStatus(postData.id, postData.status));
+    if (action === "clockin") return createJsonResponse(handleClock(p, "IN"));
+    if (action === "clockout") return createJsonResponse(handleClock(p, "OUT"));
+    if (action === "saveEmployee") return createJsonResponse(handleSaveEmployee(p));
+    if (action === "deleteEmployee") return createJsonResponse(handleDeleteEmployee(p.oldNickname, p.oldFullName));
+    if (action === "saveDeduction") return createJsonResponse(handleSaveDeduction(p.oldDate, p.date, p.nickname, p.type, p.amount, p.note));
+    if (action === "deleteDeduction") return createJsonResponse(handleDeleteDeduction(p.date, p.nickname, p.type));
+    if (action === "saveReward") return createJsonResponse(handleSaveReward(p.oldDate, p.date, p.nickname, p.amount, p.note));
+    if (action === "deleteReward") return createJsonResponse(handleDeleteReward(p.date, p.nickname));
+    if (action === "getEmployeeLogs") return createJsonResponse(handleGetEmployeeLogs(p.nickname, p.month, p.year));
+    if (action === "updateEmployeeLog") return createJsonResponse(handleUpdateEmployeeLog(p));
+    if (action == "requestLeave") return createJsonResponse(handleRequestLeave(p.leave));
+    if (action == "updateLeaveStatus") return createJsonResponse(handleUpdateLeaveStatus(p.id, p.status));
     
     // From new attendance system
-    if (action == "processData") return createJsonResponse(handleProcessData(postData.payload));
+    if (action == "processData") return createJsonResponse(handleProcessData(p.payload));
     if (action == "getInitPayrollData") return createJsonResponse(handleGetInitPayrollData());
-    
-    // From employee management
-    if (action == "saveEmployee") return createJsonResponse(handleSaveEmployee(postData.oldNickname, postData.oldFullName, postData.employee));
-    if (action == "deleteEmployee") return createJsonResponse(handleDeleteEmployee(postData.nickname, postData.fullName));
 
     return createJsonResponse({status: "error", message: "Unknown action"});
   } catch (error) {
@@ -78,7 +77,7 @@ function getSheetByNameOrCreateNew(name) {
     if (name === "Attendance") {
       sheet.appendRow(["Timestamp", "Name", "Type", "ScheduledTime", "Note"]);
     } else if (name === "Employees") {
-      sheet.appendRow(["ชื่อเล่น", "ชื่อจริง-นามสกุล", "PIN", "เรตรายวัน", "เรตรายชม.", "เรต OT", "ประเภทการหักเงิน", "เลขบัญชีธนาคาร", "ประเภทพนักงาน", "รูปภาพ", "วันที่เริ่มงาน"]);
+      sheet.appendRow(["ชื่อเล่น", "ชื่อจริง-นามสกุล", "PIN", "เรตรายวัน", "เรตรายชม.", "เรต OT", "ประเภทการหักเงิน", "เลขบัญชีธนาคาร", "ประเภทพนักงาน", "รูปภาพ", "วันที่เริ่มงาน", "สถานะ", "เงินเดือน", "เงินล่วงหน้า"]);
     } else if (name === "Deductions") {
       sheet.appendRow(["ID", "Period", "Name", "Amount", "Reason", "Timestamp", "Type"]);
     } else if (name === "Leaves") {
@@ -165,7 +164,8 @@ function getEmployeesData() {
         photo: String(row[9] || "").trim(),
         startDate: String(row[10] || "").trim(),
         status: String(row[11] || "Active").trim(),
-        monthlyRate: Number(row[12]) || 0
+        monthlyRate: Number(row[12]) || 0,
+        advancePayment: Number(row[13]) || 0
       });
     }
     return result;
@@ -257,105 +257,14 @@ function handleGetInitPayrollData() {
   };
 }
 
-function handleUpdatePin(name, oldPin, newPin) {
-  var sheet = getSheetByNameOrCreateNew("Employees");
-  var data = sheet.getDataRange().getValues();
-  for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]).trim() === name) {
-      if (String(data[i][2] || "").trim() === oldPin) {
-        sheet.getRange(i + 1, 3).setValue(newPin);
-        return {status: "success", message: "PIN updated successfully"};
-      } else return {status: "error", message: "รหัสผ่านเดิมไม่ถูกต้อง"};
-    }
-  }
-  return {status: "error", message: "ไม่พบชื่อพนักงาน"};
-}
-
-function handleSaveDeduction(deduction) {
-  var sheet = getSheetByNameOrCreateNew("Deductions");
-  var timestamp = new Date().toISOString();
-  if (deduction.id) {
-    var data = sheet.getDataRange().getValues();
-    for (var i = 1; i < data.length; i++) {
-      if (String(data[i][0]) === deduction.id) {
-        sheet.getRange(i + 1, 2).setValue(deduction.period);
-        sheet.getRange(i + 1, 3).setValue(deduction.name);
-        sheet.getRange(i + 1, 4).setValue(deduction.amount);
-        sheet.getRange(i + 1, 5).setValue(deduction.reason);
-        sheet.getRange(i + 1, 6).setValue(timestamp);
-        sheet.getRange(i + 1, 7).setValue(deduction.type || "Deduction");
-        return {status: "success", message: "Updated successfully", id: deduction.id};
-      }
-    }
-    return {status: "error", message: "Not found"};
-  } else {
-    var newId = Utilities.getUuid();
-    sheet.appendRow([newId, deduction.period, deduction.name, deduction.amount, deduction.reason, timestamp, deduction.type || "Deduction"]);
-    return {status: "success", message: "Added successfully", id: newId};
-  }
-}
-
-function handleDeleteDeduction(id) {
-  var sheet = getSheetByNameOrCreateNew("Deductions");
-  var data = sheet.getDataRange().getValues();
-  for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]) === id) {
-      sheet.deleteRow(i + 1);
-      return {status: "success"};
-    }
-  }
-  return {status: "error"};
-}
-
-function handleRequestLeave(leave) {
-  var sheet = getSheetByNameOrCreateNew("Leaves");
-  var newId = Utilities.getUuid();
-  var timestamp = new Date().toISOString();
-  // ["ID", "Name", "StartDate", "EndDate", "LeaveType", "Reason", "Status", "Timestamp"]
-  sheet.appendRow([newId, leave.name, leave.startDate, leave.endDate, leave.leaveType, leave.reason, "Pending", timestamp]);
-  return {status: "success", message: "Requested successfully", id: newId};
-}
-
-function handleUpdateLeaveStatus(id, newStatus) {
-  var sheet = getSheetByNameOrCreateNew("Leaves");
-  var data = sheet.getDataRange().getValues();
-  for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]) === id) {
-      sheet.getRange(i + 1, 7).setValue(newStatus);
-      return {status: "success"};
-    }
-  }
-  return {status: "error", message: "Not found"};
-}
-
-function handleAutoRegister(names) {
-  var sheet = getSheetByNameOrCreateNew("Employees");
-  var existingData = sheet.getDataRange().getValues();
-  var existingNames = {};
-  for (var i = 1; i < existingData.length; i++) {
-    existingNames[String(existingData[i][0]).trim()] = true;
-  }
-  var addedCount = 0;
-  for (var i = 0; i < names.length; i++) {
-    var name = names[i];
-    if (!existingNames[name] && name.trim() !== "") {
-      // ["ชื่อเล่น", "ชื่อจริง-นามสกุล", "PIN", "เรตรายวัน", "เรตรายชม.", "เรต OT", "ประเภทการหักเงิน", "เลขบัญชีธนาคาร", "ประเภทพนักงาน"]
-      sheet.appendRow([name, "", "1234", 0, 46.88, 8.79, "3%", "", "", "", "", "Active"]);
-      existingNames[name] = true;
-      addedCount++;
-    }
-  }
-  return {status: "success", added: addedCount};
-}
-
-function handleSaveEmployee(oldNickname, oldFullName, emp) {
+function handleSaveEmployee(p) {
   var sheet = getSheetByNameOrCreateNew("Employees");
   var data = sheet.getDataRange().getValues();
   
   var foundIdx = -1;
-  if (oldNickname) {
+  if (p.oldNickname) {
     for (var i = 1; i < data.length; i++) {
-      if (String(data[i][0]).trim() === oldNickname && String(data[i][1] || "").trim() === oldFullName) {
+      if (String(data[i][0]).trim() === p.oldNickname && String(data[i][1] || "").trim() === p.oldFullName) {
         foundIdx = i;
         break;
       }
@@ -363,28 +272,24 @@ function handleSaveEmployee(oldNickname, oldFullName, emp) {
   }
 
   var rowData = [
-    emp.nickname,
-    emp.fullName,
-    emp.pin,
-    emp.dailyRate,
-    emp.hourlyRate,
-    emp.otRate,
-    emp.deductionType,
-    emp.bankAccount,
-    emp.employeeType,
-    emp.photo || "",
-    emp.startDate || "",
-    emp.status || "Active",
-    emp.monthlyRate || 0
+    p.nickname,
+    p.fullName,
+    p.pin,
+    p.dailyRate,
+    p.hourlyRate,
+    p.otRate,
+    p.deductionType,
+    p.bankAccount,
+    p.employeeType,
+    p.photo || "",
+    p.startDate || Utilities.formatDate(new Date(), "Asia/Bangkok", "yyyy-MM-dd"),
+    p.status || "Active",
+    p.monthlyRate || 0,
+    p.advancePayment || 0
   ];
 
   if (foundIdx !== -1) {
-    var requiredCols = rowData.length;
-    var currentCols = sheet.getMaxColumns();
-    if (currentCols < requiredCols) {
-      sheet.insertColumnsAfter(currentCols, requiredCols - currentCols);
-    }
-    sheet.getRange(foundIdx + 1, 1, 1, requiredCols).setValues([rowData]);
+    sheet.getRange(foundIdx + 1, 1, 1, rowData.length).setValues([rowData]);
     return {status: "success", message: "Updated successfully"};
   } else {
     sheet.appendRow(rowData);
@@ -402,6 +307,93 @@ function handleDeleteEmployee(nickname, fullName) {
     }
   }
   return {status: "error", message: "Not found"};
+}
+
+// ----------------------------------------------------
+// Time Logs API
+// ----------------------------------------------------
+function handleGetEmployeeLogs(nickname, monthStr, yearStr) {
+  try {
+    var sheet = getSheetByNameOrCreateNew("Logs");
+    var data = sheet.getDataRange().getValues();
+    var results = [];
+    var month = parseInt(monthStr, 10);
+    var year = parseInt(yearStr, 10);
+    
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      if (String(row[1]).trim() === nickname) {
+        var dateObj = new Date(row[0]);
+        if (dateObj.getMonth() + 1 === month && dateObj.getFullYear() === year) {
+          results.push({
+            date: Utilities.formatDate(dateObj, "Asia/Bangkok", "yyyy-MM-dd"),
+            in: row[3] ? Utilities.formatDate(new Date(row[3]), "Asia/Bangkok", "HH:mm") : "",
+            out: row[4] ? Utilities.formatDate(new Date(row[4]), "Asia/Bangkok", "HH:mm") : "",
+            type: String(row[2] || "").trim()
+          });
+        }
+      }
+    }
+    
+    // Sort by date
+    results.sort(function(a, b) {
+      return new Date(a.date) - new Date(b.date);
+    });
+    
+    return {status: "success", logs: results};
+  } catch(e) {
+    return {status: "error", message: e.toString()};
+  }
+}
+
+function handleUpdateEmployeeLog(p) {
+  try {
+    var sheet = getSheetByNameOrCreateNew("Logs");
+    var data = sheet.getDataRange().getValues();
+    var nickname = p.nickname;
+    var targetDateStr = p.date; // yyyy-MM-dd
+    
+    var foundIdx = -1;
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][1]).trim() === nickname) {
+        var dStr = Utilities.formatDate(new Date(data[i][0]), "Asia/Bangkok", "yyyy-MM-dd");
+        if (dStr === targetDateStr) {
+          foundIdx = i;
+          break;
+        }
+      }
+    }
+    
+    if (p.actionType === "delete") {
+      if (foundIdx !== -1) {
+        sheet.deleteRow(foundIdx + 1);
+        return {status: "success", message: "Deleted log successfully"};
+      }
+      return {status: "error", message: "Log not found for deletion"};
+    }
+    
+    var timeIn = p.in ? targetDateStr + "T" + p.in + ":00" : "";
+    var timeOut = p.out ? targetDateStr + "T" + p.out + ":00" : "";
+    var recordType = p.type || "Work"; // Work, Leave_Paid, Leave_Unpaid
+    
+    if (foundIdx !== -1) {
+      sheet.getRange(foundIdx + 1, 3).setValue(recordType);
+      sheet.getRange(foundIdx + 1, 4).setValue(timeIn);
+      sheet.getRange(foundIdx + 1, 5).setValue(timeOut);
+      return {status: "success", message: "Updated log successfully"};
+    } else {
+      sheet.appendRow([
+        targetDateStr,
+        nickname,
+        recordType,
+        timeIn,
+        timeOut
+      ]);
+      return {status: "success", message: "Added log successfully"};
+    }
+  } catch(e) {
+    return {status: "error", message: e.toString()};
+  }
 }
 
 // ----------------------------------------------------
