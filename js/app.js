@@ -1431,6 +1431,20 @@ function switchEmpTab(tab) {
     renderAdminEmployees();
 }
 
+function toggleEmpSearch() {
+    const container = document.getElementById('emp-search-container');
+    if (container.classList.contains('hidden')) {
+        container.classList.remove('hidden');
+        container.classList.add('flex');
+        document.getElementById('emp-search-input').focus();
+    } else {
+        container.classList.add('hidden');
+        container.classList.remove('flex');
+        document.getElementById('emp-search-input').value = '';
+        renderAdminEmployees();
+    }
+}
+
 let currentEmployeePhotoBase64 = "";
 
 function handlePhotoUpload(event) {
