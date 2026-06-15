@@ -320,9 +320,16 @@ function showEmployeeDashboard() {
     document.getElementById('emp-user-initial').innerText = loggedInEmployee.name.charAt(0);
     document.getElementById('emp-user-name').innerText = loggedInEmployee.name;
 
-    buildPeriodDropdown();
-    renderEmployeeTable();
-    renderSalarySummary();
+    setupPeriods();
+    
+    if (availablePeriods.length > 0) {
+        selectPeriod(availablePeriods[0].value, availablePeriods[0].text);
+    } else {
+        document.getElementById('period-btn-text').innerText = '- ไม่พบข้อมูล -';
+        document.getElementById('salary-summary-container').innerHTML = '';
+        document.getElementById('table-container').innerHTML = '<div class="text-center py-8 text-slate-400 font-bold text-sm">ไม่พบข้อมูลเวลาเข้า-ออกงาน</div>';
+    }
+    
     renderEmployeeLeaves();
 }
 
@@ -332,8 +339,14 @@ function showAdminDashboard() {
     document.getElementById('view-admin-employees').classList.add('hidden');
     document.getElementById('loading-overlay').classList.add('hidden');
 
-    buildPeriodDropdown();
-    renderAdminSummary();
+    setupPeriods();
+
+    if (availablePeriods.length > 0) {
+        selectPeriod(availablePeriods[0].value, availablePeriods[0].text);
+    } else {
+        document.getElementById('admin-period-btn-text').innerText = "- ไม่พบข้อมูล -";
+    }
+    
     renderAdminLeaves();
 }
 
