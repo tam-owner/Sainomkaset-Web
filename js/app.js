@@ -346,10 +346,39 @@ function logout() {
 // ----------------------------------------------------
 // Views Routing
 // ----------------------------------------------------
-function showEmployeeDashboard() {
-    document.getElementById('view-login').classList.add('hidden');
-    document.getElementById('view-employee').classList.remove('hidden');
+function showView(viewId) {
+    const views = ['view-login', 'view-dashboard', 'view-employee', 'view-profile', 'view-leave', 'view-stock', 'view-checklist', 'view-qa', 'view-admin-dashboard', 'view-admin-employees'];
+    views.forEach(v => {
+        let el = document.getElementById(v);
+        if (el) el.classList.add('hidden');
+    });
+    
+    let target = document.getElementById(viewId);
+    if (target) target.classList.remove('hidden');
+    
     document.getElementById('loading-overlay').classList.add('hidden');
+}
+
+function showEmployeeDashboard() {
+    showView('view-dashboard');
+    
+    // Update header info in dashboard
+    const initialSpan = document.getElementById('dash-user-initial');
+    const photoImg = document.getElementById('dash-user-photo');
+    if (loggedInEmployee && loggedInEmployee.photo) {
+        if(photoImg) { photoImg.src = loggedInEmployee.photo; photoImg.classList.remove('hidden'); }
+        if(initialSpan) initialSpan.classList.add('hidden');
+    } else if (loggedInEmployee) {
+        if(photoImg) { photoImg.src = ""; photoImg.classList.add('hidden'); }
+        if(initialSpan) { initialSpan.classList.remove('hidden'); initialSpan.innerText = loggedInEmployee.name.charAt(0); }
+    }
+    if (document.getElementById('dash-user-name') && loggedInEmployee) {
+        document.getElementById('dash-user-name').innerText = loggedInEmployee.name;
+    }
+}
+
+function openTimesheet() {
+    showView('view-employee');
     
     const initialSpan = document.getElementById('emp-user-initial');
     const photoImg = document.getElementById('emp-user-photo');

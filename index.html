@@ -121,26 +121,174 @@
     </div>
 
     <!-- ===================================== -->
-    <!-- VIEW: EMPLOYEE DASHBOARD              -->
+    <!-- VIEW: MAIN DASHBOARD (NEW)            -->
+    <!-- ===================================== -->
+    <div id="view-dashboard" class="hidden px-4">
+        <div class="mb-8 mt-2 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-black text-xl shadow-inner relative overflow-hidden">
+                    <img id="dash-user-photo" src="" class="absolute inset-0 w-full h-full object-cover hidden">
+                    <span id="dash-user-initial"></span>
+                </div>
+                <div>
+                    <h1 class="text-sm text-slate-500 font-bold leading-tight">สวัสดี,</h1>
+                    <h2 class="text-xl font-black text-slate-800 leading-tight truncate max-w-[250px]" id="dash-user-name"></h2>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="openChangePinModal()" class="text-xs font-bold text-slate-600 bg-slate-200 px-3 py-2 rounded-lg active:scale-95 transition flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                </button>
+                <button onclick="logout()" class="text-xs font-bold text-rose-600 bg-rose-100 px-3 py-2 rounded-lg active:scale-95 transition flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <button onclick="openTimesheet()" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95">
+                <div class="w-14 h-14 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <span class="font-bold text-slate-700 text-sm">บันทึกเข้า-ออก</span>
+            </button>
+            <button onclick="showView('view-leave')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95">
+                <div class="w-14 h-14 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                </div>
+                <span class="font-bold text-slate-700 text-sm">ลางาน</span>
+            </button>
+            <button onclick="showView('view-profile')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95">
+                <div class="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                </div>
+                <span class="font-bold text-slate-700 text-sm">ประวัติ & สลิป</span>
+            </button>
+            <button onclick="showView('view-stock')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95">
+                <div class="w-14 h-14 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                </div>
+                <span class="font-bold text-slate-700 text-sm">นับ Stock</span>
+            </button>
+            <button onclick="showView('view-checklist')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95">
+                <div class="w-14 h-14 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                </div>
+                <span class="font-bold text-slate-700 text-sm">Checklist เปิด-ปิด</span>
+            </button>
+            <button onclick="showView('view-qa')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95">
+                <div class="w-14 h-14 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <span class="font-bold text-slate-700 text-sm">Q&A</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- PLACEHOLDER VIEWS                     -->
+    <!-- ===================================== -->
+    <div id="view-profile" class="hidden px-4">
+        <div class="mb-6 mt-2 flex items-center gap-3">
+            <button onclick="showView('view-dashboard')" class="p-2 bg-white rounded-full shadow-sm border border-slate-200 text-slate-600 active:scale-95">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+            <h1 class="text-xl font-black text-slate-800">ประวัติส่วนตัว & สลิป</h1>
+        </div>
+        <div class="bg-white rounded-[24px] p-6 shadow-sm border border-slate-200 text-center flex flex-col items-center gap-3">
+            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-400">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+            </div>
+            <h2 class="font-bold text-slate-700">กำลังพัฒนาระบบ</h2>
+            <p class="text-sm text-slate-500">ส่วนนี้จะแสดงชื่อ เลขบัญชีธนาคาร ยอดเงินเดือน และปุ่มดาวน์โหลดสลิปเงินเดือนในอนาคตครับ</p>
+        </div>
+    </div>
+
+    <div id="view-leave" class="hidden px-4">
+        <div class="mb-6 mt-2 flex items-center gap-3">
+            <button onclick="showView('view-dashboard')" class="p-2 bg-white rounded-full shadow-sm border border-slate-200 text-slate-600 active:scale-95">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+            <h1 class="text-xl font-black text-slate-800">ระบบลางาน</h1>
+        </div>
+        <div class="bg-white rounded-[24px] p-6 shadow-sm border border-slate-200 text-center flex flex-col items-center gap-3">
+            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-400">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+            </div>
+            <h2 class="font-bold text-slate-700">กำลังพัฒนาระบบ</h2>
+            <p class="text-sm text-slate-500">ระบบขอลางานผ่านแอปกำลังอยู่ระหว่างการจัดทำครับ</p>
+        </div>
+    </div>
+
+    <div id="view-stock" class="hidden px-4">
+        <div class="mb-6 mt-2 flex items-center gap-3">
+            <button onclick="showView('view-dashboard')" class="p-2 bg-white rounded-full shadow-sm border border-slate-200 text-slate-600 active:scale-95">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+            <h1 class="text-xl font-black text-slate-800">นับ Stock</h1>
+        </div>
+        <div class="bg-white rounded-[24px] p-6 shadow-sm border border-slate-200 text-center flex flex-col items-center gap-3">
+            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-400">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+            </div>
+            <h2 class="font-bold text-slate-700">กำลังพัฒนาระบบ</h2>
+            <p class="text-sm text-slate-500">หน้าจอสำหรับการนับและบันทึกสต็อกสินค้า</p>
+        </div>
+    </div>
+
+    <div id="view-checklist" class="hidden px-4">
+        <div class="mb-6 mt-2 flex items-center gap-3">
+            <button onclick="showView('view-dashboard')" class="p-2 bg-white rounded-full shadow-sm border border-slate-200 text-slate-600 active:scale-95">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+            <h1 class="text-xl font-black text-slate-800">Checklist เปิด-ปิดร้าน</h1>
+        </div>
+        <div class="bg-white rounded-[24px] p-6 shadow-sm border border-slate-200 text-center flex flex-col items-center gap-3">
+            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-400">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+            </div>
+            <h2 class="font-bold text-slate-700">กำลังพัฒนาระบบ</h2>
+            <p class="text-sm text-slate-500">ระบบเช็คลิสต์ตรวจสอบความเรียบร้อย</p>
+        </div>
+    </div>
+
+    <div id="view-qa" class="hidden px-4">
+        <div class="mb-6 mt-2 flex items-center gap-3">
+            <button onclick="showView('view-dashboard')" class="p-2 bg-white rounded-full shadow-sm border border-slate-200 text-slate-600 active:scale-95">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+            <h1 class="text-xl font-black text-slate-800">Q&A</h1>
+        </div>
+        <div class="bg-white rounded-[24px] p-6 shadow-sm border border-slate-200 text-center flex flex-col items-center gap-3">
+            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-400">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+            </div>
+            <h2 class="font-bold text-slate-700">กำลังพัฒนาระบบ</h2>
+            <p class="text-sm text-slate-500">ถาม-ตอบข้อสงสัยในการทำงานต่างๆ</p>
+        </div>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- VIEW: EMPLOYEE DASHBOARD (TIMESHEET)  -->
     <!-- ===================================== -->
     <div id="view-employee" class="hidden">
-        <div class="px-4 mb-4 flex justify-between items-center">
+        <div class="px-4 mb-4 flex items-center gap-3">
+            <button onclick="showView('view-dashboard')" class="p-2 bg-white rounded-full shadow-sm border border-slate-200 text-slate-600 active:scale-95">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-black text-lg shadow-inner relative overflow-hidden">
                     <img id="emp-user-photo" src="" class="absolute inset-0 w-full h-full object-cover hidden">
                     <span id="emp-user-initial"></span>
                 </div>
                 <div>
-                    <h1 class="text-sm text-slate-500 font-bold leading-tight">Hello,</h1>
-                    <h2 class="text-lg font-black text-slate-800 leading-tight truncate max-w-[250px] flex items-baseline" id="emp-user-name"></h2>
+                    <h1 class="text-sm text-slate-500 font-bold leading-tight">บันทึกเวลา</h1>
+                    <h2 class="text-lg font-black text-slate-800 leading-tight truncate max-w-[200px] flex items-baseline" id="emp-user-name"></h2>
                 </div>
             </div>
-            <div class="flex gap-2">
+            <div class="ml-auto">
                 <button onclick="openChangePinModal()" class="text-xs font-bold text-slate-600 bg-slate-200 px-3 py-2 rounded-lg active:scale-95 transition flex items-center gap-1">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg> PIN
-                </button>
-                <button onclick="logout()" class="text-xs font-bold text-red-600 bg-red-100 px-3 py-2 rounded-lg active:scale-95 transition">
-                    ออกระบบ
                 </button>
             </div>
         </div>
@@ -418,7 +566,7 @@
         </div>
     </div>
 
-    <script src="js/app.js?v=1781542175"></script>
+    <script src="js/app.js?v=1781543153"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
