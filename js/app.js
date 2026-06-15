@@ -407,8 +407,6 @@ function openTimesheet() {
         document.getElementById('salary-summary-container').innerHTML = '';
         document.getElementById('table-container').innerHTML = '<div class="text-center py-8 text-slate-400 font-bold text-sm">ไม่พบข้อมูลเวลาเข้า-ออกงาน</div>';
     }
-    
-    renderEmployeeLeaves();
 }
 
 function showAdminDashboard() {
@@ -1828,21 +1826,24 @@ function printSlip(idx) {
     printWindow.document.close();
 }
 
+function openLeave() {
+    showView('view-leave');
+    renderEmployeeLeaves();
+}
+
 // ----------------------------------------------------
 function renderEmployeeLeaves() {
     const list = document.getElementById('leave-history-list');
-    const container = document.getElementById('view-leave');
     
-    if (!loggedInEmployee || !list || !container) return;
+    if (!loggedInEmployee || !list) return;
 
     let myLeaves = leaves.filter(l => l.name === loggedInEmployee.name);
     
     if (myLeaves.length === 0) {
-        container.classList.add('hidden');
+        list.innerHTML = `<div class="text-center py-6 text-slate-400 text-sm">ไม่พบประวัติการลางาน</div>`;
         return;
     }
     
-    container.classList.remove('hidden');
     let html = '';
     myLeaves.forEach(l => {
         let statusBadge = '';
