@@ -10,6 +10,7 @@ let availablePeriods = [];
 let currentPeriodVal = '';
 let loggedInEmployee = null; // Object if employee, or string "ADMIN"
 let isAdmin = false;
+let currentEmpTab = 'active';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Check session storage first
@@ -1348,18 +1349,17 @@ function renderAdminEmployees() {
         }
     });
 
-    if (activeEmployees.length === 0 && inactiveEmployees.length === 0) {
+    const listToRender = currentEmpTab === 'active' ? activeEmployees : inactiveEmployees;
+    
+    document.getElementById('emp-setup-count').innerText = listToRender.length;
+
+    if (listToRender.length === 0) {
         container.innerHTML = '<div class="text-center text-slate-400 py-8 text-sm font-medium">ไม่พบข้อมูลพนักงาน</div>';
         return;
     }
 
-    const renderGroup = (list, title, isInactive) => {
+    const renderGroup = (list, isInactive) => {
         if (list.length === 0) return;
-        
-        const groupTitle = document.createElement('div');
-        groupTitle.className = 'text-xs font-bold text-slate-400 mt-4 mb-2 px-1 uppercase tracking-wider';
-        groupTitle.innerText = title;
-        container.appendChild(groupTitle);
         
         list.forEach(emp => {
             const div = document.createElement('div');
@@ -1407,8 +1407,27 @@ function renderAdminEmployees() {
         });
     };
     
-    renderGroup(activeEmployees, 'พนักงานปัจจุบัน', false);
-    renderGroup(inactiveEmployees, 'พนักงานเก่า', true);
+    renderGroup(listToRender, currentEmpTab === 'inactive');
+}
+
+function switchEmpTab(tab) {
+    currentEmpTab = tab;
+    const btnActive = document.getElementById('tab-emp-active');
+    const btnInactive = document.getElementById('tab-emp-inactive');
+    
+    if (tab === 'active') {
+        btnActive.classList.add('bg-white', 'shadow-sm', 'text-slate-800');
+        btnActive.classList.remove('text-slate-500');
+        btnInactive.classList.remove('bg-white', 'shadow-sm', 'text-slate-800');
+        btnInactive.classList.add('text-slate-500');
+    } else {
+        btnInactive.classList.add('bg-white', 'shadow-sm', 'text-slate-800');
+        btnInactive.classList.remove('text-slate-500');
+        btnActive.classList.remove('bg-white', 'shadow-sm', 'text-slate-800');
+        btnActive.classList.add('text-slate-500');
+    }
+    
+    renderAdminEmployees();
 }
 
 let currentEmployeePhotoBase64 = "";

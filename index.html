@@ -607,7 +607,13 @@
             </div>
 
             <div class="flex justify-between items-center px-1">
-                <div class="text-sm font-bold text-slate-500">พนักงานทั้งหมด <span id="emp-setup-count" class="text-blue-600">0</span> คน</div>
+                <div class="text-sm font-bold text-slate-500">พนักงานในกลุ่มนี้ <span id="emp-setup-count" class="text-blue-600">0</span> คน</div>
+            </div>
+
+            <!-- TABS -->
+            <div class="flex bg-slate-100 p-1 rounded-xl shadow-inner mb-4">
+                <button id="tab-emp-active" onclick="switchEmpTab('active')" class="flex-1 py-2 text-sm font-bold rounded-lg shadow-sm bg-white text-slate-800 transition-all">พนักงานปัจจุบัน</button>
+                <button id="tab-emp-inactive" onclick="switchEmpTab('inactive')" class="flex-1 py-2 text-sm font-bold rounded-lg text-slate-500 hover:text-slate-700 transition-all">พนักงานเก่า</button>
             </div>
 
             <div id="employee-setup-list" class="space-y-2"></div>
