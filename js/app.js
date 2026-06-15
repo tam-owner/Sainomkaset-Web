@@ -1662,21 +1662,35 @@ function openProfile(pushToHistory = true) {
             startDateEl.innerText = startDateObj.toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: 'numeric' });
             
             const now = new Date();
-            const diffTime = now.getTime() - startDateObj.getTime();
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             
-            if (diffDays < 0) {
+            if (startDateObj > now) {
                 tenureEl.innerText = '-';
-            } else if (diffDays < 30) {
-                tenureEl.innerText = `${diffDays} วัน`;
-            } else if (diffDays < 365) {
-                const months = Math.floor(diffDays / 30);
-                const days = diffDays % 30;
-                tenureEl.innerText = `${months} เดือน ${days > 0 ? days + ' วัน' : ''}`;
             } else {
-                const years = Math.floor(diffDays / 365);
-                const months = Math.floor((diffDays % 365) / 30);
-                tenureEl.innerText = `${years} ปี ${months > 0 ? months + ' เดือน' : ''}`;
+                let years = now.getFullYear() - startDateObj.getFullYear();
+                let months = now.getMonth() - startDateObj.getMonth();
+                let days = now.getDate() - startDateObj.getDate();
+
+                if (days < 0) {
+                    months--;
+                    const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+                    days += prevMonth.getDate();
+                }
+                
+                if (months < 0) {
+                    years--;
+                    months += 12;
+                }
+
+                let totalMonths = (years * 12) + months;
+                
+                if (totalMonths === 0 && days === 0) {
+                    tenureEl.innerText = 'เริ่มงานวันนี้';
+                } else {
+                    let parts = [];
+                    if (totalMonths > 0) parts.push(`${totalMonths} เดือน`);
+                    if (days > 0) parts.push(`${days} วัน`);
+                    tenureEl.innerText = parts.join(' ');
+                }
             }
         } else {
             startDateEl.innerText = startDateStr;
