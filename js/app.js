@@ -584,14 +584,20 @@ function renderEmployeeDashboard() {
                 <span class="text-sm font-black text-slate-700">฿${formatCurrency(payBeforeTax)}</span>
             </div>
 
-            <!-- Tax / Social Security -->
-            ${standardDeduct > 0 ? `
-            <div class="flex justify-between items-center px-2 mb-4 bg-rose-50/50 p-1.5 rounded-lg border border-rose-100/50">
-                <span class="text-[11px] font-bold text-rose-500">${deductLabel} (ยอด ฿${formatCurrency(payBeforeTax)})</span>
-                <span class="text-sm font-black text-rose-600">- ฿${formatCurrency(standardDeduct)}</span>
-            </div>
-            ` : ''}
 
+            <!-- Net Pay (Grand Total) -->
+            <div class="bg-[#0fa981] rounded-[20px] p-5 flex justify-between items-center shadow-lg shadow-emerald-600/30 mt-4 relative overflow-hidden">
+                <div class="relative z-10">
+                    <p class="text-[11px] font-black text-emerald-50 uppercase tracking-widest">รวมรายได้สุทธิ</p>
+                    <p class="text-[10px] text-emerald-100 mt-1 font-medium">รับจริงหลังหักทั้งหมด (Net Pay)</p>
+                </div>
+                <div class="text-3xl font-black text-white tracking-tight relative z-10 flex items-baseline">
+                    <span class="text-lg text-emerald-200 mr-1.5 font-bold">฿</span>${formatCurrency(netPay)}
+                </div>
+            </div>
+            
+            ${loggedInEmployee.bankAccount ? `
+            <div class="mt-4 flex items-center justify-center gap-2 text-[11px] font-bold text-emerald-600 bg-emerald-50/50 border border-emerald-100/50 py-2.5 rounded-xl">
                 <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
                 โอนเข้าบัญชี: <span class="text-emerald-800 text-xs">${loggedInEmployee.bankAccount}</span>
             </div>
