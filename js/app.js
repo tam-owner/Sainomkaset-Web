@@ -1354,6 +1354,37 @@ function renderAdminEmployees() {
     document.getElementById('tab-emp-active').innerText = `พนักงานปัจจุบัน (${activeEmployees.length})`;
     document.getElementById('tab-emp-inactive').innerText = `พนักงานเก่า (${inactiveEmployees.length})`;
 
+    const getSortPriority = (emp) => {
+        const type = emp.employeeType || '';
+        const ded = String(emp.deductionType || "").trim();
+        const isSoc = (ded === "5%" || ded === "0.05" || ded.includes("5%"));
+        const isTax = (ded === "3%" || ded === "0.03" || ded.includes("3%") || ded === "" || ded === "None");
+
+        if (type === 'Full Time' && isSoc) return 1;
+        if (type === 'Full Time' && isTax) return 2;
+        if (type === 'Part Time' && isSoc) return 3;
+        if (type === 'Part Time' && isTax) return 4;
+        return 5;
+    };
+
+    const getSafeTime = (dStr) => {
+        if (!dStr) return Infinity;
+        const ms = new Date(dStr).getTime();
+        return isNaN(ms) ? Infinity : ms;
+    };
+
+    listToRender.sort((a, b) => {
+        const pA = getSortPriority(a);
+        const pB = getSortPriority(b);
+        if (pA !== pB) return pA - pB;
+        
+        const dateA = getSafeTime(a.startDate);
+        const dateB = getSafeTime(b.startDate);
+        if (dateA !== dateB) return dateA - dateB;
+        
+        return (a.name || "").localeCompare(b.name || "");
+    });
+
     if (listToRender.length === 0) {
         container.innerHTML = '<div class="text-center text-slate-400 py-8 text-sm font-medium">ไม่พบข้อมูลพนักงาน</div>';
         return;
@@ -1375,6 +1406,14 @@ function renderAdminEmployees() {
                 typeBadge = `<span class="bg-amber-100 text-amber-700 text-[10px] font-bold px-1.5 py-0.5 rounded">Part Time</span>`;
             }
 
+            let deductBadge = '';
+            let empDedType = String(emp.deductionType || "").trim();
+            if (empDedType === "5%" || empDedType === "0.05" || empDedType.includes("5%")) {
+                deductBadge = `<span class="bg-purple-100 text-purple-700 text-[10px] font-bold px-1.5 py-0.5 rounded">ประกันสังคม</span>`;
+            } else if (empDedType === "3%" || empDedType === "0.03" || empDedType.includes("3%") || empDedType === "" || empDedType === "None") {
+                deductBadge = `<span class="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-1.5 py-0.5 rounded">หักภาษี 3%</span>`;
+            }
+
             let avatarHtml = emp.photo ? 
                 `<img src="${emp.photo}" class="w-10 h-10 rounded-full object-cover shrink-0 border-2 border-slate-100">` : 
                 `<div class="w-10 h-10 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold shrink-0 border-2 border-slate-100 text-lg">${(emp.name || '?').charAt(0)}</div>`;
@@ -1384,14 +1423,15 @@ function renderAdminEmployees() {
                     ${avatarHtml}
                     <div class="flex flex-col justify-center min-w-0">
                         <div class="flex items-center gap-2 flex-wrap">
-                            <div class="text-[15px] font-black text-slate-900 truncate flex items-baseline gap-1.5">
-                                ${emp.name || '-'} 
-                                ${emp.fullName ? `<span class="text-[11px] text-slate-500 font-medium hidden sm:inline">${emp.fullName}</span>` : ''}
+                            <div class="text-[15px] font-black text-slate-900 truncate">
+                                ${emp.name || '-'}
+                            </div>
+                            <div class="flex items-center gap-1">
+                                ${typeBadge}
+                                ${deductBadge}
                             </div>
                         </div>
-                        <div class="flex items-center gap-2 mt-0.5">
-                            ${typeBadge}
-                        </div>
+                        ${emp.fullName ? `<div class="text-[12px] text-slate-500 font-medium truncate mt-0.5">${emp.fullName}</div>` : ''}
                     </div>
                 </div>
                 <div class="flex items-center gap-3 shrink-0">
