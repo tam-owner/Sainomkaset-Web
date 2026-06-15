@@ -78,7 +78,7 @@ function getSheetByNameOrCreateNew(name) {
     if (name === "Attendance") {
       sheet.appendRow(["Timestamp", "Name", "Type", "ScheduledTime", "Note"]);
     } else if (name === "Employees") {
-      sheet.appendRow(["ชื่อเล่น", "ชื่อจริง-นามสกุล", "PIN", "เรตรายวัน", "เรตรายชม.", "เรต OT", "ประเภทการหักเงิน", "เลขบัญชีธนาคาร", "ประเภทพนักงาน"]);
+      sheet.appendRow(["ชื่อเล่น", "ชื่อจริง-นามสกุล", "PIN", "เรตรายวัน", "เรตรายชม.", "เรต OT", "ประเภทการหักเงิน", "เลขบัญชีธนาคาร", "ประเภทพนักงาน", "รูปภาพ", "วันที่เริ่มงาน"]);
     } else if (name === "Deductions") {
       sheet.appendRow(["ID", "Period", "Name", "Amount", "Reason", "Timestamp", "Type"]);
     } else if (name === "Leaves") {
@@ -162,7 +162,8 @@ function getEmployeesData() {
         deductionType: String(row[6] || "3%").trim(),
         bankAccount: String(row[7] || "").trim(),
         employeeType: String(row[8] || "").trim(),
-        photo: String(row[9] || "").trim()
+        photo: String(row[9] || "").trim(),
+        startDate: String(row[10] || "").trim()
       });
     }
     return result;

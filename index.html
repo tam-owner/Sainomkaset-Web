@@ -207,7 +207,7 @@
         </div>
 
         <!-- Profile Card -->
-        <div class="bg-white rounded-[24px] p-6 shadow-sm border border-slate-200 mb-6 flex items-center gap-4">
+        <div class="bg-white rounded-[24px] p-6 shadow-sm border border-slate-200 mb-4 flex items-center gap-4">
             <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-black text-2xl shadow-inner relative overflow-hidden shrink-0">
                 <img id="profile-user-photo" src="" class="absolute inset-0 w-full h-full object-cover hidden">
                 <span id="profile-user-initial"></span>
@@ -218,6 +218,34 @@
                 <div class="text-xs font-semibold text-slate-500 mt-1.5 flex items-center gap-1.5 truncate">
                     <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
                     <span id="profile-user-bank" class="truncate"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Work History Card -->
+        <div class="bg-white rounded-[24px] p-5 shadow-sm border border-slate-200 mb-6">
+            <h2 class="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
+                <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                ประวัติการทำงาน
+            </h2>
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <div class="text-[10px] font-bold text-slate-500 mb-1">วันที่เริ่มงาน</div>
+                    <div class="text-sm font-black text-slate-800" id="profile-start-date">กำลังโหลด...</div>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <div class="text-[10px] font-bold text-slate-500 mb-1">อายุงาน</div>
+                    <div class="text-sm font-black text-slate-800" id="profile-tenure">กำลังโหลด...</div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100">
+                    <div class="text-[10px] font-bold text-emerald-600 mb-1">รวมเวลาทำงาน</div>
+                    <div class="text-sm font-black text-emerald-700"><span id="profile-total-hours">0</span> <span class="text-[10px]">ชม.</span></div>
+                </div>
+                <div class="bg-amber-50 p-3 rounded-xl border border-amber-100">
+                    <div class="text-[10px] font-bold text-amber-600 mb-1">รวมรายได้สุทธิ</div>
+                    <div class="text-sm font-black text-amber-700"><span id="profile-total-income">0</span> <span class="text-[10px]">฿</span></div>
                 </div>
             </div>
         </div>
@@ -659,7 +687,7 @@
         </div>
     </div>
 
-    <script src="js/app.js?v=1781544998"></script>
+    <script src="js/app.js?v=1781545675"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {

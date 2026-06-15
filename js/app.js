@@ -1628,12 +1628,69 @@ function openProfile(pushToHistory = true) {
         initialSpan.innerText = loggedInEmployee.name.charAt(0);
     }
 
-    document.getElementById('profile-user-fullname').innerText = loggedInEmployee.fullName || loggedInEmployee.name;
-    document.getElementById('profile-user-type').innerText = loggedInEmployee.type || 'พนักงาน';
+    if (loggedInEmployee.fullName) {
+        document.getElementById('profile-user-fullname').innerText = `${loggedInEmployee.name} (${loggedInEmployee.fullName})`;
+    } else {
+        document.getElementById('profile-user-fullname').innerText = loggedInEmployee.name;
+    }
+    document.getElementById('profile-user-type').innerText = loggedInEmployee.employeeType || 'พนักงาน';
     document.getElementById('profile-user-bank').innerText = loggedInEmployee.bankAccount || 'ยังไม่ระบุเลขบัญชี';
 
     calculateMonthlySlips();
     renderSlips();
+
+    // Work History calculation
+    let totalHours = 0;
+    let totalIncome = 0;
+    monthlySlips.forEach(s => {
+        totalHours += (s.regularHours + s.otHours);
+        totalIncome += s.netPay;
+    });
+
+    document.getElementById('profile-total-hours').innerText = formatMoney(totalHours);
+    document.getElementById('profile-total-income').innerText = formatMoney(totalIncome);
+
+    // Calculate tenure
+    const startDateStr = loggedInEmployee.startDate || '';
+    const startDateEl = document.getElementById('profile-start-date');
+    const tenureEl = document.getElementById('profile-tenure');
+    
+    if (startDateStr) {
+        // Try parsing assuming ISO format or Google Sheets standard date string
+        const startDateObj = new Date(startDateStr);
+        if (!isNaN(startDateObj.getTime())) {
+            startDateEl.innerText = startDateObj.toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: 'numeric' });
+            
+            const now = new Date();
+            const diffTime = now.getTime() - startDateObj.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays < 0) {
+                tenureEl.innerText = '-';
+            } else if (diffDays < 30) {
+                tenureEl.innerText = `${diffDays} วัน`;
+            } else if (diffDays < 365) {
+                const months = Math.floor(diffDays / 30);
+                const days = diffDays % 30;
+                tenureEl.innerText = `${months} เดือน ${days > 0 ? days + ' วัน' : ''}`;
+            } else {
+                const years = Math.floor(diffDays / 365);
+                const months = Math.floor((diffDays % 365) / 30);
+                tenureEl.innerText = `${years} ปี ${months > 0 ? months + ' เดือน' : ''}`;
+            }
+        } else {
+            startDateEl.innerText = startDateStr;
+            tenureEl.innerText = '-';
+        }
+    } else {
+        startDateEl.innerText = 'ยังไม่ระบุ';
+        tenureEl.innerText = 'ยังไม่ระบุ';
+    }
+}
+
+function formatMoney(num) {
+    if (!num) return "0.00";
+    return Number(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function calculateMonthlySlips() {
