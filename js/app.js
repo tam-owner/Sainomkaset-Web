@@ -1351,7 +1351,8 @@ function renderAdminEmployees() {
 
     const listToRender = currentEmpTab === 'active' ? activeEmployees : inactiveEmployees;
     
-    document.getElementById('emp-setup-count').innerText = listToRender.length;
+    document.getElementById('tab-emp-active').innerText = `พนักงานปัจจุบัน (${activeEmployees.length})`;
+    document.getElementById('tab-emp-inactive').innerText = `พนักงานเก่า (${inactiveEmployees.length})`;
 
     if (listToRender.length === 0) {
         container.innerHTML = '<div class="text-center text-slate-400 py-8 text-sm font-medium">ไม่พบข้อมูลพนักงาน</div>';
