@@ -1,4 +1,4 @@
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzJFpGK_K-d8jkce0gacRlwCG8xWHKwXGtPgS5Rfh8lss_1iCzFxlyDFSLTAWqzkvQ/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw4QuPW52ewb-04vE2E97FUKCijO959hL9cN5X7kLcyhRerPx5nVztyKQxiqSF1ZFQ/exec';
 
 let rawAttendance = [];
 let employees = [];
