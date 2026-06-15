@@ -379,7 +379,12 @@ function handleSaveEmployee(oldNickname, oldFullName, emp) {
   ];
 
   if (foundIdx !== -1) {
-    sheet.getRange(foundIdx + 1, 1, 1, 13).setValues([rowData]);
+    var requiredCols = rowData.length;
+    var currentCols = sheet.getMaxColumns();
+    if (currentCols < requiredCols) {
+      sheet.insertColumnsAfter(currentCols, requiredCols - currentCols);
+    }
+    sheet.getRange(foundIdx + 1, 1, 1, requiredCols).setValues([rowData]);
     return {status: "success", message: "Updated successfully"};
   } else {
     sheet.appendRow(rowData);
