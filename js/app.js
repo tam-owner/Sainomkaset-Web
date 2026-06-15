@@ -76,6 +76,24 @@ async function fetchFreshDataSilently() {
         if (json.status === "success") {
             localStorage.setItem('snk_payroll_data', JSON.stringify(json));
             applyInitData(json.data); // Update with fresh data
+            
+            // Re-render UI if already logged in
+            if (loggedInEmployee) {
+                if (isAdmin) {
+                    renderAdminDashboard();
+                    if (!document.getElementById('view-admin-employees').classList.contains('hidden')) {
+                        document.getElementById('emp-setup-count').innerText = employees.length;
+                        renderAdminEmployees();
+                    }
+                } else {
+                    const freshEmp = employees.find(e => e.name === loggedInEmployee.name);
+                    if (freshEmp) {
+                        loggedInEmployee = freshEmp;
+                        sessionStorage.setItem('snk_payroll_user', JSON.stringify(freshEmp));
+                    }
+                    showEmployeeDashboard(); // Updates header avatar and re-renders
+                }
+            }
         }
     } catch (e) {
         console.error("Silent fetch error", e);
