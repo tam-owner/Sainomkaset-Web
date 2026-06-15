@@ -164,7 +164,8 @@ function getEmployeesData() {
         employeeType: String(row[8] || "").trim(),
         photo: String(row[9] || "").trim(),
         startDate: String(row[10] || "").trim(),
-        status: String(row[11] || "Active").trim()
+        status: String(row[11] || "Active").trim(),
+        monthlyRate: Number(row[12]) || 0
       });
     }
     return result;
@@ -373,11 +374,12 @@ function handleSaveEmployee(oldNickname, oldFullName, emp) {
     emp.employeeType,
     emp.photo || "",
     emp.startDate || "",
-    emp.status || "Active"
+    emp.status || "Active",
+    emp.monthlyRate || 0
   ];
 
   if (foundIdx !== -1) {
-    sheet.getRange(foundIdx + 1, 1, 1, 12).setValues([rowData]);
+    sheet.getRange(foundIdx + 1, 1, 1, 13).setValues([rowData]);
     return {status: "success", message: "Updated successfully"};
   } else {
     sheet.appendRow(rowData);

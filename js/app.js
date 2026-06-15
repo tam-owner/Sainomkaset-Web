@@ -1532,6 +1532,7 @@ function openEmployeeModal() {
     document.getElementById('emp-nickname').value = "";
     document.getElementById('emp-fullname').value = "";
     document.getElementById('emp-pin').value = "1234";
+    document.getElementById('emp-monthlyrate').value = "";
     document.getElementById('emp-dailyrate').value = "";
     document.getElementById('emp-hourlyrate').value = "";
     document.getElementById('emp-otrate').value = "";
@@ -1539,6 +1540,8 @@ function openEmployeeModal() {
     document.getElementById('emp-bank').value = "";
     document.getElementById('emp-type').value = "Full Time";
     document.getElementById('emp-status').value = "Active";
+    
+    updateEmployeeFormLayout();
     
     document.getElementById('btn-delete-employee').classList.add('hidden');
 
@@ -1565,6 +1568,7 @@ function editEmployee(emp) {
     document.getElementById('emp-nickname').value = emp.name || "";
     document.getElementById('emp-fullname').value = emp.fullName || "";
     document.getElementById('emp-pin').value = emp.pin || "";
+    document.getElementById('emp-monthlyrate').value = emp.monthlyRate || "";
     document.getElementById('emp-dailyrate').value = emp.dailyRate || "";
     document.getElementById('emp-hourlyrate').value = emp.normalRate || "";
     document.getElementById('emp-otrate').value = emp.otRate || "";
@@ -1572,6 +1576,8 @@ function editEmployee(emp) {
     document.getElementById('emp-bank').value = emp.bankAccount || "";
     document.getElementById('emp-type').value = emp.employeeType || "Full Time";
     document.getElementById('emp-status').value = emp.status || "Active";
+    
+    updateEmployeeFormLayout();
     
     const delBtn = document.getElementById('btn-delete-employee');
     delBtn.classList.remove('hidden');
@@ -1620,6 +1626,7 @@ async function saveEmployee() {
         nickname: nickname,
         fullName: document.getElementById('emp-fullname').value.trim(),
         pin: document.getElementById('emp-pin').value.trim(),
+        monthlyRate: parseFloat(document.getElementById('emp-monthlyrate').value) || 0,
         dailyRate: parseFloat(document.getElementById('emp-dailyrate').value) || 0,
         normalRate: parseFloat(document.getElementById('emp-hourlyrate').value) || 0,
         otRate: parseFloat(document.getElementById('emp-otrate').value) || 0,
@@ -2179,6 +2186,38 @@ function downloadPayslipPdf() {
 // ----------------------------------------------------
 // Scroll Effects
 // ----------------------------------------------------
+
+function updateEmployeeFormLayout() {
+    const type = document.getElementById('emp-type').value;
+    const monthlyContainer = document.getElementById('emp-monthly-container');
+    const hourlyInput = document.getElementById('emp-hourlyrate');
+    const otInput = document.getElementById('emp-otrate');
+    
+    if (type === 'Full Time') {
+        if(monthlyContainer) monthlyContainer.classList.remove('hidden');
+        if(hourlyInput) { hourlyInput.readOnly = false; hourlyInput.classList.remove('bg-slate-100'); }
+        if(otInput) { otInput.readOnly = false; otInput.classList.remove('bg-slate-100'); }
+    } else {
+        if(monthlyContainer) monthlyContainer.classList.add('hidden');
+        if(hourlyInput) { hourlyInput.readOnly = true; hourlyInput.classList.add('bg-slate-100'); }
+        if(otInput) { otInput.readOnly = true; otInput.classList.add('bg-slate-100'); }
+        calculatePartTimeRates();
+    }
+}
+
+function calculatePartTimeRates() {
+    const type = document.getElementById('emp-type').value;
+    if (type === 'Part Time') {
+        const daily = parseFloat(document.getElementById('emp-dailyrate').value) || 0;
+        const hourly = daily / 8; // Assuming 8 hours
+        const ot = hourly * 1.5;
+        const hourlyEl = document.getElementById('emp-hourlyrate');
+        const otEl = document.getElementById('emp-otrate');
+        if(hourlyEl) hourlyEl.value = hourly ? hourly.toFixed(2) : '';
+        if(otEl) otEl.value = ot ? ot.toFixed(2) : '';
+    }
+}
+
 window.addEventListener('scroll', () => {
     const tableHeader = document.getElementById('employee-table-header');
     const periodCard = document.getElementById('period-selector-card');
