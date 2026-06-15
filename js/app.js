@@ -75,7 +75,7 @@ async function fetchFreshDataSilently() {
         const json = await res.json();
         if (json.status === "success") {
             localStorage.setItem('snk_payroll_data', JSON.stringify(json));
-            applyInitData(json.data); // Update with fresh data
+            applyInitData(json.data, true); // Update with fresh data, isSilent=true
             
             // Re-render UI if already logged in
             if (loggedInEmployee) {
@@ -114,7 +114,7 @@ async function fetchFreshDataSilently() {
     }
 }
 
-function applyInitData(data) {
+function applyInitData(data, isSilent = false) {
     const overlay = document.getElementById('loading-overlay');
     rawAttendance = data.attendance;
     employees = data.employees.map(emp => {
@@ -151,18 +151,20 @@ function applyInitData(data) {
     populateLoginNames();
     if (currentSelection && select) select.value = currentSelection;
     
-    if (isAdmin) {
-        showAdminDashboard();
-    } else if (loggedInEmployee) {
-        const updatedEmp = employees.find(e => e.name === loggedInEmployee.name);
-        if (updatedEmp) {
-            loggedInEmployee = updatedEmp;
-            showEmployeeDashboard();
+    if (!isSilent) {
+        if (isAdmin) {
+            showAdminDashboard();
+        } else if (loggedInEmployee) {
+            const updatedEmp = employees.find(e => e.name === loggedInEmployee.name);
+            if (updatedEmp) {
+                loggedInEmployee = updatedEmp;
+                showEmployeeDashboard();
+            } else {
+                logout();
+            }
         } else {
-            logout();
+            overlay.classList.add('hidden');
         }
-    } else {
-        overlay.classList.add('hidden');
     }
 }
 
