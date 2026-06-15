@@ -3,6 +3,7 @@ const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzJFpGK_K-d8jkce0ga
 let rawAttendance = [];
 let employees = [];
 let deductions = [];
+let leaves = [];
 
 let processedAttendance = [];
 let availablePeriods = [];
@@ -92,7 +93,8 @@ function applyInitData(data) {
         }
         return emp;
     });
-    deductions = data.deductions;
+    deductions = data.deductions || [];
+    leaves = data.leaves || [];
 
     // Auto-register missing names
     let attendanceNames = new Set(rawAttendance.map(r => r.name).filter(n => n));
@@ -313,20 +315,13 @@ function logout() {
 function showEmployeeDashboard() {
     document.getElementById('view-login').classList.add('hidden');
     document.getElementById('view-employee').classList.remove('hidden');
-    document.getElementById('loading-overlay').classList.add('hidden');
-    
-    document.getElementById('emp-user-name').innerHTML = `${loggedInEmployee.name} ${loggedInEmployee.fullName ? `<span class="text-xs font-semibold text-slate-500 ml-1 truncate">${loggedInEmployee.fullName}</span>` : ''}`;
     document.getElementById('emp-user-initial').innerText = loggedInEmployee.name.charAt(0);
-    
-    setupPeriods();
-    
-    if (availablePeriods.length > 0) {
-        selectPeriod(availablePeriods[0].value, availablePeriods[0].text);
-    } else {
-        document.getElementById('period-btn-text').innerText = '- ไม่พบข้อมูล -';
-        document.getElementById('salary-summary-container').innerHTML = '';
-        document.getElementById('table-container').innerHTML = '<div class="text-center py-8 text-slate-400 font-bold text-sm">ไม่พบข้อมูลเวลาเข้า-ออกงาน</div>';
-    }
+    document.getElementById('emp-user-name').innerText = loggedInEmployee.name;
+
+    buildPeriodDropdown();
+    renderEmployeeTable();
+    renderSalarySummary();
+    renderEmployeeLeaves();
 }
 
 function showAdminDashboard() {
@@ -474,18 +469,36 @@ function renderEmployeeDashboard() {
     let otPay = totalOTHours * loggedInEmployee.otRate;
     let grossPay = normalPay + otPay;
     
-    let myDeductions = deductions.filter(d => d.period === currentPeriodVal && d.name === loggedInEmployee.name);
-    let customDeductTotal = myDeductions.reduce((sum, d) => sum + d.amount, 0);
+    let customDeductTotal = 0;
+    let customBonusTotal = 0;
+    let customDeductHtml = '';
 
-    let payBeforeTax = grossPay - customDeductTotal;
+    let empDeductions = deductions.filter(d => d.period === currentPeriodVal && d.name === loggedInEmployee.name);
+    empDeductions.forEach(d => {
+        if (d.type === 'Bonus') {
+            customBonusTotal += d.amount;
+            customDeductHtml += `<div class="flex justify-between items-center text-xs py-1.5 border-b border-dashed border-indigo-100 last:border-0">
+                <span class="text-indigo-600 font-bold">${d.reason}</span>
+                <span class="font-black text-indigo-700">+฿${d.amount.toLocaleString()}</span>
+            </div>`;
+        } else {
+            customDeductTotal += d.amount;
+            customDeductHtml += `<div class="flex justify-between items-center text-xs py-1.5 border-b border-dashed border-red-100 last:border-0">
+                <span class="text-red-500 font-bold">${d.reason}</span>
+                <span class="font-black text-red-600">-฿${d.amount.toLocaleString()}</span>
+            </div>`;
+        }
+    });
+
+    let payBeforeTax = grossPay + customBonusTotal - customDeductTotal;
 
     let standardDeduct = 0;
     let deductLabel = '';
-    let dedType = String(loggedInEmployee.deductionType).trim();
-    if (dedType === "3%" || dedType === "0.03") {
+    let empDedType = String(loggedInEmployee.deductionType).trim();
+    if (empDedType === "3%" || empDedType === "0.03") {
         standardDeduct = payBeforeTax * 0.03;
         deductLabel = "หัก ณ ที่จ่าย 3%";
-    } else if (dedType === "5%" || dedType === "0.05") {
+    } else if (empDedType === "5%" || empDedType === "0.05") {
         standardDeduct = payBeforeTax * 0.05;
         deductLabel = "ประกันสังคม 5%";
     }
@@ -552,26 +565,7 @@ function renderEmployeeDashboard() {
                     </div>
                 </div>
 
-                <!-- Deductions -->
-                ${customDeductTotal > 0 ? `
-                <div class="flex justify-between items-start p-3 bg-gradient-to-r from-rose-50 to-white rounded-xl border border-rose-100 shadow-sm">
-                    <div class="flex items-start gap-3">
-                        <div class="w-9 h-9 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center shrink-0 shadow-inner mt-0.5">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-bold text-rose-700">รายการหักออก</p>
-                            <div class="text-xs font-medium text-rose-500/80 mt-1 space-y-0.5">
-                                ${myDeductions.map(d => `<p class="flex items-center gap-1"><span class="w-1 h-1 rounded-full bg-rose-300"></span> ${d.reason} (฿${formatCurrency(d.amount)})</p>`).join('')}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-right font-black text-rose-600 pt-1 shrink-0 text-lg">
-                        <span class="mr-1">-</span>฿${formatCurrency(customDeductTotal)}
-                    </div>
-                </div>
-                ` : ''}
-
+                ${customDeductHtml}
             </div>
 
             <!-- Totals Divider -->
@@ -588,7 +582,7 @@ function renderEmployeeDashboard() {
 
             <!-- Subtotal -->
             <div class="flex justify-between items-center px-2 mb-2">
-                <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">รวมค่าแรงปกติ + OT - หักออก</span>
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">รวมค่าแรงปกติ + OT + พิเศษ - หักออก</span>
                 <span class="text-sm font-black text-slate-700">฿${formatCurrency(payBeforeTax)}</span>
             </div>
 
@@ -600,19 +594,6 @@ function renderEmployeeDashboard() {
             </div>
             ` : ''}
 
-            <!-- Net Pay (Grand Total) -->
-            <div class="bg-[#0fa981] rounded-[20px] p-5 flex justify-between items-center shadow-lg shadow-emerald-600/30 mt-4 relative overflow-hidden">
-                <div class="relative z-10">
-                    <p class="text-[11px] font-black text-emerald-50 uppercase tracking-widest">รวมรายได้สุทธิ</p>
-                    <p class="text-[10px] text-emerald-100 mt-1 font-medium">รับจริงหลังหักทั้งหมด (Net Pay)</p>
-                </div>
-                <div class="text-3xl font-black text-white tracking-tight relative z-10 flex items-baseline">
-                    <span class="text-lg text-emerald-200 mr-1.5 font-bold">฿</span>${formatCurrency(netPay)}
-                </div>
-            </div>
-            
-            ${loggedInEmployee.bankAccount ? `
-            <div class="mt-4 flex items-center justify-center gap-2 text-[11px] font-bold text-emerald-600 bg-emerald-50/50 border border-emerald-100/50 py-2.5 rounded-xl">
                 <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
                 โอนเข้าบัญชี: <span class="text-emerald-800 text-xs">${loggedInEmployee.bankAccount}</span>
             </div>
@@ -853,6 +834,12 @@ function renderAdminSummary() {
     let totalPayroll = 0;
     let activeEmployeesCount = 0;
     
+    let chartLabels = [];
+    let chartNormalPay = [];
+    let chartOTPay = [];
+    let chartBonus = [];
+    let chartDeduct = [];
+    
     let html = '';
     let formatCurrency = (val) => Number(val || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     
@@ -866,9 +853,15 @@ function renderAdminSummary() {
         let grossPay = normalPay + otPay;
         
         let empDeductions = deductions.filter(d => d.period === currentPeriodVal && d.name === emp.name);
-        let customDeductTotal = empDeductions.reduce((sum, d) => sum + d.amount, 0);
+        let customDeductTotal = 0;
+        let customBonusTotal = 0;
+        
+        empDeductions.forEach(d => {
+            if (d.type === 'Bonus') customBonusTotal += d.amount;
+            else customDeductTotal += d.amount;
+        });
 
-        let payBeforeTax = grossPay - customDeductTotal;
+        let payBeforeTax = grossPay + customBonusTotal - customDeductTotal;
 
         let standardDeduct = 0;
         let deductLabel = '';
@@ -883,6 +876,12 @@ function renderAdminSummary() {
 
         let netPay = payBeforeTax - standardDeduct;
         totalPayroll += netPay;
+        
+        chartLabels.push(emp.name);
+        chartNormalPay.push(normalPay);
+        chartOTPay.push(otPay);
+        chartBonus.push(customBonusTotal);
+        chartDeduct.push(customDeductTotal + standardDeduct);
 
         html += `
         <div class="card p-4 bg-white rounded-2xl shadow-sm border border-emerald-100 hover:shadow-md transition">
@@ -919,17 +918,17 @@ function renderAdminSummary() {
                 </div>
                 ${empDeductions.length > 0 ? `<div class="space-y-1">
                     ${empDeductions.map(d => `
-                        <div class="flex justify-between items-center bg-red-50 px-2 py-1.5 rounded-lg text-xs">
+                        <div class="flex justify-between items-center ${d.type === 'Bonus' ? 'bg-indigo-50' : 'bg-red-50'} px-2 py-1.5 rounded-lg text-xs">
                             <div class="flex flex-col">
-                                <span class="font-bold text-red-700">${d.reason}</span>
+                                <span class="font-bold ${d.type === 'Bonus' ? 'text-indigo-700' : 'text-red-700'}">${d.reason}</span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <span class="font-black text-red-600">-฿${d.amount.toLocaleString()}</span>
+                                <span class="font-black ${d.type === 'Bonus' ? 'text-indigo-600' : 'text-red-600'}">${d.type === 'Bonus' ? '+' : '-'}฿${d.amount.toLocaleString()}</span>
                                 <button onclick="openDeductionModal('${emp.name}', '${d.id}')" class="text-slate-400 hover:text-indigo-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
                             </div>
                         </div>
                     `).join('')}
-                </div>` : '<div class="text-xs text-slate-400 italic">ไม่มีรายการหัก</div>'}
+                </div>` : '<div class="text-xs text-slate-400 italic">ไม่มีรายการ</div>'}
             </div>
         </div>`;
     });
@@ -942,6 +941,38 @@ function renderAdminSummary() {
     document.getElementById('overall-summary').style.display = 'grid';
     document.getElementById('total-employees').innerText = activeEmployeesCount;
     document.getElementById('total-payroll').innerText = totalPayroll.toLocaleString('en-US', {minimumFractionDigits: 0});
+    
+    // Render Chart
+    document.getElementById('admin-chart-container').classList.remove('hidden');
+    renderAdminChart(chartLabels, chartNormalPay, chartOTPay, chartBonus, chartDeduct);
+}
+
+let payrollChartInstance = null;
+function renderAdminChart(labels, normalData, otData, bonusData, deductData) {
+    const ctx = document.getElementById('payrollChart').getContext('2d');
+    if (payrollChartInstance) payrollChartInstance.destroy();
+    
+    payrollChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                { label: 'ค่าจ้างปกติ', data: normalData, backgroundColor: '#34d399', stack: 'Stack 0' },
+                { label: 'OT', data: otData, backgroundColor: '#fbbf24', stack: 'Stack 0' },
+                { label: 'โบนัส', data: bonusData, backgroundColor: '#818cf8', stack: 'Stack 0' },
+                { label: 'หักเงิน', data: deductData, backgroundColor: '#f87171', stack: 'Stack 1' }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
+            scales: {
+                x: { stacked: true, ticks: { font: { size: 10 } } },
+                y: { stacked: true, ticks: { font: { size: 10 }, callback: value => '฿' + value } }
+            }
+        }
+    });
 }
 
 function openDeductionModal(empName, deductionId = null) {
@@ -953,15 +984,17 @@ function openDeductionModal(empName, deductionId = null) {
     const btnDel = document.getElementById('btn-delete-deduction');
 
     if (deductionId) {
-        title.innerText = "แก้ไขรายการหักเงิน";
+        title.innerText = "แก้ไขรายการ";
         const d = deductions.find(x => x.id === deductionId);
         document.getElementById('deduction-id').value = d.id;
+        document.getElementById('deduction-type').value = d.type || 'Deduction';
         document.getElementById('deduction-reason').value = d.reason;
         document.getElementById('deduction-amount').value = d.amount;
         btnDel.classList.remove('hidden');
     } else {
-        title.innerText = "เพิ่มรายการหักเงินใหม่";
+        title.innerText = "รายการปรับเพิ่ม/ลดเงิน";
         document.getElementById('deduction-id').value = '';
+        document.getElementById('deduction-type').value = 'Deduction';
         document.getElementById('deduction-reason').value = '';
         document.getElementById('deduction-amount').value = '';
         btnDel.classList.add('hidden');
@@ -987,6 +1020,7 @@ async function saveDeduction() {
     const id = document.getElementById('deduction-id').value;
     const name = document.getElementById('deduction-emp-name').value;
     const period = document.getElementById('deduction-period').value;
+    const type = document.getElementById('deduction-type').value;
     const reason = document.getElementById('deduction-reason').value.trim();
     const amount = parseFloat(document.getElementById('deduction-amount').value);
 
@@ -997,7 +1031,7 @@ async function saveDeduction() {
 
     const payload = {
         action: "saveDeduction",
-        deduction: { id: id || null, name, period, reason, amount }
+        deduction: { id: id || null, name, period, reason, amount, type }
     };
 
     closeDeductionModal();
@@ -1018,9 +1052,10 @@ async function saveDeduction() {
                 if (idx > -1) {
                     deductions[idx].reason = reason;
                     deductions[idx].amount = amount;
+                    deductions[idx].type = type;
                 }
             } else {
-                deductions.push({ id: json.id, period, name, amount, reason });
+                deductions.push({ id: json.id, period, name, amount, reason, type });
             }
             renderAdminSummary();
         } else {
@@ -1064,6 +1099,51 @@ async function deleteDeduction() {
     } finally {
         overlay.classList.add('hidden');
     }
+}
+
+// Admin Leaves
+function renderAdminLeaves() {
+    const container = document.getElementById('admin-leave-approvals');
+    const list = document.getElementById('admin-leave-list');
+    const pending = leaves.filter(l => l.status === "Pending");
+    
+    if (pending.length === 0) {
+        container.classList.add('hidden');
+        return;
+    }
+    
+    container.classList.remove('hidden');
+    list.innerHTML = pending.map(l => `
+        <div class="flex justify-between items-center bg-amber-50 p-3 rounded-xl border border-amber-100">
+            <div>
+                <div class="font-black text-amber-900">${l.name} <span class="text-xs text-amber-700 font-bold ml-1">(${l.leaveType})</span></div>
+                <div class="text-xs font-semibold text-amber-600 mt-0.5">${l.startDate} ถึง ${l.endDate}</div>
+                <div class="text-[10px] text-amber-500 mt-1">เหตุผล: ${l.reason}</div>
+            </div>
+            <div class="flex flex-col gap-1">
+                <button onclick="updateLeaveStatus('${l.id}', 'Approved')" class="bg-green-600 hover:bg-green-700 text-white text-[10px] font-bold px-3 py-1.5 rounded active:scale-95 transition">อนุมัติ</button>
+                <button onclick="updateLeaveStatus('${l.id}', 'Rejected')" class="bg-red-50 hover:bg-red-100 text-red-600 text-[10px] font-bold px-3 py-1.5 rounded active:scale-95 transition">ปฏิเสธ</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function updateLeaveStatus(id, status) {
+    const payload = { action: "updateLeaveStatus", id, status };
+    const overlay = document.getElementById('loading-overlay');
+    document.getElementById('loading-text').innerText = "กำลังอัปเดต...";
+    overlay.classList.remove('hidden');
+
+    try {
+        const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const json = await res.json();
+        if (json.status === "success") {
+            let idx = leaves.findIndex(l => l.id === id);
+            if (idx > -1) leaves[idx].status = status;
+            renderAdminLeaves();
+        } else alert("Error: " + json.message);
+    } catch(e) { console.error(e); alert("เชื่อมต่อไม่สำเร็จ"); }
+    finally { overlay.classList.add('hidden'); }
 }
 
 // ----------------------------------------------------

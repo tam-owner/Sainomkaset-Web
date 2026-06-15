@@ -32,6 +32,8 @@
         input, select { outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
         input:focus, select:focus { border-color: #4F46E5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="pb-10 pt-4 max-w-md mx-auto relative min-h-screen">
     
@@ -104,6 +106,15 @@
             </div>
         </div>
 
+        <div class="px-4 mb-4 flex gap-2">
+            <button onclick="downloadPayslipPdf()" class="flex-1 bg-slate-800 text-white text-xs font-bold py-2 rounded-lg active:scale-95 transition shadow-sm flex items-center justify-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> โหลดสลิป
+            </button>
+            <button onclick="openRequestLeaveModal()" class="flex-1 bg-amber-500 text-white text-xs font-bold py-2 rounded-lg active:scale-95 transition shadow-sm flex items-center justify-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> ลางาน
+            </button>
+        </div>
+
         <main class="px-4 space-y-4">
             <!-- Unified Payslip Card -->
             <div class="bg-white rounded-[20px] shadow-lg shadow-emerald-900/5 border border-emerald-50 overflow-hidden mb-6 flex flex-col relative">
@@ -122,6 +133,13 @@
 
                 <!-- Salary Summary Section -->
                 <div id="salary-summary-container"></div>
+            </div>
+            
+            <div id="employee-leaves-container" class="mt-4 hidden bg-white rounded-xl shadow-sm border border-amber-100 overflow-hidden">
+                <div class="bg-amber-50 px-4 py-2 border-b border-amber-100 text-sm font-bold text-amber-800 flex justify-between items-center">
+                    <span>ประวัติการลา</span>
+                </div>
+                <div id="employee-leaves-list" class="divide-y divide-amber-50 p-2 text-sm text-center"></div>
             </div>
 
             <div class="mt-4">
@@ -171,6 +189,21 @@
                     <div class="text-[11px] font-bold text-green-200 uppercase tracking-wider mb-1 relative z-10">ยอดจ่ายรวม</div>
                     <div class="text-2xl font-black relative z-10"><span id="total-payroll">0</span> <span class="text-sm font-medium text-green-200">฿</span></div>
                 </div>
+            </div>
+
+            <!-- Chart Section -->
+            <div id="admin-chart-container" class="bg-white p-4 rounded-[16px] shadow-sm border border-slate-200 hidden">
+                <h3 class="text-xs font-bold text-slate-500 uppercase mb-2">สัดส่วนรายจ่าย</h3>
+                <div class="relative h-48 w-full"><canvas id="payrollChart"></canvas></div>
+            </div>
+
+            <!-- Leave Approvals -->
+            <div id="admin-leave-approvals" class="bg-white p-4 rounded-[16px] shadow-sm border border-slate-200 hidden">
+                <h3 class="text-sm font-black text-amber-600 flex items-center gap-2 mb-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    รออนุมัติลางาน
+                </h3>
+                <div id="admin-leave-list" class="space-y-2"></div>
             </div>
 
             <div id="admin-summary-list" class="space-y-4"></div>
@@ -241,24 +274,48 @@
         </div>
     </div>
 
-    <!-- Admin Deduction Modal -->
+    <!-- Admin Adjustment Modal -->
     <div id="deduction-modal" class="hidden fixed inset-0 bg-slate-900/60 z-[120] flex items-center justify-center p-4 backdrop-blur-sm transition-all duration-300 opacity-0 pointer-events-none">
         <div id="deduction-modal-box" class="bg-white rounded-[24px] p-6 w-full max-w-sm shadow-2xl transform scale-95 transition-transform duration-300">
-            <h3 class="text-lg font-black text-indigo-900 border-b border-slate-100 pb-3 mb-4" id="deduction-modal-title">จัดการรายการหักเงิน</h3>
+            <h3 class="text-lg font-black text-indigo-900 border-b border-slate-100 pb-3 mb-4" id="deduction-modal-title">รายการปรับเพิ่ม/ลดเงิน</h3>
             <input type="hidden" id="deduction-id"><input type="hidden" id="deduction-emp-name"><input type="hidden" id="deduction-period">
             <div class="space-y-4">
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">พนักงาน</label>
                     <div id="deduction-emp-display" class="font-black text-slate-800 text-lg bg-slate-50 px-3 py-2 rounded-lg border border-slate-200"></div>
                 </div>
-                <div><label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">เหตุผล</label><input type="text" id="deduction-reason" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm font-semibold"></div>
-                <div><label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">จำนวนเงิน</label><input type="number" id="deduction-amount" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm font-semibold"></div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">ประเภท</label>
+                    <select id="deduction-type" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm font-semibold focus:border-indigo-500 outline-none">
+                        <option value="Deduction">หักเงิน (Deduct)</option>
+                        <option value="Bonus">บวกเงิน (Bonus/OT พิเศษ)</option>
+                    </select>
+                </div>
+                <div><label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">เหตุผล</label><input type="text" id="deduction-reason" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm font-semibold outline-none"></div>
+                <div><label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">จำนวนเงิน (฿)</label><input type="number" id="deduction-amount" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm font-semibold outline-none"></div>
             </div>
             <div class="mt-6 flex gap-3">
                 <button onclick="saveDeduction()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl">บันทึกข้อมูล</button>
                 <button id="btn-delete-deduction" onclick="deleteDeduction()" class="hidden bg-red-100 hover:bg-red-200 text-red-600 font-bold px-4 rounded-xl"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
             </div>
             <button onclick="closeDeductionModal()" class="w-full mt-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl">ยกเลิก</button>
+        </div>
+    </div>
+
+    <!-- Request Leave Modal -->
+    <div id="leave-modal" class="hidden fixed inset-0 bg-slate-900/60 z-[120] flex items-center justify-center p-4 backdrop-blur-sm transition-all duration-300 opacity-0 pointer-events-none">
+        <div id="leave-modal-box" class="bg-white rounded-[24px] p-6 w-full max-w-sm shadow-2xl transform scale-95 transition-transform duration-300">
+            <h3 class="text-lg font-black text-amber-600 border-b border-slate-100 pb-3 mb-4" id="leave-modal-title">ขอลางาน</h3>
+            <div class="space-y-3">
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">ประเภทการลา</label><select id="leave-type" class="w-full border border-slate-300 rounded-lg px-3 py-2 font-semibold outline-none"><option value="ลากิจ">ลากิจ</option><option value="ลาป่วย">ลาป่วย</option></select></div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">เริ่มวันที่</label><input type="date" id="leave-start" class="w-full border border-slate-300 rounded-lg px-3 py-2 font-semibold outline-none"></div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">ถึงวันที่</label><input type="date" id="leave-end" class="w-full border border-slate-300 rounded-lg px-3 py-2 font-semibold outline-none"></div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">เหตุผล</label><input type="text" id="leave-reason" placeholder="เหตุผลสั้นๆ..." class="w-full border border-slate-300 rounded-lg px-3 py-2 font-semibold outline-none"></div>
+            </div>
+            <div class="mt-6 flex gap-3">
+                <button onclick="submitLeaveRequest()" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl shadow-sm">ส่งคำขอ</button>
+                <button onclick="closeRequestLeaveModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl">ยกเลิก</button>
+            </div>
         </div>
     </div>
 

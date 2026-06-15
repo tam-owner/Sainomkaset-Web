@@ -6,6 +6,7 @@ function doGet(e) {
   if (action == "getAttendance") return createJsonResponse({status: "success", data: getMergedAttendanceData()});
   if (action == "getEmployees") return createJsonResponse({status: "success", data: getEmployeesData()});
   if (action == "getDeductions") return createJsonResponse({status: "success", data: getDeductionsData()});
+  if (action == "getLeaves") return createJsonResponse({status: "success", data: getLeavesData()});
   if (action == "getInitPayrollData") return createJsonResponse(handleGetInitPayrollData());
   
   return HtmlService.createHtmlOutput('API is running (v2 with Merged Sheets).');
@@ -21,6 +22,10 @@ function doPost(e) {
     if (action == "saveDeduction") return createJsonResponse(handleSaveDeduction(postData.deduction));
     if (action == "deleteDeduction") return createJsonResponse(handleDeleteDeduction(postData.id));
     if (action == "autoRegister") return createJsonResponse(handleAutoRegister(postData.names));
+    
+    // Leaves
+    if (action == "requestLeave") return createJsonResponse(handleRequestLeave(postData.leave));
+    if (action == "updateLeaveStatus") return createJsonResponse(handleUpdateLeaveStatus(postData.id, postData.status));
     
     // From new attendance system
     if (action == "processData") return createJsonResponse(handleProcessData(postData.payload));
@@ -59,7 +64,8 @@ function getSheetByNameOrCreateOld(name) {
   if (!sheet) {
     sheet = ss.insertSheet(name);
     if (name === "Employees") sheet.appendRow(["Name", "PIN", "NormalRate", "OTRate", "DeductionType"]);
-    else if (name === "Deductions") sheet.appendRow(["ID", "Period", "Name", "Amount", "Reason", "Timestamp"]);
+    else if (name === "Deductions") sheet.appendRow(["ID", "Period", "Name", "Amount", "Reason", "Timestamp", "Type"]);
+    else if (name === "Leaves") sheet.appendRow(["ID", "Name", "StartDate", "EndDate", "LeaveType", "Reason", "Status", "Timestamp"]);
   }
   return sheet;
 }
@@ -74,7 +80,9 @@ function getSheetByNameOrCreateNew(name) {
     } else if (name === "Employees") {
       sheet.appendRow(["ชื่อเล่น", "ชื่อจริง-นามสกุล", "PIN", "เรตรายวัน", "เรตรายชม.", "เรต OT", "ประเภทการหักเงิน", "เลขบัญชีธนาคาร", "ประเภทพนักงาน"]);
     } else if (name === "Deductions") {
-      sheet.appendRow(["ID", "Period", "Name", "Amount", "Reason", "Timestamp"]);
+      sheet.appendRow(["ID", "Period", "Name", "Amount", "Reason", "Timestamp", "Type"]);
+    } else if (name === "Leaves") {
+      sheet.appendRow(["ID", "Name", "StartDate", "EndDate", "LeaveType", "Reason", "Status", "Timestamp"]);
     }
   }
   return sheet;
@@ -170,7 +178,26 @@ function getDeductionsData() {
       if (!row[0] || row[0] == "") continue;
       result.push({
         id: String(row[0]), period: String(row[1]), name: String(row[2]),
-        amount: Number(row[3]) || 0, reason: String(row[4] || ""), timestamp: row[5]
+        amount: Number(row[3]) || 0, reason: String(row[4] || ""), timestamp: row[5],
+        type: String(row[6] || "Deduction") // "Deduction" or "Bonus"
+      });
+    }
+    return result;
+  } catch (e) { return []; }
+}
+
+function getLeavesData() {
+  try {
+    var sheet = getSheetByNameOrCreateNew("Leaves");
+    var data = sheet.getDataRange().getValues();
+    var result = [];
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      if (!row[0] || row[0] == "") continue;
+      result.push({
+        id: String(row[0]), name: String(row[1]), startDate: String(row[2]),
+        endDate: String(row[3]), leaveType: String(row[4]), reason: String(row[5] || ""),
+        status: String(row[6]), timestamp: row[7]
       });
     }
     return result;
@@ -252,13 +279,14 @@ function handleSaveDeduction(deduction) {
         sheet.getRange(i + 1, 4).setValue(deduction.amount);
         sheet.getRange(i + 1, 5).setValue(deduction.reason);
         sheet.getRange(i + 1, 6).setValue(timestamp);
+        sheet.getRange(i + 1, 7).setValue(deduction.type || "Deduction");
         return {status: "success", message: "Updated successfully", id: deduction.id};
       }
     }
     return {status: "error", message: "Not found"};
   } else {
     var newId = Utilities.getUuid();
-    sheet.appendRow([newId, deduction.period, deduction.name, deduction.amount, deduction.reason, timestamp]);
+    sheet.appendRow([newId, deduction.period, deduction.name, deduction.amount, deduction.reason, timestamp, deduction.type || "Deduction"]);
     return {status: "success", message: "Added successfully", id: newId};
   }
 }
@@ -273,6 +301,27 @@ function handleDeleteDeduction(id) {
     }
   }
   return {status: "error"};
+}
+
+function handleRequestLeave(leave) {
+  var sheet = getSheetByNameOrCreateNew("Leaves");
+  var newId = Utilities.getUuid();
+  var timestamp = new Date().toISOString();
+  // ["ID", "Name", "StartDate", "EndDate", "LeaveType", "Reason", "Status", "Timestamp"]
+  sheet.appendRow([newId, leave.name, leave.startDate, leave.endDate, leave.leaveType, leave.reason, "Pending", timestamp]);
+  return {status: "success", message: "Requested successfully", id: newId};
+}
+
+function handleUpdateLeaveStatus(id, newStatus) {
+  var sheet = getSheetByNameOrCreateNew("Leaves");
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === id) {
+      sheet.getRange(i + 1, 7).setValue(newStatus);
+      return {status: "success"};
+    }
+  }
+  return {status: "error", message: "Not found"};
 }
 
 function handleAutoRegister(names) {
@@ -421,7 +470,8 @@ function handleGetInitPayrollData() {
     data: {
       attendance: getMergedAttendanceData(),
       employees: getEmployeesData(),
-      deductions: getDeductionsData()
+      deductions: getDeductionsData(),
+      leaves: getLeavesData()
     }
   };
 }
