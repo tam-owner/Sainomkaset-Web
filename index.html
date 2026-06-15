@@ -116,27 +116,21 @@
             </button>
         </div>
 
-        <main class="px-4 space-y-4">
-            <!-- Unified Payslip Card -->
-            <!-- Unified Payslip Card -->
-            <div class="bg-white rounded-[20px] shadow-lg shadow-emerald-900/5 border border-emerald-50 mb-6 flex flex-col relative">
-                
-                <!-- Period Selector Section (Sticky) -->
-                <div class="sticky top-0 z-40 bg-slate-50/95 backdrop-blur-md rounded-t-[20px] shadow-sm pb-1 border-b border-slate-100">
-                    <!-- Top decorative pattern -->
-                    <div class="absolute top-0 left-0 right-0 h-1.5 bg-emerald-500 rounded-t-[20px] z-10"></div>
-                    
-                    <div class="px-5 pt-4 pb-2.5 flex items-center justify-between gap-3 relative z-10">
-                        <label class="font-bold text-[11px] text-slate-500 uppercase tracking-wide whitespace-nowrap">เลือกรอบเวลา</label>
-                        <button type="button" onclick="togglePeriodDropdown()" class="custom-select-btn !w-auto flex-1 text-sm shadow-sm bg-white border-emerald-100/50 hover:border-emerald-200 transition-colors !py-2">
-                            <span id="period-btn-text" class="truncate text-slate-800 font-bold text-[14px] text-left">- กรุณารอสักครู่ -</span>
-                            <svg class="w-4 h-4 text-emerald-500 shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </button>
-                        <input type="hidden" id="period-select" value="">
-                    </div>
-                </div>
+        <!-- Sticky Period Selector -->
+        <div class="sticky top-0 z-50 px-4 mb-4 pt-2">
+            <div class="bg-white/95 backdrop-blur-xl rounded-[20px] shadow-md shadow-emerald-900/5 border border-slate-200 px-5 py-3 flex items-center justify-between gap-3 transition-all">
+                <label class="font-black text-[12px] text-slate-500 uppercase tracking-widest whitespace-nowrap">เลือกรอบเวลา</label>
+                <button type="button" onclick="togglePeriodDropdown()" class="w-auto flex-1 flex justify-between items-center shadow-sm bg-slate-50 border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 transition-colors py-2.5 px-4 rounded-xl text-emerald-800">
+                    <span id="period-btn-text" class="truncate font-black text-[15px] text-left tracking-tight">- กรุณารอสักครู่ -</span>
+                    <svg class="w-5 h-5 text-emerald-600 shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <input type="hidden" id="period-select" value="">
+            </div>
+        </div>
 
-                <!-- Salary Summary Section -->
+        <main class="px-4 space-y-4">
+            <!-- Salary Summary Section -->
+            <div class="bg-white rounded-[20px] shadow-lg shadow-emerald-900/5 border border-emerald-50 mb-6 flex flex-col relative overflow-hidden">
                 <div id="salary-summary-container"></div>
             </div>
             
@@ -174,14 +168,18 @@
             </div>
         </div>
 
-        <main class="px-4 space-y-4">
-            <div class="bg-white p-4 rounded-[16px] shadow-sm border border-slate-200">
-                <label class="block font-bold text-xs text-slate-500 mb-2 uppercase tracking-wide">เลือกรอบเวลา</label>
-                <button type="button" onclick="togglePeriodDropdown()" class="custom-select-btn text-sm shadow-sm">
-                    <span id="admin-period-btn-text" class="truncate text-slate-800 font-bold text-[14px]">- กรุณารอสักครู่ -</span>
-                    <svg class="w-4 h-4 text-slate-400 shrink-0 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        <!-- Sticky Period Selector (Admin) -->
+        <div class="sticky top-0 z-50 px-4 mb-4 pt-2">
+            <div class="bg-white/95 backdrop-blur-xl rounded-[20px] shadow-md shadow-emerald-900/5 border border-slate-200 px-5 py-3 flex items-center justify-between gap-3 transition-all">
+                <label class="font-black text-[12px] text-slate-500 uppercase tracking-widest whitespace-nowrap">เลือกรอบเวลา</label>
+                <button type="button" onclick="togglePeriodDropdown()" class="w-auto flex-1 flex justify-between items-center shadow-sm bg-slate-50 border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 transition-colors py-2.5 px-4 rounded-xl text-emerald-800">
+                    <span id="admin-period-btn-text" class="truncate font-black text-[15px] text-left tracking-tight">- กรุณารอสักครู่ -</span>
+                    <svg class="w-5 h-5 text-emerald-600 shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
             </div>
+        </div>
+
+        <main class="px-4 space-y-4">
 
             <div class="grid grid-cols-2 gap-3" id="overall-summary" style="display:none;">
                 <div class="bg-indigo-600 rounded-[16px] p-4 text-white shadow-md relative overflow-hidden">
@@ -384,7 +382,7 @@
         </div>
     </div>
 
-    <script src="js/app.js?v=1781531282"></script>
+    <script src="js/app.js?v=1781531807"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
