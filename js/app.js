@@ -1688,7 +1688,7 @@ function openProfile(pushToHistory = true) {
                 } else {
                     let parts = [];
                     if (totalMonths > 0) parts.push(`${totalMonths} เดือน`);
-                    if (days > 0) parts.push(`${days} วัน`);
+                    parts.push(`${days} วัน`);
                     tenureEl.innerText = parts.join(' ');
                 }
             }
