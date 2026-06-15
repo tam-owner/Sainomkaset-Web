@@ -1589,8 +1589,8 @@ async function confirmDeleteEmployee() {
 // Employee Leave System
 // ----------------------------------------------------
 function renderEmployeeLeaves() {
-    const list = document.getElementById('employee-leaves-list');
-    const container = document.getElementById('employee-leaves-container');
+    const list = document.getElementById('leave-history-list');
+    const container = document.getElementById('view-leave');
     
     if (!loggedInEmployee || !list || !container) return;
 
@@ -1609,10 +1609,10 @@ function renderEmployeeLeaves() {
         else if (l.status === 'Approved') statusBadge = '<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded text-[10px] font-bold">อนุมัติ</span>';
         else statusBadge = '<span class="bg-rose-100 text-rose-700 px-2 py-0.5 rounded text-[10px] font-bold">ปฏิเสธ</span>';
 
-        html += `<div class="flex justify-between items-center p-2 border-b border-amber-50 last:border-0">
+        html += `<div class="flex justify-between items-center p-3 border border-slate-100 rounded-xl bg-slate-50 mb-2">
             <div class="text-left">
-                <div class="font-bold text-slate-800 text-xs">${l.type} <span class="font-normal text-slate-500">(${l.start} - ${l.end})</span></div>
-                <div class="text-[10px] text-slate-400 mt-0.5">${l.reason}</div>
+                <div class="font-bold text-slate-800 text-sm">${l.leaveType || l.type} <span class="font-normal text-slate-500 text-xs ml-1">(${l.startDate || l.start} ถึง ${l.endDate || l.end})</span></div>
+                <div class="text-xs text-slate-500 mt-1">เหตุผล: ${l.reason}</div>
             </div>
             <div>${statusBadge}</div>
         </div>`;
@@ -1652,9 +1652,9 @@ async function submitLeaveRequest() {
         leave: {
             id: crypto.randomUUID(),
             name: loggedInEmployee.name,
-            type: type,
-            start: start,
-            end: end,
+            leaveType: type,
+            startDate: start,
+            endDate: end,
             reason: reason,
             status: "Pending",
             timestamp: new Date().toISOString()
@@ -1664,16 +1664,26 @@ async function submitLeaveRequest() {
     const overlay = document.getElementById('loading-overlay');
     document.getElementById('loading-text').innerText = "กำลังส่งคำขอ...";
     overlay.classList.remove('hidden');
-    closeRequestLeaveModal();
 
     try {
         let res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
         let json = await res.json();
         if (json.status === "success") {
+            // Update local leaves array
             leaves.push(payload.leave);
+            
+            // Clear form
+            document.getElementById('leave-type').value = 'ลาป่วย';
+            document.getElementById('leave-start').value = '';
+            document.getElementById('leave-end').value = '';
+            document.getElementById('leave-reason').value = '';
+            
             renderEmployeeLeaves();
+            
+            overlay.classList.add('hidden');
             alert("ส่งคำขอลางานเรียบร้อยแล้ว");
         } else {
+            overlay.classList.add('hidden');
             alert("Error: " + json.message);
         }
     } catch (e) {
