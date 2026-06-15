@@ -710,11 +710,11 @@ function renderEmployeeDashboard() {
         
         let schedInTextColor = row.noteIn ? 'text-amber-500' : 'text-slate-800';
         let schedInClass = `font-black text-[13px] ${schedInTextColor} ${row.noteIn ? 'cursor-pointer active:scale-90 inline-block transition-transform' : ''}`.trim();
-        let inClick = row.noteIn ? `data-note="หมายเหตุเข้า: ${(row.noteIn||'').replace(/"/g, '&quot;')}" onclick="showNoteTooltip(event)"` : '';
+        let inClick = row.noteIn ? `data-note="${(row.noteIn||'').replace(/"/g, '&quot;')}" onclick="showNoteTooltip(event)"` : '';
 
         let schedOutTextColor = row.noteOut ? 'text-amber-500' : 'text-slate-800';
         let schedOutClass = `font-black text-[13px] ${schedOutTextColor} ${row.noteOut ? 'cursor-pointer active:scale-90 inline-block transition-transform' : ''}`.trim();
-        let outClick = row.noteOut ? `data-note="หมายเหตุออก: ${(row.noteOut||'').replace(/"/g, '&quot;')}" onclick="showNoteTooltip(event)"` : '';
+        let outClick = row.noteOut ? `data-note="${(row.noteOut||'').replace(/"/g, '&quot;')}" onclick="showNoteTooltip(event)"` : '';
 
         let inClass = `scan-time-text text-[11px] font-medium mt-1 ${row.isLate ? 'text-red-500' : 'text-slate-500'}`;
         let outClass = `scan-time-text text-[11px] font-medium mt-1 text-slate-500`;
@@ -764,8 +764,8 @@ function renderEmployeeDashboard() {
             </div>
             ${(row.noteIn || row.noteOut) ? `
             <div class="remark-box text-left mt-2 text-[11px] text-yellow-800 bg-yellow-50 p-2.5 rounded-lg border border-yellow-200 mx-1 shadow-sm">
-                ${row.noteIn ? `<div><b class="text-yellow-600">หมายเหตุเข้า:</b> ${row.noteIn}</div>` : ''}
-                ${row.noteOut ? `<div class="${row.noteIn?'mt-1':''}"><b class="text-yellow-600">หมายเหตุออก:</b> ${row.noteOut}</div>` : ''}
+                ${row.noteIn ? `<div><b class="text-yellow-600">Note เข้า:</b> ${row.noteIn}</div>` : ''}
+                ${row.noteOut ? `<div class="${row.noteIn?'mt-1':''}"><b class="text-yellow-600">Note ออก:</b> ${row.noteOut}</div>` : ''}
             </div>` : ''}
         </div>`;
     });
