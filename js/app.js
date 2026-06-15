@@ -628,7 +628,10 @@ function renderEmployeeDashboard() {
             <div onclick="downloadPayslipPdf()" class="bg-[#0fa981] rounded-[20px] p-5 flex justify-between items-center shadow-lg shadow-[#0fa981]/40 mt-4 relative overflow-hidden cursor-pointer active:scale-95 transition-transform duration-200 group">
                 <div class="relative z-10 flex flex-col">
                     <p class="text-[11px] font-black text-emerald-50 uppercase tracking-widest">รวมรายได้สุทธิ (Net Pay)</p>
-                    <p class="text-[10px] text-emerald-100 mt-0.5 font-medium">หลังหักทั้งหมด</p>
+                    <div class="mt-2 flex items-center gap-1 bg-white/20 px-2 py-1 rounded-full w-max opacity-90 group-hover:opacity-100 transition-opacity">
+                        <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span class="text-[10px] font-bold text-white">แตะเพื่อโหลดสลิป</span>
+                    </div>
                 </div>
                 <div class="text-3xl font-black text-white tracking-tight relative z-10 flex items-baseline">
                     <span class="text-lg text-emerald-200 mr-1.5 font-bold">฿</span>${formatCurrency(netPay)}
