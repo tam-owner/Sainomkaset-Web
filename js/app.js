@@ -686,11 +686,11 @@ function renderEmployeeDashboard() {
         
         let schedInTextColor = row.noteIn ? 'text-amber-500' : 'text-slate-800';
         let schedInClass = `font-black text-[13px] ${schedInTextColor} ${row.noteIn ? 'cursor-pointer active:scale-90 inline-block transition-transform' : ''}`.trim();
-        let inClick = row.noteIn ? `data-note="${(row.noteIn||'').replace(/"/g, '&quot;')}" onclick="showNoteTooltip(event)"` : '';
+        let inClick = row.noteIn ? `data-note="หมายเหตุเข้า: ${(row.noteIn||'').replace(/"/g, '&quot;')}" onclick="showNoteTooltip(event)"` : '';
 
         let schedOutTextColor = row.noteOut ? 'text-amber-500' : 'text-slate-800';
         let schedOutClass = `font-black text-[13px] ${schedOutTextColor} ${row.noteOut ? 'cursor-pointer active:scale-90 inline-block transition-transform' : ''}`.trim();
-        let outClick = row.noteOut ? `data-note="${(row.noteOut||'').replace(/"/g, '&quot;')}" onclick="showNoteTooltip(event)"` : '';
+        let outClick = row.noteOut ? `data-note="หมายเหตุออก: ${(row.noteOut||'').replace(/"/g, '&quot;')}" onclick="showNoteTooltip(event)"` : '';
 
         let inClass = `scan-time-text text-[11px] font-medium mt-1 ${row.isLate ? 'text-red-500' : 'text-slate-500'}`;
         let outClass = `scan-time-text text-[11px] font-medium mt-1 text-slate-500`;

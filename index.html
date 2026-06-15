@@ -31,6 +31,13 @@
         
         input, select { outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
         input:focus, select:focus { border-color: #4F46E5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        
+        #table-container.hide-details .day-text,
+        #table-container.hide-details .scan-time-text,
+        #table-container.hide-details .late-text,
+        #table-container.hide-details .remark-box {
+            display: none !important;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -142,7 +149,7 @@
             </div>
 
             <div class="mt-4">
-                <div id="employee-table-header" class="table-grid font-bold text-white bg-slate-800/95 backdrop-blur-md text-[12px] py-2.5 px-1 rounded-t-lg text-center shadow-md sticky top-[76px] z-40 border-b border-slate-700 transition-all duration-200">
+                <div id="employee-table-header" onclick="document.getElementById('table-container').classList.toggle('hide-details')" class="table-grid font-bold text-white bg-slate-800/95 backdrop-blur-md text-[12px] py-2.5 px-1 rounded-t-lg text-center shadow-md sticky top-[76px] z-40 border-b border-slate-700 transition-all duration-200 cursor-pointer hover:bg-slate-700/95">
                     <div class="text-left pl-2">วันที่</div>
                     <div>เข้างาน</div>
                     <div>ออกงาน</div>
@@ -259,7 +266,7 @@
     </div>
 
     <!-- Note Tooltip -->
-    <div id="note-tooltip" class="hidden fixed bg-gray-900 text-white text-xs rounded py-1.5 px-3 z-[150] whitespace-nowrap shadow-xl pointer-events-none transition-all duration-150 transform"></div>
+    <div id="note-tooltip" class="hidden fixed bg-amber-50 border border-amber-200 text-amber-800 font-medium text-[11px] rounded-lg py-2 px-3 z-[150] whitespace-nowrap shadow-md pointer-events-none transition-all duration-150 transform"></div>
 
     <!-- Change PIN Modal -->
     <div id="pin-modal" class="hidden fixed inset-0 bg-slate-900/60 z-[120] flex items-center justify-center p-4 backdrop-blur-sm transition-all duration-300 opacity-0 pointer-events-none">
@@ -382,7 +389,7 @@
         </div>
     </div>
 
-    <script src="js/app.js?v=1781533128"></script>
+    <script src="js/app.js?v=1781533610"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
