@@ -440,6 +440,14 @@ function togglePeriodDropdown() {
         overlay.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
         setTimeout(() => sheet.classList.remove('translate-y-full'), 10);
     } else {
+        closePeriodDropdown();
+    }
+}
+
+function closePeriodDropdown() {
+    const overlay = document.getElementById('period-dropdown-overlay');
+    const sheet = document.getElementById('period-dropdown');
+    if (!overlay.classList.contains('hidden')) {
         sheet.classList.add('translate-y-full');
         setTimeout(() => overlay.classList.add('opacity-0', 'pointer-events-none', 'hidden'), 300);
     }
@@ -457,7 +465,7 @@ function selectPeriod(val, text) {
         renderEmployeeDashboard();
     }
     renderPeriodDropdown();
-    togglePeriodDropdown();
+    closePeriodDropdown();
 }
 
 // ----------------------------------------------------
