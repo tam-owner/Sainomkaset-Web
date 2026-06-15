@@ -2192,39 +2192,47 @@ function downloadPayslipPdf() {
 
 function updateEmployeeFormLayout() {
     const type = document.getElementById('emp-type').value;
-    const monthlyContainer = document.getElementById('emp-monthly-container');
-    const dailyWrapper = document.getElementById('emp-daily-wrapper');
-    const hourlyOtWrapper = document.getElementById('emp-hourly-ot-wrapper');
+    const monthlyWrapper = document.getElementById('emp-monthly-wrapper');
     const hintContainer = document.getElementById('emp-hint-container');
     
     if (type === 'Full Time') {
-        if(monthlyContainer) monthlyContainer.classList.remove('hidden');
-        if(hourlyOtWrapper) hourlyOtWrapper.classList.remove('hidden');
-        if(hintContainer) hintContainer.classList.add('hidden');
-    } else {
-        if(monthlyContainer) monthlyContainer.classList.add('hidden');
-        if(hourlyOtWrapper) hourlyOtWrapper.classList.add('hidden');
+        if(monthlyWrapper) {
+            monthlyWrapper.classList.remove('hidden');
+            monthlyWrapper.classList.add('grid');
+        }
         if(hintContainer) hintContainer.classList.remove('hidden');
-        calculatePartTimeRates();
+    } else {
+        if(monthlyWrapper) {
+            monthlyWrapper.classList.add('hidden');
+            monthlyWrapper.classList.remove('grid');
+        }
+        if(hintContainer) hintContainer.classList.remove('hidden');
     }
+    calculateRates();
 }
 
-function calculatePartTimeRates() {
-    const type = document.getElementById('emp-type').value;
-    if (type === 'Part Time') {
-        const daily = parseFloat(document.getElementById('emp-dailyrate').value) || 0;
-        const hourly = daily / 8; // Assuming 8 hours
-        const ot = hourly * 1.5;
-        const hourlyEl = document.getElementById('emp-hourlyrate');
-        const otEl = document.getElementById('emp-otrate');
-        if(hourlyEl) hourlyEl.value = hourly ? hourly.toFixed(2) : '';
-        if(otEl) otEl.value = ot ? ot.toFixed(2) : '';
-        
-        const hintHourly = document.getElementById('hint-hourly');
-        const hintOt = document.getElementById('hint-ot');
-        if(hintHourly) hintHourly.innerText = hourly ? hourly.toFixed(2) : '0';
-        if(hintOt) hintOt.innerText = ot ? ot.toFixed(2) : '0';
-    }
+function calculateRates() {
+    // Calculate Half Month (for Full Time)
+    const monthlyRate = parseFloat(document.getElementById('emp-monthlyrate').value) || 0;
+    const halfMonth = (monthlyRate / 2).toFixed(2);
+    const hintHalfmonth = document.getElementById('hint-halfmonth');
+    if (hintHalfmonth) hintHalfmonth.innerText = halfMonth;
+
+    // Calculate Hourly and OT (for both Full Time and Part Time)
+    const dailyRate = parseFloat(document.getElementById('emp-dailyrate').value) || 0;
+    const hourlyRate = dailyRate / 8; // Assuming 8 hours
+    const otRate = hourlyRate * 1.5;
+    
+    const hintHourly = document.getElementById('hint-hourly');
+    const hintOt = document.getElementById('hint-ot');
+    if(hintHourly) hintHourly.innerText = hourlyRate ? hourlyRate.toFixed(2) : '0';
+    if(hintOt) hintOt.innerText = otRate ? otRate.toFixed(2) : '0';
+    
+    // Update hidden inputs for saving
+    const empHourlyRate = document.getElementById('emp-hourlyrate');
+    const empOtRate = document.getElementById('emp-otrate');
+    if (empHourlyRate) empHourlyRate.value = hourlyRate ? hourlyRate.toFixed(2) : '';
+    if (empOtRate) empOtRate.value = otRate ? otRate.toFixed(2) : '';
 }
 
 window.addEventListener('scroll', () => {

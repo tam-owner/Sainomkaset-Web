@@ -731,25 +731,30 @@
                     <div><label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">รหัส PIN</label><input type="text" id="emp-pin" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500 font-bold tracking-widest"></div>
                     <div><label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">ประเภท</label><select id="emp-type" class="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white outline-none focus:border-blue-500" onchange="updateEmployeeFormLayout()"><option value="Full Time">Full Time</option><option value="Part Time">Part Time</option></select></div>
                 </div>
-                <div class="grid grid-cols-2 gap-3 mb-3">
-                    <div id="emp-monthly-container" class="hidden">
+                <div id="emp-monthly-wrapper" class="hidden grid-cols-2 gap-3 mb-3">
+                    <div>
                         <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">ค่าแรงรายเดือน</label>
-                        <input type="number" id="emp-monthlyrate" class="w-full border border-slate-300 rounded-lg px-2 py-2 text-center text-blue-600 font-bold" placeholder="0">
+                        <input type="number" id="emp-monthlyrate" class="w-full border border-slate-300 rounded-lg px-2 py-2 text-center text-blue-600 font-bold" placeholder="0" oninput="calculateRates()">
                     </div>
+                    <div class="flex items-end">
+                        <div class="text-[11px] text-slate-600 bg-slate-50 border border-slate-200 px-3 py-2 rounded-lg w-full text-center tracking-tight">
+                            ครึ่งเดือน: <span id="hint-halfmonth" class="font-bold text-slate-800">0</span> ฿
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mb-3">
                     <div id="emp-daily-wrapper">
                         <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">ค่าแรง/วัน</label>
-                        <input type="number" id="emp-dailyrate" class="w-full border border-slate-300 rounded-lg px-2 py-2 text-center shrink-0" placeholder="0" oninput="calculatePartTimeRates()">
+                        <input type="number" id="emp-dailyrate" class="w-full border border-slate-300 rounded-lg px-2 py-2 text-center shrink-0" placeholder="0" oninput="calculateRates()">
                     </div>
-                    <div id="emp-hint-container" class="hidden flex items-end">
+                    <div id="emp-hint-container" class="flex items-end">
                         <div class="text-[11px] text-slate-600 bg-slate-50 border border-slate-200 px-3 py-2 rounded-lg w-full text-center tracking-tight">
                             ชม: <span id="hint-hourly" class="font-bold text-slate-800">0</span> ฿ | OT: <span id="hint-ot" class="font-bold text-slate-800">0</span> ฿/ชม
                         </div>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-3 mb-3" id="emp-hourly-ot-wrapper">
-                    <div><label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">ค่าแรง/ชม</label><input type="number" id="emp-hourlyrate" class="w-full border border-slate-300 rounded-lg px-2 py-2 text-center" placeholder="0"></div>
-                    <div><label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">OT/ชม</label><input type="number" id="emp-otrate" class="w-full border border-slate-300 rounded-lg px-2 py-2 text-center" placeholder="0"></div>
-                </div>
+                <input type="hidden" id="emp-hourlyrate">
+                <input type="hidden" id="emp-otrate">
                 <div class="grid grid-cols-2 gap-3">
                     <div><label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">ประเภทหักเงิน</label><select id="emp-deductiontype" class="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white"><option value="NoDeduct">ไม่หัก</option><option value="3%">หัก 3%</option><option value="5%">หักประกันสังคม 5%</option></select></div>
                     <div><label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">สถานะ</label><select id="emp-status" class="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white"><option value="Active">ทำงานอยู่ (Active)</option><option value="Inactive">พนักงานเก่า (Inactive)</option></select></div>
@@ -781,7 +786,7 @@
     </div>
 
     <script src="js/customSelect.js"></script>
-    <script src="js/app.js?v=20260616_6"></script>
+    <script src="js/app.js?v=20260616_7"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
