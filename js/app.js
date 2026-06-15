@@ -767,13 +767,13 @@ function showNoteTooltip(event) {
     tooltip.offsetHeight; 
     
     const rect = event.currentTarget.getBoundingClientRect();
-    let top = rect.bottom + window.scrollY + 8;
+    let top = rect.bottom + 8;
     
     if (rect.bottom + 50 > window.innerHeight && rect.top > 50) {
-        top = rect.top + window.scrollY - tooltip.offsetHeight - 8;
+        top = rect.top - tooltip.offsetHeight - 8;
     }
     
-    let left = rect.left + window.scrollX + (rect.width / 2) - (tooltip.offsetWidth / 2);
+    let left = rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2);
     if (left < 10) left = 10;
     if (left + tooltip.offsetWidth > window.innerWidth - 10) {
         left = window.innerWidth - tooltip.offsetWidth - 10;
