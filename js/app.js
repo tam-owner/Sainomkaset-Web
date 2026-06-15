@@ -583,7 +583,8 @@ function renderEmployeeDashboard() {
     let periodText = availablePeriods.find(p => p.value === currentPeriodVal)?.text || '';
 
     let summaryHtml = `
-    <div class="relative">
+    <div class="bg-white rounded-[20px] shadow-lg shadow-emerald-900/5 border border-emerald-50 mb-6 flex flex-col relative overflow-hidden">
+        <div class="relative">
         <!-- Header -->
         <div class="bg-[#0fa981] text-white px-5 py-4 flex justify-between items-center">
             <div class="flex items-center gap-2">
@@ -693,6 +694,7 @@ function renderEmployeeDashboard() {
             ` : ''}
 
         </div>
+    </div>
     </div>`;
 
     document.getElementById('salary-summary-container').innerHTML = summaryHtml;
