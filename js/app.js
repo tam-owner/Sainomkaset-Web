@@ -351,9 +351,12 @@ function showEmployeeDashboard() {
     document.getElementById('emp-user-name').innerText = loggedInEmployee.name;
 
     setupPeriods();
+    currentPeriodVal = '';
     
     if (availablePeriods.length > 0) {
-        selectPeriod(availablePeriods[0].value, availablePeriods[0].text);
+        document.getElementById('period-btn-text').innerText = '- กรุณาเลือกรอบเวลา -';
+        document.getElementById('salary-summary-container').innerHTML = '';
+        document.getElementById('table-container').innerHTML = '<div class="text-center py-8 text-slate-400 font-bold text-sm">กรุณาเลือกรอบเวลาเพื่อดูข้อมูล</div>';
     } else {
         document.getElementById('period-btn-text').innerText = '- ไม่พบข้อมูล -';
         document.getElementById('salary-summary-container').innerHTML = '';
@@ -370,11 +373,16 @@ function showAdminDashboard() {
     document.getElementById('loading-overlay').classList.add('hidden');
 
     setupPeriods();
+    currentPeriodVal = '';
 
     if (availablePeriods.length > 0) {
-        selectPeriod(availablePeriods[0].value, availablePeriods[0].text);
+        document.getElementById('admin-period-btn-text').innerText = '- กรุณาเลือกรอบเวลา -';
+        document.getElementById('admin-summary-list').innerHTML = '<div class="text-center py-8 text-slate-400 font-bold text-sm">กรุณาเลือกรอบเวลาเพื่อดูสรุปข้อมูล</div>';
+        document.getElementById('admin-chart-container').classList.add('hidden');
     } else {
         document.getElementById('admin-period-btn-text').innerText = "- ไม่พบข้อมูล -";
+        document.getElementById('admin-summary-list').innerHTML = '';
+        document.getElementById('admin-chart-container').classList.add('hidden');
     }
     
     renderAdminLeaves();
