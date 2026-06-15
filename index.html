@@ -738,9 +738,11 @@
                     </div>
                     <div id="emp-daily-wrapper" class="col-span-2">
                         <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">ค่าแรง/วัน</label>
-                        <input type="number" id="emp-dailyrate" class="w-full border border-slate-300 rounded-lg px-2 py-2 text-center" placeholder="0" oninput="calculatePartTimeRates()">
-                        <div id="emp-hint-container" class="text-[10px] text-slate-500 mt-1.5 text-center bg-slate-50 rounded-md py-1 border border-slate-100 hidden">
-                            ( ชม: <span id="hint-hourly" class="font-bold text-slate-700">0</span> ฿ | OT: <span id="hint-ot" class="font-bold text-slate-700">0</span> ฿/ชม )
+                        <div class="flex items-center gap-2">
+                            <input type="number" id="emp-dailyrate" class="w-28 border border-slate-300 rounded-lg px-2 py-2 text-center shrink-0" placeholder="0" oninput="calculatePartTimeRates()">
+                            <div id="emp-hint-container" class="text-[10px] text-slate-500 hidden whitespace-nowrap">
+                                ( ชม: <span id="hint-hourly" class="font-bold text-slate-700">0</span> ฿ | OT: <span id="hint-ot" class="font-bold text-slate-700">0</span> ฿/ชม )
+                            </div>
                         </div>
                     </div>
                 </div>
