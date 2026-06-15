@@ -271,7 +271,21 @@ function populateLoginNames() {
     const select = document.getElementById('login-name');
     select.innerHTML = '<option value="" selected disabled>- กรุณาเลือกชื่อ -</option>';
     
-    const activeEmployees = employees; // Simplified, show all employees
+    const now = new Date();
+    const fifteenDaysAgo = new Date(now.getTime() - (15 * 24 * 60 * 60 * 1000));
+    
+    const lastAttendanceMap = {};
+    processedAttendance.forEach(rec => {
+        if (!lastAttendanceMap[rec.name] || rec.dateObj > lastAttendanceMap[rec.name]) {
+            lastAttendanceMap[rec.name] = rec.dateObj;
+        }
+    });
+
+    const activeEmployees = employees.filter(emp => {
+        const lastAtt = lastAttendanceMap[emp.name];
+        if (!lastAtt) return true; // New employee, never clocked in
+        return lastAtt >= fifteenDaysAgo;
+    });
 
     const sortedEmp = activeEmployees.sort((a, b) => a.name.localeCompare(b.name, 'th'));
     sortedEmp.forEach(emp => {
