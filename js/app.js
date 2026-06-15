@@ -233,7 +233,7 @@ function processData() {
                             if (lateMins > threshold) {
                                 rec.isLate = true;
                                 rec.lateMins = lateMins;
-                                rec.lateDeduction = 1.0 + Math.floor(lateMins / 30) * 0.5;
+                                rec.lateDeduction = 1.0 + Math.floor(lateMins / 15) * 0.25;
                                 rec.regularHours -= rec.lateDeduction;
                                 if (rec.regularHours < 0) rec.regularHours = 0;
                             }
