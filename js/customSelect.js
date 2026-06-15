@@ -32,7 +32,7 @@ function initCustomSelect(select) {
     display.appendChild(chevron);
     
     const menu = document.createElement('div');
-    menu.className = "custom-select-menu absolute top-[calc(100%+4px)] left-0 w-full bg-white/95 backdrop-blur-xl rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-slate-100 overflow-hidden z-[100] max-h-60 overflow-y-auto transform origin-top transition-all scale-95 opacity-0 hidden";
+    menu.className = "custom-select-menu absolute top-[calc(100%+4px)] left-0 w-full bg-white/95 backdrop-blur-xl rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-slate-100 overflow-hidden z-[100] max-h-[55vh] overflow-y-auto transform origin-top transition-all scale-95 opacity-0 hidden";
     
     const listContainer = document.createElement('div');
     listContainer.className = "py-1 flex flex-col";
@@ -89,12 +89,13 @@ function renderCustomSelectOptions(select) {
             return;
         }
 
-        item.className = "px-4 py-3 cursor-pointer hover:bg-blue-50/80 transition-colors flex items-center justify-between text-sm";
+        item.className = "px-4 py-3 cursor-pointer hover:bg-blue-50/80 transition-colors flex items-center text-sm";
         
         if (select.id === 'login-name' && opt.value && opt.value !== 'ADMIN') {
             const emp = employees.find(e => e.name === opt.value);
             if (emp && emp.fullName) {
-                item.innerHTML = `<span class="font-bold text-slate-700">${opt.text}</span> <span class="text-[11px] text-slate-400 font-medium ml-2 truncate max-w-[150px]">${emp.fullName}</span>`;
+                const firstName = emp.fullName.trim().split(/\s+/)[0];
+                item.innerHTML = `<span class="font-bold text-slate-700">${opt.text}</span> <span class="text-[12px] text-slate-400 font-medium ml-2 truncate">${firstName}</span>`;
             } else {
                 item.innerHTML = `<span class="font-bold text-slate-700">${opt.text}</span>`;
             }
