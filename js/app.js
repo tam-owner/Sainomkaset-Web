@@ -2190,17 +2190,24 @@ function downloadPayslipPdf() {
 function updateEmployeeFormLayout() {
     const type = document.getElementById('emp-type').value;
     const monthlyContainer = document.getElementById('emp-monthly-container');
-    const hourlyInput = document.getElementById('emp-hourlyrate');
-    const otInput = document.getElementById('emp-otrate');
+    const dailyWrapper = document.getElementById('emp-daily-wrapper');
+    const hourlyOtWrapper = document.getElementById('emp-hourly-ot-wrapper');
+    const hintContainer = document.getElementById('emp-hint-container');
     
     if (type === 'Full Time') {
         if(monthlyContainer) monthlyContainer.classList.remove('hidden');
-        if(hourlyInput) { hourlyInput.readOnly = false; hourlyInput.classList.remove('bg-slate-100'); }
-        if(otInput) { otInput.readOnly = false; otInput.classList.remove('bg-slate-100'); }
+        if(dailyWrapper) {
+            dailyWrapper.classList.remove('col-span-2');
+        }
+        if(hourlyOtWrapper) hourlyOtWrapper.classList.remove('hidden');
+        if(hintContainer) hintContainer.classList.add('hidden');
     } else {
         if(monthlyContainer) monthlyContainer.classList.add('hidden');
-        if(hourlyInput) { hourlyInput.readOnly = true; hourlyInput.classList.add('bg-slate-100'); }
-        if(otInput) { otInput.readOnly = true; otInput.classList.add('bg-slate-100'); }
+        if(dailyWrapper) {
+            dailyWrapper.classList.add('col-span-2');
+        }
+        if(hourlyOtWrapper) hourlyOtWrapper.classList.add('hidden');
+        if(hintContainer) hintContainer.classList.remove('hidden');
         calculatePartTimeRates();
     }
 }
@@ -2215,6 +2222,11 @@ function calculatePartTimeRates() {
         const otEl = document.getElementById('emp-otrate');
         if(hourlyEl) hourlyEl.value = hourly ? hourly.toFixed(2) : '';
         if(otEl) otEl.value = ot ? ot.toFixed(2) : '';
+        
+        const hintHourly = document.getElementById('hint-hourly');
+        const hintOt = document.getElementById('hint-ot');
+        if(hintHourly) hintHourly.innerText = hourly ? hourly.toFixed(2) : '0';
+        if(hintOt) hintOt.innerText = ot ? ot.toFixed(2) : '0';
     }
 }
 
