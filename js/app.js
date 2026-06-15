@@ -84,7 +84,8 @@ async function fetchFreshDataSilently() {
                 if (isAdmin) {
                     if (currentPeriodVal) renderAdminSummary();
                     if (!document.getElementById('view-admin-employees').classList.contains('hidden')) {
-                        document.getElementById('emp-setup-count').innerText = employees.length;
+                        const countEl = document.getElementById('emp-setup-count');
+                        if (countEl) countEl.innerText = employees.length;
                         renderAdminEmployees();
                     }
                 } else {
@@ -1664,7 +1665,8 @@ async function saveEmployee() {
             } else {
                 employees.push(empObj);
             }
-            document.getElementById('emp-setup-count').innerText = employees.length;
+            const countEl = document.getElementById('emp-setup-count');
+            if (countEl) countEl.innerText = employees.length;
             renderAdminEmployees();
         } else {
             alert("Error: " + json.message);
@@ -1722,7 +1724,8 @@ async function confirmDeleteEmployee() {
         let json = await res.json();
         if (json.status === "success") {
             employees = employees.filter(e => e.name !== nickname);
-            document.getElementById('emp-setup-count').innerText = employees.length;
+            const countEl = document.getElementById('emp-setup-count');
+            if (countEl) countEl.innerText = employees.length;
             renderAdminEmployees();
         } else {
             alert("Error: " + json.message);
