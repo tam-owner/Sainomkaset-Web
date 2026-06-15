@@ -632,6 +632,12 @@ function renderEmployeeDashboard() {
                     <p class="text-[11px] font-black text-emerald-500 uppercase tracking-widest mb-1">ชื่อพนักงาน</p>
                     <p class="text-2xl font-black text-slate-800 leading-none drop-shadow-sm">${loggedInEmployee.name} ${loggedInEmployee.fullName ? `<span class="text-sm font-semibold text-slate-400 ml-1 tracking-tight">${loggedInEmployee.fullName}</span>` : ''}</p>
                 </div>
+                <button onclick="openProfile()" class="bg-white rounded-[24px] p-5 shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-3 active:scale-95 transition-transform">
+                    <div class="w-14 h-14 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-500 mb-1">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    </div>
+                    <span class="text-sm font-bold text-slate-700 text-center leading-tight">ประวัติ<br>& สลิป</span>
+                </button>
                 <div class="text-right">
                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">เรตรายวัน (8 ชม.)</p>
                     <p class="text-lg font-black text-emerald-600 leading-none bg-emerald-50 px-2 py-1 rounded-md">฿${formatCurrency(loggedInEmployee.dailyRate)}</p>
@@ -1587,6 +1593,241 @@ async function confirmDeleteEmployee() {
 
 // ----------------------------------------------------
 // Employee Leave System
+// ----------------------------------------------------
+// Employee Profile & Slip System
+// ----------------------------------------------------
+let monthlySlips = [];
+
+function openProfile() {
+    showView('view-profile');
+    
+    // Setup Profile Header
+    const initialSpan = document.getElementById('profile-user-initial');
+    const photoImg = document.getElementById('profile-user-photo');
+    if (loggedInEmployee.photo) {
+        photoImg.src = loggedInEmployee.photo;
+        photoImg.classList.remove('hidden');
+        initialSpan.classList.add('hidden');
+    } else {
+        photoImg.src = "";
+        photoImg.classList.add('hidden');
+        initialSpan.classList.remove('hidden');
+        initialSpan.innerText = loggedInEmployee.name.charAt(0);
+    }
+
+    document.getElementById('profile-user-fullname').innerText = loggedInEmployee.fullName || loggedInEmployee.name;
+    document.getElementById('profile-user-type').innerText = loggedInEmployee.type || 'พนักงาน';
+    document.getElementById('profile-user-bank').innerText = loggedInEmployee.bankAccount || 'ยังไม่ระบุเลขบัญชี';
+
+    calculateMonthlySlips();
+    renderSlips();
+}
+
+function calculateMonthlySlips() {
+    if (!loggedInEmployee) return;
+    
+    const slipsMap = {}; // Key: "YYYY-MM"
+    
+    // Process Attendance
+    const myAttendance = processedAttendance.filter(a => a.name === loggedInEmployee.name);
+    myAttendance.forEach(a => {
+        if (!a.dateObj) return;
+        let yyyy = a.dateObj.getFullYear();
+        let mm = String(a.dateObj.getMonth() + 1).padStart(2, '0');
+        let key = `${yyyy}-${mm}`;
+        
+        if (!slipsMap[key]) {
+            slipsMap[key] = {
+                monthStr: key,
+                monthName: a.dateObj.toLocaleString('th-TH', { month: 'long', year: 'numeric' }),
+                regularHours: 0,
+                otHours: 0,
+                lateDeduction: 0,
+                otherDeductions: 0
+            };
+        }
+        
+        slipsMap[key].regularHours += (a.regularHours || 0);
+        slipsMap[key].otHours += (a.otHours || 0);
+        slipsMap[key].lateDeduction += (a.lateDeduction || 0);
+    });
+
+    // Add explicit deductions from deductions array
+    if (typeof deductions !== 'undefined') {
+        const myDeductions = deductions.filter(d => d.name === loggedInEmployee.name);
+        myDeductions.forEach(d => {
+            // d.period looks like "2026-06-1" or "2026-06-2"
+            let parts = d.period.split('-');
+            if (parts.length >= 2) {
+                let key = `${parts[0]}-${parts[1].padStart(2, '0')}`;
+                if (!slipsMap[key]) {
+                    // Create empty if no attendance exists
+                    let dObj = new Date(parseInt(parts[0]), parseInt(parts[1])-1, 1);
+                    slipsMap[key] = {
+                        monthStr: key,
+                        monthName: dObj.toLocaleString('th-TH', { month: 'long', year: 'numeric' }),
+                        regularHours: 0,
+                        otHours: 0,
+                        lateDeduction: 0,
+                        otherDeductions: 0
+                    };
+                }
+                slipsMap[key].otherDeductions += d.amount;
+            }
+        });
+    }
+
+    monthlySlips = Object.values(slipsMap).sort((a, b) => b.monthStr.localeCompare(a.monthStr));
+    
+    // Calculate final pay
+    const rate = loggedInEmployee.normalRate || 0;
+    const otRate = loggedInEmployee.otRate || 0;
+    
+    monthlySlips.forEach(s => {
+        s.grossPay = (s.regularHours * rate) + (s.otHours * otRate);
+        s.totalDeductions = s.lateDeduction + s.otherDeductions;
+        s.netPay = s.grossPay - s.totalDeductions;
+        s.rate = rate;
+        s.otRate = otRate;
+    });
+}
+
+function renderSlips() {
+    const list = document.getElementById('profile-slips-list');
+    if (!list) return;
+    
+    if (monthlySlips.length === 0) {
+        list.innerHTML = `<div class="text-center py-8 text-slate-400 font-bold text-sm bg-slate-50 rounded-2xl border border-slate-100">ไม่พบประวัติสลิปเงินเดือน</div>`;
+        return;
+    }
+    
+    let html = '';
+    monthlySlips.forEach((s, idx) => {
+        html += `<div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex items-center justify-between shadow-sm">
+            <div>
+                <div class="font-bold text-slate-800 text-sm">${s.monthName}</div>
+                <div class="text-xs text-slate-500 mt-1">รับสุทธิ: <span class="font-bold text-emerald-600">${formatMoney(s.netPay)}</span> ฿</div>
+            </div>
+            <button onclick="printSlip(${idx})" class="p-2.5 bg-indigo-100 text-indigo-700 rounded-xl hover:bg-indigo-200 active:scale-95 transition-transform">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            </button>
+        </div>`;
+    });
+    list.innerHTML = html;
+}
+
+function printSlip(idx) {
+    const s = monthlySlips[idx];
+    if (!s) return;
+    
+    // Create print iframe or popup window
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+        alert("กรุณาอนุญาต Pop-up เพื่อเปิดสลิปเงินเดือน");
+        return;
+    }
+
+    const html = `
+    <html>
+    <head>
+        <title>สลิปเงินเดือน ${s.monthName}</title>
+        <meta charset="utf-8">
+        <style>
+            body { font-family: 'Sarabun', 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #333; }
+            .slip-container { max-width: 600px; margin: 0 auto; border: 1px solid #ddd; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 15px; }
+            .header h1 { margin: 0 0 5px 0; font-size: 24px; color: #111; }
+            .header p { margin: 0; color: #666; }
+            .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+            .info-item { font-size: 14px; }
+            .info-label { font-weight: bold; color: #555; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+            th, td { border: 1px solid #ddd; padding: 12px; text-align: right; font-size: 14px; }
+            th { background-color: #f8f9fa; font-weight: bold; text-align: center; }
+            td:first-child, th:first-child { text-align: left; }
+            .total-row { font-weight: bold; background-color: #f1f5f9; }
+            .net-row { font-weight: bold; background-color: #e2e8f0; font-size: 16px; color: #0f172a; }
+            .footer { text-align: center; font-size: 12px; color: #888; margin-top: 40px; }
+            
+            @media print {
+                body { padding: 0; }
+                .slip-container { border: none; box-shadow: none; }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="slip-container">
+            <div class="header">
+                <h1>ใบรับรองเงินเดือน (Payslip)</h1>
+                <p>ประจำเดือน ${s.monthName}</p>
+            </div>
+            
+            <div class="info-grid">
+                <div class="info-item"><span class="info-label">ชื่อพนักงาน:</span> ${loggedInEmployee.fullName || loggedInEmployee.name}</div>
+                <div class="info-item"><span class="info-label">ตำแหน่ง/ประเภท:</span> ${loggedInEmployee.type || 'พนักงานทั่วไป'}</div>
+                <div class="info-item"><span class="info-label">เลขที่บัญชี:</span> ${loggedInEmployee.bankAccount || '-'}</div>
+                <div class="info-item"><span class="info-label">วันที่ออกเอกสาร:</span> ${new Date().toLocaleDateString('th-TH')}</div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>รายการ (Description)</th>
+                        <th>จำนวน (Qty)</th>
+                        <th>จำนวนเงิน (Amount)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>ค่าจ้างปกติ (เรท ${s.rate} ฿/ชม.)</td>
+                        <td>${s.regularHours.toFixed(2)} ชม.</td>
+                        <td>${formatMoney(s.regularHours * s.rate)} ฿</td>
+                    </tr>
+                    <tr>
+                        <td>ค่าล่วงเวลา OT (เรท ${s.otRate} ฿/ชม.)</td>
+                        <td>${s.otHours.toFixed(2)} ชม.</td>
+                        <td>${formatMoney(s.otHours * s.otRate)} ฿</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td colspan="2" style="text-align: right;">รวมรายได้ (Gross Pay)</td>
+                        <td>${formatMoney(s.grossPay)} ฿</td>
+                    </tr>
+                    <tr>
+                        <td>หักสาย/ขาดงาน</td>
+                        <td>-</td>
+                        <td>-${formatMoney(s.lateDeduction)} ฿</td>
+                    </tr>
+                    <tr>
+                        <td>หักอื่นๆ</td>
+                        <td>-</td>
+                        <td>-${formatMoney(s.otherDeductions)} ฿</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td colspan="2" style="text-align: right;">รวมรายการหัก (Total Deductions)</td>
+                        <td style="color: #dc2626;">-${formatMoney(s.totalDeductions)} ฿</td>
+                    </tr>
+                    <tr class="net-row">
+                        <td colspan="2" style="text-align: right;">รายได้สุทธิ (Net Pay)</td>
+                        <td style="color: #16a34a;">${formatMoney(s.netPay)} ฿</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="footer">
+                เอกสารนี้สร้างขึ้นโดยระบบอัตโนมัติ (Sainomkaset Web App)
+            </div>
+        </div>
+        <script>
+            window.onload = function() { window.print(); };
+        </script>
+    </body>
+    </html>
+    `;
+    
+    printWindow.document.write(html);
+    printWindow.document.close();
+}
+
 // ----------------------------------------------------
 function renderEmployeeLeaves() {
     const list = document.getElementById('leave-history-list');
