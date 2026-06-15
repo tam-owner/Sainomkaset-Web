@@ -118,7 +118,7 @@
 
         <!-- Sticky Period Selector -->
         <div class="sticky top-0 z-50 px-4 mb-4 pt-2">
-            <div class="bg-white/95 backdrop-blur-xl rounded-[20px] shadow-[0_15px_40px_rgba(0,0,0,0.12)] border border-slate-200 px-5 py-3 flex items-center justify-between gap-3 transition-all">
+            <div id="period-selector-card" class="bg-white/95 backdrop-blur-xl rounded-[20px] shadow-[0_15px_40px_rgba(0,0,0,0.12)] border border-slate-200 px-5 py-3 flex items-center justify-between gap-3 transition-all duration-200">
                 <label class="font-black text-[12px] text-slate-500 uppercase tracking-widest whitespace-nowrap">เลือกรอบเวลา</label>
                 <button type="button" onclick="togglePeriodDropdown()" class="w-auto flex-1 flex justify-between items-center shadow-sm bg-slate-50 border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 transition-colors py-2.5 px-4 rounded-xl text-emerald-800">
                     <span id="period-btn-text" class="truncate font-black text-[15px] text-left tracking-tight">- กรุณารอสักครู่ -</span>
@@ -142,7 +142,7 @@
             </div>
 
             <div class="mt-4">
-                <div class="table-grid font-bold text-white bg-slate-800/95 backdrop-blur-md text-[12px] py-2.5 px-1 rounded-t-lg text-center shadow-md sticky top-[76px] z-40 border-b border-slate-700">
+                <div id="employee-table-header" class="table-grid font-bold text-white bg-slate-800/95 backdrop-blur-md text-[12px] py-2.5 px-1 rounded-t-lg text-center shadow-md sticky top-[76px] z-40 border-b border-slate-700 transition-all duration-200">
                     <div class="text-left pl-2">วันที่</div>
                     <div>เข้างาน</div>
                     <div>ออกงาน</div>
@@ -382,7 +382,7 @@
         </div>
     </div>
 
-    <script src="js/app.js?v=1781532862"></script>
+    <script src="js/app.js?v=1781533128"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {

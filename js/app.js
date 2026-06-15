@@ -1659,3 +1659,24 @@ function downloadPayslipPdf() {
     });
 }
 
+// ----------------------------------------------------
+// Scroll Effects
+// ----------------------------------------------------
+window.addEventListener('scroll', () => {
+    const tableHeader = document.getElementById('employee-table-header');
+    const periodCard = document.getElementById('period-selector-card');
+    
+    if (tableHeader && periodCard) {
+        const rect = tableHeader.getBoundingClientRect();
+        // The table header is sticky at top: 76px. When rect.top is <= 77, they touch.
+        if (rect.top <= 77) {
+            periodCard.classList.remove('rounded-[20px]');
+            periodCard.classList.add('rounded-t-[20px]', 'rounded-b-none');
+            tableHeader.classList.remove('rounded-t-lg');
+        } else {
+            periodCard.classList.remove('rounded-t-[20px]', 'rounded-b-none');
+            periodCard.classList.add('rounded-[20px]');
+            tableHeader.classList.add('rounded-t-lg');
+        }
+    }
+});
