@@ -741,7 +741,7 @@ function renderEmployeeDashboard() {
                 <div class="flex flex-col text-left pl-1 justify-start">
                     <span class="font-black text-[13px] text-indigo-900 leading-tight date-text">${shortDateStr}</span>
                     <span class="text-[11px] text-slate-500 font-medium leading-tight day-text mt-1">${dayStr}</span>
-                    ${row.isLate ? `<span class="text-[10px] font-normal text-red-500 leading-tight late-text mt-0.5">สาย ${row.lateMins} น. ${row.lateDeduction > 0 ? `(-${row.lateDeduction} ชม)` : ''}</span>` : ''}
+                    ${row.isLate ? `<span class="text-[10px] font-normal text-red-500 leading-tight late-text mt-0.5">สาย ${row.lateMins} น.${row.lateDeduction > 0 ? `<br>(-${row.lateDeduction} ชม)` : ''}</span>` : ''}
                 </div>
                 
                 <div class="text-center flex flex-col items-center justify-start">
