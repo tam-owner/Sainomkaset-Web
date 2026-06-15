@@ -163,7 +163,8 @@ function getEmployeesData() {
         bankAccount: String(row[7] || "").trim(),
         employeeType: String(row[8] || "").trim(),
         photo: String(row[9] || "").trim(),
-        startDate: String(row[10] || "").trim()
+        startDate: String(row[10] || "").trim(),
+        status: String(row[11] || "Active").trim()
       });
     }
     return result;
@@ -370,11 +371,13 @@ function handleSaveEmployee(oldNickname, oldFullName, emp) {
     emp.deductionType,
     emp.bankAccount,
     emp.employeeType,
-    emp.photo || ""
+    emp.photo || "",
+    emp.startDate || "",
+    emp.status || "Active"
   ];
 
   if (foundIdx !== -1) {
-    sheet.getRange(foundIdx + 1, 1, 1, 10).setValues([rowData]);
+    sheet.getRange(foundIdx + 1, 1, 1, 12).setValues([rowData]);
     return {status: "success", message: "Updated successfully"};
   } else {
     sheet.appendRow(rowData);

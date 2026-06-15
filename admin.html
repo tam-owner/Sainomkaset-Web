@@ -731,12 +731,16 @@
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div><label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">ประเภทหักเงิน</label><select id="emp-deductiontype" class="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white"><option value="NoDeduct">ไม่หัก</option><option value="3%">หัก 3%</option><option value="5%">หักประกันสังคม 5%</option></select></div>
+                    <div><label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">สถานะ</label><select id="emp-status" class="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white"><option value="Active">ทำงานอยู่ (Active)</option><option value="Inactive">พนักงานเก่า (Inactive)</option></select></div>
+                </div>
+                <div class="grid grid-cols-1 gap-3">
                     <div><label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">เลขบัญชี</label><input type="text" id="emp-bank" class="w-full border border-slate-300 rounded-lg px-3 py-2"></div>
                 </div>
             </div>
             <div class="p-4 border-t border-slate-100 flex gap-3 shrink-0 bg-slate-50 rounded-b-[24px]">
                 <button onclick="saveEmployee()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl active:scale-95 transition">บันทึก</button>
                 <button onclick="closeEmployeeModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2.5 rounded-xl active:scale-95 transition">ยกเลิก</button>
+                <button id="btn-delete-employee" class="hidden px-4 bg-red-100 hover:bg-red-200 text-red-600 font-bold py-2.5 rounded-xl active:scale-95 transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
             </div>
         </div>
     </div>

@@ -271,9 +271,6 @@ function populateLoginNames() {
     const select = document.getElementById('login-name');
     select.innerHTML = '<option value="" selected disabled>- กรุณาเลือกชื่อ -</option>';
     
-    const now = new Date();
-    const fifteenDaysAgo = new Date(now.getTime() - (15 * 24 * 60 * 60 * 1000));
-    
     const lastAttendanceMap = {};
     processedAttendance.forEach(rec => {
         if (!lastAttendanceMap[rec.name] || rec.dateObj > lastAttendanceMap[rec.name]) {
@@ -281,11 +278,7 @@ function populateLoginNames() {
         }
     });
 
-    const activeEmployees = employees.filter(emp => {
-        const lastAtt = lastAttendanceMap[emp.name];
-        if (!lastAtt) return true; // New employee, never clocked in
-        return lastAtt >= fifteenDaysAgo;
-    });
+    const activeEmployees = employees.filter(emp => emp.status !== "Inactive");
 
     const sortedEmp = activeEmployees.sort((a, b) => {
         const lastA = lastAttendanceMap[a.name] ? lastAttendanceMap[a.name].getTime() : Infinity;
@@ -1341,70 +1334,81 @@ function renderAdminEmployees() {
         (e.fullName && e.fullName.toLowerCase().includes(search))
     );
 
-    if (filtered.length === 0) {
+    const activeEmployees = [];
+    const inactiveEmployees = [];
+
+    employees.forEach(emp => {
+        if (!emp.name.toLowerCase().includes(search) && !(emp.fullName && emp.fullName.toLowerCase().includes(search))) {
+            return;
+        }
+        if (emp.status === "Inactive") {
+            inactiveEmployees.push(emp);
+        } else {
+            activeEmployees.push(emp);
+        }
+    });
+
+    if (activeEmployees.length === 0 && inactiveEmployees.length === 0) {
         container.innerHTML = '<div class="text-center text-slate-400 py-8 text-sm font-medium">ไม่พบข้อมูลพนักงาน</div>';
         return;
     }
 
-    filtered.forEach(emp => {
-        const div = document.createElement('div');
-        div.className = 'bg-white rounded-xl p-3 flex flex-col md:flex-row md:items-center gap-2 md:gap-4 border border-slate-200 shadow-sm relative transition-all hover:shadow-md';
+    const renderGroup = (list, title, isInactive) => {
+        if (list.length === 0) return;
         
-        let typeBadge = '';
-        if (emp.employeeType === 'Full Time') {
-            typeBadge = `<span class="bg-blue-100 text-blue-700 text-[10px] font-bold px-1.5 py-0.5 rounded">Full Time</span>`;
-        } else if (emp.employeeType === 'Part Time') {
-            typeBadge = `<span class="bg-amber-100 text-amber-700 text-[10px] font-bold px-1.5 py-0.5 rounded">Part Time</span>`;
-        }
+        const groupTitle = document.createElement('div');
+        groupTitle.className = 'text-xs font-bold text-slate-400 mt-4 mb-2 px-1 uppercase tracking-wider';
+        groupTitle.innerText = title;
+        container.appendChild(groupTitle);
+        
+        list.forEach(emp => {
+            const div = document.createElement('div');
+            // Simplified card: only one row
+            div.className = `bg-white rounded-xl p-3 flex items-center justify-between gap-3 border ${isInactive ? 'border-red-100 opacity-70' : 'border-slate-200'} shadow-sm relative transition-all hover:shadow-md cursor-pointer`;
+            div.onclick = () => editEmployee(emp);
+            
+            let typeBadge = '';
+            if (emp.employeeType === 'Full Time') {
+                typeBadge = `<span class="bg-blue-100 text-blue-700 text-[10px] font-bold px-1.5 py-0.5 rounded">Full Time</span>`;
+            } else if (emp.employeeType === 'Part Time') {
+                typeBadge = `<span class="bg-amber-100 text-amber-700 text-[10px] font-bold px-1.5 py-0.5 rounded">Part Time</span>`;
+            }
 
-        let avatarHtml = emp.photo ? 
-            `<img src="${emp.photo}" class="w-10 h-10 rounded-full object-cover shrink-0 border-2 border-slate-100">` : 
-            `<div class="w-10 h-10 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold shrink-0 border-2 border-slate-100 text-lg">${(emp.name || '?').charAt(0)}</div>`;
+            let avatarHtml = emp.photo ? 
+                `<img src="${emp.photo}" class="w-10 h-10 rounded-full object-cover shrink-0 border-2 border-slate-100">` : 
+                `<div class="w-10 h-10 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold shrink-0 border-2 border-slate-100 text-lg">${(emp.name || '?').charAt(0)}</div>`;
 
-        div.innerHTML = `
-            <div class="flex justify-between items-center md:w-[250px] shrink-0">
-                <div class="flex items-center gap-3">
+            div.innerHTML = `
+                <div class="flex items-center gap-3 overflow-hidden">
                     ${avatarHtml}
-                    <div class="flex flex-col justify-center">
+                    <div class="flex flex-col justify-center min-w-0">
                         <div class="flex items-center gap-2 flex-wrap">
-                            <div class="text-[15px] font-black text-slate-900 flex items-baseline gap-1.5">
+                            <div class="text-[15px] font-black text-slate-900 truncate flex items-baseline gap-1.5">
                                 ${emp.name || '-'} 
-                                ${emp.fullName ? `<span class="text-[11px] text-slate-500 font-medium">${emp.fullName}</span>` : ''}
+                                ${emp.fullName ? `<span class="text-[11px] text-slate-500 font-medium hidden sm:inline">${emp.fullName}</span>` : ''}
                             </div>
+                        </div>
+                        <div class="flex items-center gap-2 mt-0.5">
                             ${typeBadge}
                         </div>
                     </div>
                 </div>
-                <div class="flex gap-1 md:hidden">
-                    <button onclick='editEmployee(${JSON.stringify(emp).replace(/'/g, "&#39;")})' class="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                    </button>
-                    <button onclick="openDeleteModal('${emp.name}', '${emp.fullName || ''}')" class="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-md transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    </button>
+                <div class="flex items-center gap-3 shrink-0">
+                    <div class="text-right">
+                        <div class="text-[10px] font-bold text-slate-400 uppercase">รายวัน</div>
+                        <div class="font-black text-slate-800 text-[13px]">${emp.dailyRate ? emp.dailyRate + '฿' : '-'}</div>
+                    </div>
+                    <div class="text-slate-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="flex-1 grid grid-cols-3 md:grid-cols-6 gap-x-2 gap-y-1.5 text-[11px] bg-slate-50 md:bg-transparent p-2 md:p-0 rounded-lg border border-slate-100 md:border-none items-center">
-                <div class="flex flex-col"><span class="text-slate-400 font-bold">PIN</span><span class="font-black text-slate-800 text-[13px]">${emp.pin || '-'}</span></div>
-                <div class="flex flex-col"><span class="text-slate-400 font-bold">รายวัน</span><span class="font-black text-slate-800 text-[13px]">${emp.dailyRate ? emp.dailyRate + '฿' : '-'}</span></div>
-                <div class="flex flex-col"><span class="text-slate-400 font-bold">รายชั่วโมง</span><span class="font-black text-slate-800 text-[13px]">${emp.normalRate ? emp.normalRate + '฿' : '-'}</span></div>
-                <div class="flex flex-col"><span class="text-slate-400 font-bold">OT</span><span class="font-black text-slate-800 text-[13px]">${emp.otRate ? emp.otRate + '฿' : '-'}</span></div>
-                <div class="flex flex-col"><span class="text-slate-400 font-bold">หักเงิน</span><span class="font-black text-red-600 text-[13px]">${emp.deductionType || '-'}</span></div>
-                <div class="flex flex-col"><span class="text-slate-400 font-bold">เลขบัญชี</span><span class="font-black text-slate-800 text-[13px] truncate w-full">${emp.bankAccount || '-'}</span></div>
-            </div>
-
-            <div class="hidden md:flex gap-1 shrink-0 ml-4">
-                <button onclick='editEmployee(${JSON.stringify(emp).replace(/'/g, "&#39;")})' class="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg border border-transparent hover:border-blue-200 transition" title="แก้ไข">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                </button>
-                <button onclick="openDeleteModal('${emp.name}', '${emp.fullName || ''}')" class="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg border border-transparent hover:border-red-200 transition" title="ลบ">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                </button>
-            </div>
-        `;
-        container.appendChild(div);
-    });
+            `;
+            container.appendChild(div);
+        });
+    };
+    
+    renderGroup(activeEmployees, 'พนักงานปัจจุบัน', false);
+    renderGroup(inactiveEmployees, 'พนักงานเก่า', true);
 }
 
 let currentEmployeePhotoBase64 = "";
@@ -1462,6 +1466,9 @@ function openEmployeeModal() {
     document.getElementById('emp-deductiontype').value = "3%";
     document.getElementById('emp-bank').value = "";
     document.getElementById('emp-type').value = "Full Time";
+    document.getElementById('emp-status').value = "Active";
+    
+    document.getElementById('btn-delete-employee').classList.add('hidden');
 
     currentEmployeePhotoBase64 = "";
     document.getElementById('emp-photo-preview').src = "";
@@ -1492,6 +1499,11 @@ function editEmployee(emp) {
     document.getElementById('emp-deductiontype').value = emp.deductionType || "3%";
     document.getElementById('emp-bank').value = emp.bankAccount || "";
     document.getElementById('emp-type').value = emp.employeeType || "Full Time";
+    document.getElementById('emp-status').value = emp.status || "Active";
+    
+    const delBtn = document.getElementById('btn-delete-employee');
+    delBtn.classList.remove('hidden');
+    delBtn.setAttribute('onclick', `openDeleteModal('${emp.name}', '${emp.fullName || ''}')`);
 
     currentEmployeePhotoBase64 = emp.photo || "";
     if (currentEmployeePhotoBase64) {
@@ -1542,6 +1554,7 @@ async function saveEmployee() {
         deductionType: document.getElementById('emp-deductiontype').value,
         bankAccount: document.getElementById('emp-bank').value.trim(),
         employeeType: document.getElementById('emp-type').value,
+        status: document.getElementById('emp-status').value,
         photo: currentEmployeePhotoBase64
     };
 
