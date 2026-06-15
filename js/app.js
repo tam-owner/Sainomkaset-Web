@@ -482,9 +482,7 @@ function showAdminEmployees() {
     document.getElementById('view-login').classList.add('hidden');
     document.getElementById('view-admin-dashboard').classList.add('hidden');
     document.getElementById('view-admin-employees').classList.remove('hidden');
-    
-    document.getElementById('emp-setup-count').innerText = employees.length;
-    renderAdminEmployees();
+    switchEmpTab('active');
 }
 
 // ----------------------------------------------------
