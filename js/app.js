@@ -1295,7 +1295,7 @@ function renderAdminLeaves() {
         <div class="flex justify-between items-center bg-amber-50 p-3 rounded-xl border border-amber-100">
             <div>
                 <div class="font-black text-amber-900">${l.name} <span class="text-xs text-amber-700 font-bold ml-1">(${l.leaveType})</span></div>
-                <div class="text-xs font-semibold text-amber-600 mt-0.5">${l.startDate} ถึง ${l.endDate}</div>
+                <div class="text-xs font-semibold text-amber-600 mt-0.5">${new Date(l.startDate).toLocaleDateString('th-TH', {day: 'numeric', month: 'short', year: 'numeric'})} ถึง ${new Date(l.endDate).toLocaleDateString('th-TH', {day: 'numeric', month: 'short', year: 'numeric'})}</div>
                 <div class="text-[10px] text-amber-500 mt-1">เหตุผล: ${l.reason}</div>
             </div>
             <div class="flex flex-col gap-1">
@@ -1974,7 +1974,7 @@ function renderEmployeeLeaves() {
 
         html += `<div class="flex justify-between items-center p-3 border border-slate-100 rounded-xl bg-slate-50 mb-2">
             <div class="text-left">
-                <div class="font-bold text-slate-800 text-sm">${l.leaveType || l.type} <span class="font-normal text-slate-500 text-xs ml-1">(${l.startDate || l.start} ถึง ${l.endDate || l.end})</span></div>
+                <div class="font-bold text-slate-800 text-sm">${l.leaveType || l.type} <span class="font-normal text-slate-500 text-xs ml-1">(${new Date(l.startDate || l.start).toLocaleDateString('th-TH', {day: 'numeric', month: 'short', year: 'numeric'})} ถึง ${new Date(l.endDate || l.end).toLocaleDateString('th-TH', {day: 'numeric', month: 'short', year: 'numeric'})})</span></div>
                 <div class="text-xs text-slate-500 mt-1">เหตุผล: ${l.reason}</div>
             </div>
             <div>${statusBadge}</div>
