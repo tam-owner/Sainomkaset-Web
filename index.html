@@ -736,13 +736,13 @@
                         <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">ค่าแรงรายเดือน</label>
                         <input type="number" id="emp-monthlyrate" class="w-full border border-slate-300 rounded-lg px-2 py-2 text-center text-blue-600 font-bold" placeholder="0">
                     </div>
-                    <div id="emp-daily-wrapper" class="col-span-2">
+                    <div id="emp-daily-wrapper">
                         <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">ค่าแรง/วัน</label>
-                        <div class="flex items-center gap-2">
-                            <input type="number" id="emp-dailyrate" class="w-28 border border-slate-300 rounded-lg px-2 py-2 text-center shrink-0" placeholder="0" oninput="calculatePartTimeRates()">
-                            <div id="emp-hint-container" class="text-[10px] text-slate-500 hidden whitespace-nowrap">
-                                ( ชม: <span id="hint-hourly" class="font-bold text-slate-700">0</span> ฿ | OT: <span id="hint-ot" class="font-bold text-slate-700">0</span> ฿/ชม )
-                            </div>
+                        <input type="number" id="emp-dailyrate" class="w-full border border-slate-300 rounded-lg px-2 py-2 text-center shrink-0" placeholder="0" oninput="calculatePartTimeRates()">
+                    </div>
+                    <div id="emp-hint-container" class="hidden flex items-end">
+                        <div class="text-[11px] text-slate-600 bg-slate-50 border border-slate-200 px-3 py-2 rounded-lg w-full text-center tracking-tight">
+                            ชม: <span id="hint-hourly" class="font-bold text-slate-800">0</span> ฿ | OT: <span id="hint-ot" class="font-bold text-slate-800">0</span> ฿/ชม
                         </div>
                     </div>
                 </div>
@@ -781,7 +781,7 @@
     </div>
 
     <script src="js/customSelect.js"></script>
-    <script src="js/app.js?v=20260616_4"></script>
+    <script src="js/app.js?v=20260616_6"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {

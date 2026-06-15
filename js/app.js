@@ -2199,16 +2199,10 @@ function updateEmployeeFormLayout() {
     
     if (type === 'Full Time') {
         if(monthlyContainer) monthlyContainer.classList.remove('hidden');
-        if(dailyWrapper) {
-            dailyWrapper.classList.remove('col-span-2');
-        }
         if(hourlyOtWrapper) hourlyOtWrapper.classList.remove('hidden');
         if(hintContainer) hintContainer.classList.add('hidden');
     } else {
         if(monthlyContainer) monthlyContainer.classList.add('hidden');
-        if(dailyWrapper) {
-            dailyWrapper.classList.add('col-span-2');
-        }
         if(hourlyOtWrapper) hourlyOtWrapper.classList.add('hidden');
         if(hintContainer) hintContainer.classList.remove('hidden');
         calculatePartTimeRates();
