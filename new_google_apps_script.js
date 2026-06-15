@@ -339,7 +339,7 @@ function handleAutoRegister(names) {
     var name = names[i];
     if (!existingNames[name] && name.trim() !== "") {
       // ["ชื่อเล่น", "ชื่อจริง-นามสกุล", "PIN", "เรตรายวัน", "เรตรายชม.", "เรต OT", "ประเภทการหักเงิน", "เลขบัญชีธนาคาร", "ประเภทพนักงาน"]
-      sheet.appendRow([name, "", "1234", 0, 46.88, 8.79, "3%", "", ""]);
+      sheet.appendRow([name, "", "1234", 0, 46.88, 8.79, "3%", "", "", "", "", "Active"]);
       existingNames[name] = true;
       addedCount++;
     }
