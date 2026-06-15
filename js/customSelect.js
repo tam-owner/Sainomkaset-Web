@@ -89,7 +89,7 @@ function renderCustomSelectOptions(select) {
             return;
         }
 
-        item.className = "px-4 py-3 cursor-pointer hover:bg-blue-50/80 transition-colors flex items-center text-sm";
+        item.className = "px-4 py-3 cursor-pointer hover:bg-blue-50/80 active:bg-blue-100 transition-all flex items-center text-sm";
         
         if (select.id === 'login-name' && opt.value && opt.value !== 'ADMIN') {
             const emp = employees.find(e => e.name === opt.value);
@@ -107,15 +107,25 @@ function renderCustomSelectOptions(select) {
         
         item.addEventListener('click', (e) => {
             e.stopPropagation();
-            select.value = opt.value;
-            select.dispatchEvent(new Event('change'));
             
-            displaySpan.innerText = opt.text;
+            item.classList.add('bg-blue-100');
             
-            menu.classList.add('scale-95', 'opacity-0');
-            menu.classList.remove('scale-100', 'opacity-100');
-            setTimeout(() => menu.classList.add('hidden'), 200);
-            chevron.classList.remove('rotate-180');
+            setTimeout(() => {
+                select.value = opt.value;
+                select.dispatchEvent(new Event('change'));
+                
+                displaySpan.innerText = opt.text;
+                
+                menu.classList.add('scale-95', 'opacity-0');
+                menu.classList.remove('scale-100', 'opacity-100');
+                
+                setTimeout(() => {
+                    menu.classList.add('hidden');
+                    item.classList.remove('bg-blue-100');
+                }, 200);
+                
+                chevron.classList.remove('rotate-180');
+            }, 120);
         });
         
         listContainer.appendChild(item);
