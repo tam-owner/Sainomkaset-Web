@@ -625,7 +625,7 @@ function renderEmployeeDashboard() {
             ` : ''}
 
             <!-- Net Pay (Grand Total) -->
-            <div class="bg-emerald-900 rounded-[20px] p-5 flex justify-between items-center shadow-lg shadow-emerald-900/40 mt-4 relative overflow-hidden">
+            <div class="bg-[#022c22] rounded-[20px] p-5 flex justify-between items-center shadow-lg shadow-[#022c22]/40 mt-4 relative overflow-hidden">
                 <div class="relative z-10">
                     <p class="text-[11px] font-black text-emerald-50 uppercase tracking-widest">รวมรายได้สุทธิ</p>
                     <p class="text-[10px] text-emerald-100 mt-1 font-medium">หลังหักทั้งหมด (Net Pay)</p>
