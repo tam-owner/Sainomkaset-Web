@@ -1671,7 +1671,7 @@ async function saveEmployee() {
         }
     } catch (e) {
         console.error(e);
-        alert("Failed to connect to server.");
+        alert("Failed to connect to server. Details: " + e.message);
     } finally {
         overlay.classList.add('hidden');
     }
@@ -1729,7 +1729,7 @@ async function confirmDeleteEmployee() {
         }
     } catch (e) {
         console.error(e);
-        alert("Failed to connect to server.");
+        alert("Failed to connect to server. Details: " + e.message);
     } finally {
         overlay.classList.add('hidden');
     }
