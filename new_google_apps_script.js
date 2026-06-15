@@ -161,7 +161,8 @@ function getEmployeesData() {
         otRate: Number(row[5]) || 0,
         deductionType: String(row[6] || "None").trim(),
         bankAccount: String(row[7] || "").trim(),
-        employeeType: String(row[8] || "").trim()
+        employeeType: String(row[8] || "").trim(),
+        photo: String(row[9] || "").trim()
       });
     }
     return result;
@@ -367,11 +368,12 @@ function handleSaveEmployee(oldNickname, oldFullName, emp) {
     emp.otRate,
     emp.deductionType,
     emp.bankAccount,
-    emp.employeeType
+    emp.employeeType,
+    emp.photo || ""
   ];
 
   if (foundIdx !== -1) {
-    sheet.getRange(foundIdx + 1, 1, 1, 9).setValues([rowData]);
+    sheet.getRange(foundIdx + 1, 1, 1, 10).setValues([rowData]);
     return {status: "success", message: "Updated successfully"};
   } else {
     sheet.appendRow(rowData);

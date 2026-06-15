@@ -317,7 +317,19 @@ function showEmployeeDashboard() {
     document.getElementById('view-employee').classList.remove('hidden');
     document.getElementById('loading-overlay').classList.add('hidden');
     
-    document.getElementById('emp-user-initial').innerText = loggedInEmployee.name.charAt(0);
+    const initialSpan = document.getElementById('emp-user-initial');
+    const photoImg = document.getElementById('emp-user-photo');
+    if (loggedInEmployee.photo) {
+        photoImg.src = loggedInEmployee.photo;
+        photoImg.classList.remove('hidden');
+        initialSpan.classList.add('hidden');
+    } else {
+        photoImg.src = "";
+        photoImg.classList.add('hidden');
+        initialSpan.classList.remove('hidden');
+        initialSpan.innerText = loggedInEmployee.name.charAt(0);
+    }
+
     document.getElementById('emp-user-name').innerText = loggedInEmployee.name;
 
     setupPeriods();
@@ -1192,15 +1204,22 @@ function renderAdminEmployees() {
             typeBadge = `<span class="bg-amber-100 text-amber-700 text-[10px] font-bold px-1.5 py-0.5 rounded">Part Time</span>`;
         }
 
+        let avatarHtml = emp.photo ? 
+            `<img src="${emp.photo}" class="w-10 h-10 rounded-full object-cover shrink-0 border-2 border-slate-100">` : 
+            `<div class="w-10 h-10 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold shrink-0 border-2 border-slate-100 text-lg">${(emp.name || '?').charAt(0)}</div>`;
+
         div.innerHTML = `
             <div class="flex justify-between items-center md:w-[250px] shrink-0">
-                <div class="flex flex-col justify-center">
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <div class="text-[15px] font-black text-slate-900 flex items-baseline gap-1.5">
-                            ${emp.name || '-'} 
-                            ${emp.fullName ? `<span class="text-[11px] text-slate-500 font-medium">${emp.fullName}</span>` : ''}
+                <div class="flex items-center gap-3">
+                    ${avatarHtml}
+                    <div class="flex flex-col justify-center">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <div class="text-[15px] font-black text-slate-900 flex items-baseline gap-1.5">
+                                ${emp.name || '-'} 
+                                ${emp.fullName ? `<span class="text-[11px] text-slate-500 font-medium">${emp.fullName}</span>` : ''}
+                            </div>
+                            ${typeBadge}
                         </div>
-                        ${typeBadge}
                     </div>
                 </div>
                 <div class="flex gap-1 md:hidden">
@@ -1235,6 +1254,47 @@ function renderAdminEmployees() {
     });
 }
 
+let currentEmployeePhotoBase64 = "";
+
+function handlePhotoUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const max_size = 150;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+                if (width > max_size) {
+                    height *= max_size / width;
+                    width = max_size;
+                }
+            } else {
+                if (height > max_size) {
+                    width *= max_size / height;
+                    height = max_size;
+                }
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            currentEmployeePhotoBase64 = canvas.toDataURL('image/jpeg', 0.6);
+            document.getElementById('emp-photo-preview').src = currentEmployeePhotoBase64;
+            document.getElementById('emp-photo-preview').classList.remove('hidden');
+            document.getElementById('emp-photo-placeholder').classList.add('hidden');
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
 function openEmployeeModal() {
     document.getElementById('employee-modal-title').innerText = "เพิ่มพนักงานใหม่";
     document.getElementById('old-nickname').value = "";
@@ -1249,6 +1309,12 @@ function openEmployeeModal() {
     document.getElementById('emp-deductiontype').value = "None";
     document.getElementById('emp-bank').value = "";
     document.getElementById('emp-type').value = "Full Time";
+
+    currentEmployeePhotoBase64 = "";
+    document.getElementById('emp-photo-preview').src = "";
+    document.getElementById('emp-photo-preview').classList.add('hidden');
+    document.getElementById('emp-photo-placeholder').classList.remove('hidden');
+    document.getElementById('emp-photo-upload').value = "";
 
     const modal = document.getElementById('employee-modal');
     const modalBox = document.getElementById('employee-modal-box');
@@ -1273,6 +1339,18 @@ function editEmployee(emp) {
     document.getElementById('emp-deductiontype').value = emp.deductionType || "None";
     document.getElementById('emp-bank').value = emp.bankAccount || "";
     document.getElementById('emp-type').value = emp.employeeType || "Full Time";
+
+    currentEmployeePhotoBase64 = emp.photo || "";
+    if (currentEmployeePhotoBase64) {
+        document.getElementById('emp-photo-preview').src = currentEmployeePhotoBase64;
+        document.getElementById('emp-photo-preview').classList.remove('hidden');
+        document.getElementById('emp-photo-placeholder').classList.add('hidden');
+    } else {
+        document.getElementById('emp-photo-preview').src = "";
+        document.getElementById('emp-photo-preview').classList.add('hidden');
+        document.getElementById('emp-photo-placeholder').classList.remove('hidden');
+    }
+    document.getElementById('emp-photo-upload').value = "";
 
     const modal = document.getElementById('employee-modal');
     const modalBox = document.getElementById('employee-modal-box');
@@ -1310,7 +1388,8 @@ async function saveEmployee() {
         otRate: parseFloat(document.getElementById('emp-otrate').value) || 0,
         deductionType: document.getElementById('emp-deductiontype').value,
         bankAccount: document.getElementById('emp-bank').value.trim(),
-        employeeType: document.getElementById('emp-type').value
+        employeeType: document.getElementById('emp-type').value,
+        photo: currentEmployeePhotoBase64
     };
 
     const overlay = document.getElementById('loading-overlay');
