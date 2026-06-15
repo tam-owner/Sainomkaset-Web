@@ -617,6 +617,12 @@ function renderEmployeeDashboard() {
                 <span class="text-sm font-black text-slate-700">฿${formatCurrency(payBeforeTax)}</span>
             </div>
 
+            ${standardDeduct > 0 ? `
+            <div class="flex justify-between items-center px-2 mb-2">
+                <span class="text-xs font-bold text-red-500 uppercase tracking-wide">${deductLabel}</span>
+                <span class="text-sm font-black text-red-600">-฿${formatCurrency(standardDeduct)}</span>
+            </div>
+            ` : ''}
 
             <!-- Net Pay (Grand Total) -->
             <div class="bg-[#0fa981] rounded-[20px] p-5 flex justify-between items-center shadow-lg shadow-emerald-600/30 mt-4 relative overflow-hidden">
