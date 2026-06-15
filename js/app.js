@@ -595,7 +595,7 @@ function renderEmployeeDashboard() {
                         </div>
                         <div>
                             <p class="text-sm font-bold text-slate-700">ค่าแรงชั่วโมงปกติ</p>
-                            <p class="text-xs font-medium text-emerald-600/80">${totalNormalHours.toFixed(1)} ชม. <span class="text-slate-800">x ฿${formatCurrency(loggedInEmployee.normalRate)}</span></p>
+                            <p class="text-xs font-medium text-emerald-600/80">${totalNormalHours.toFixed(1)} ชม. <span class="text-slate-500">x ฿${formatCurrency(loggedInEmployee.normalRate)}</span></p>
                         </div>
                     </div>
                     <div class="text-right font-black text-slate-800 text-lg">
@@ -611,7 +611,7 @@ function renderEmployeeDashboard() {
                         </div>
                         <div>
                             <p class="text-sm font-bold text-slate-700">ค่าแรงชั่วโมง OT</p>
-                            <p class="text-xs font-medium text-orange-500/80">${totalOTHours.toFixed(1)} ชม. <span class="text-slate-800">x ฿${formatCurrency(loggedInEmployee.otRate)}</span></p>
+                            <p class="text-xs font-medium text-orange-500/80">${totalOTHours.toFixed(1)} ชม. <span class="text-slate-500">x ฿${formatCurrency(loggedInEmployee.otRate)}</span></p>
                         </div>
                     </div>
                     <div class="text-right font-black text-slate-800 text-lg">
