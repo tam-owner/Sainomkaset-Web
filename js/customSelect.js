@@ -114,7 +114,28 @@ function renderCustomSelectOptions(select) {
                 select.value = opt.value;
                 select.dispatchEvent(new Event('change'));
                 
-                displaySpan.innerText = opt.text;
+                const updateDisplay = (sel, span, o) => {
+                    if (!o) return;
+                    if (!o.value) {
+                        span.innerHTML = `<span class="text-slate-500">${o.text}</span>`;
+                        return;
+                    }
+                    if (sel.id === 'login-name' && o.value !== 'ADMIN') {
+                        const e = employees.find(emp => emp.name === o.value);
+                        if (e && e.fullName) {
+                            const fName = e.fullName.trim().split(/\s+/)[0];
+                            span.innerHTML = `<span class="font-bold text-slate-800 text-[15px]">${o.text}</span> <span class="text-[13px] text-slate-400 font-medium ml-2 truncate">${fName}</span>`;
+                        } else {
+                            span.innerHTML = `<span class="font-bold text-slate-800 text-[15px]">${o.text}</span>`;
+                        }
+                    } else if (o.value === "ADMIN") {
+                        span.innerHTML = `<span class="font-bold text-indigo-600 text-[15px]">${o.text}</span>`;
+                    } else {
+                        span.innerHTML = `<span class="text-slate-800 font-bold text-[15px]">${o.text}</span>`;
+                    }
+                };
+                
+                updateDisplay(select, displaySpan, opt);
                 
                 menu.classList.add('scale-95', 'opacity-0');
                 menu.classList.remove('scale-100', 'opacity-100');
@@ -131,10 +152,31 @@ function renderCustomSelectOptions(select) {
         listContainer.appendChild(item);
     });
 
+    const updateDisplayOuter = (sel, span, o) => {
+        if (!o) return;
+        if (!o.value) {
+            span.innerHTML = `<span class="text-slate-500">${o.text}</span>`;
+            return;
+        }
+        if (sel.id === 'login-name' && o.value !== 'ADMIN') {
+            const e = employees.find(emp => emp.name === o.value);
+            if (e && e.fullName) {
+                const fName = e.fullName.trim().split(/\s+/)[0];
+                span.innerHTML = `<span class="font-bold text-slate-800 text-[15px]">${o.text}</span> <span class="text-[13px] text-slate-400 font-medium ml-2 truncate">${fName}</span>`;
+            } else {
+                span.innerHTML = `<span class="font-bold text-slate-800 text-[15px]">${o.text}</span>`;
+            }
+        } else if (o.value === "ADMIN") {
+            span.innerHTML = `<span class="font-bold text-indigo-600 text-[15px]">${o.text}</span>`;
+        } else {
+            span.innerHTML = `<span class="text-slate-800 font-bold text-[15px]">${o.text}</span>`;
+        }
+    };
+
     if (select.selectedIndex >= 0) {
-        displaySpan.innerText = select.options[select.selectedIndex].text;
+        updateDisplayOuter(select, displaySpan, select.options[select.selectedIndex]);
     } else {
-        displaySpan.innerText = select.options[0] ? select.options[0].text : '';
+        updateDisplayOuter(select, displaySpan, select.options[0]);
     }
 }
 
