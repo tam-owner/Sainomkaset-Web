@@ -315,6 +315,8 @@ function logout() {
 function showEmployeeDashboard() {
     document.getElementById('view-login').classList.add('hidden');
     document.getElementById('view-employee').classList.remove('hidden');
+    document.getElementById('loading-overlay').classList.add('hidden');
+    
     document.getElementById('emp-user-initial').innerText = loggedInEmployee.name.charAt(0);
     document.getElementById('emp-user-name').innerText = loggedInEmployee.name;
 
@@ -330,13 +332,9 @@ function showAdminDashboard() {
     document.getElementById('view-admin-employees').classList.add('hidden');
     document.getElementById('loading-overlay').classList.add('hidden');
 
-    setupPeriods();
-
-    if (availablePeriods.length > 0) {
-        selectPeriod(availablePeriods[0].value, availablePeriods[0].text);
-    } else {
-        document.getElementById('admin-period-btn-text').innerText = "- ไม่พบข้อมูล -";
-    }
+    buildPeriodDropdown();
+    renderAdminSummary();
+    renderAdminLeaves();
 }
 
 function showAdminEmployees() {
