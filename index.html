@@ -54,9 +54,9 @@
             66% { transform: translate(25vw, -35vh) scale(0.5); }
             100% { transform: translate(0, 0) scale(1); }
         }
-        .animate-blob-1 { animation: float 10s ease-in-out infinite; }
-        .animate-blob-2 { animation: float-reverse 12s ease-in-out infinite; }
-        .animate-blob-3 { animation: float 14s ease-in-out infinite reverse; }
+        .animate-blob-1 { animation: float 6s ease-in-out infinite; }
+        .animate-blob-2 { animation: float-reverse 8s ease-in-out infinite; }
+        .animate-blob-3 { animation: float 10s ease-in-out infinite reverse; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -64,9 +64,9 @@
 <body class="pb-10 pt-4 max-w-md mx-auto relative min-h-screen">
     <!-- Decorative Background -->
     <div class="fixed inset-0 z-[-1] bg-[#eef2f6] overflow-hidden pointer-events-none">
-        <div class="absolute -top-[10%] -left-[10%] w-[350px] h-[350px] rounded-full bg-blue-500/50 blur-[70px] animate-blob-1"></div>
-        <div class="absolute top-[35%] -right-[15%] w-[400px] h-[400px] rounded-full bg-cyan-400/50 blur-[70px] animate-blob-2"></div>
-        <div class="absolute -bottom-[10%] left-[10%] w-[450px] h-[450px] rounded-full bg-indigo-500/40 blur-[80px] animate-blob-3"></div>
+        <div class="absolute -top-[10%] -left-[10%] w-[350px] h-[350px] rounded-full bg-blue-400/30 blur-[70px] animate-blob-1"></div>
+        <div class="absolute top-[35%] -right-[15%] w-[400px] h-[400px] rounded-full bg-cyan-300/30 blur-[70px] animate-blob-2"></div>
+        <div class="absolute -bottom-[10%] left-[10%] w-[450px] h-[450px] rounded-full bg-indigo-400/20 blur-[80px] animate-blob-3"></div>
     </div>
     
     <!-- Global Loading Overlay -->
@@ -412,7 +412,7 @@
         </div>
     </div>
 
-    <script src="js/app.js?v=1781540964"></script>
+    <script src="js/app.js?v=1781541037"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
