@@ -54,9 +54,10 @@
             66% { transform: translate(25vw, -35vh) scale(0.5); }
             100% { transform: translate(0, 0) scale(1); }
         }
-        .animate-blob-1 { animation: float 6s ease-in-out infinite; }
-        .animate-blob-2 { animation: float-reverse 8s ease-in-out infinite; }
-        .animate-blob-3 { animation: float 10s ease-in-out infinite reverse; }
+        .animate-blob-1 { animation: float 3s ease-in-out infinite; }
+        .animate-blob-2 { animation: float-reverse 4s ease-in-out infinite; }
+        .animate-blob-3 { animation: float 5s ease-in-out infinite reverse; }
+        .animate-blob-4 { animation: float 4.5s ease-in-out infinite; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -67,6 +68,7 @@
         <div class="absolute -top-[10%] -left-[10%] w-[350px] h-[350px] rounded-full bg-blue-400/30 blur-[70px] animate-blob-1"></div>
         <div class="absolute top-[35%] -right-[15%] w-[400px] h-[400px] rounded-full bg-cyan-300/30 blur-[70px] animate-blob-2"></div>
         <div class="absolute -bottom-[10%] left-[10%] w-[450px] h-[450px] rounded-full bg-indigo-400/20 blur-[80px] animate-blob-3"></div>
+        <div class="absolute top-[20%] left-[30%] w-[300px] h-[300px] rounded-full bg-white/70 blur-[60px] animate-blob-4"></div>
     </div>
     
     <!-- Global Loading Overlay -->
@@ -412,7 +414,7 @@
         </div>
     </div>
 
-    <script src="js/app.js?v=1781541037"></script>
+    <script src="js/app.js?v=1781541159"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
