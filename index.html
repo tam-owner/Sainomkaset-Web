@@ -41,6 +41,22 @@
         #table-container.hide-details .remark-box {
             display: none !important;
         }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+        @keyframes float-reverse {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(-30px, 50px) scale(1.2); }
+            66% { transform: translate(20px, -20px) scale(0.8); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+        .animate-blob-1 { animation: float 12s ease-in-out infinite; }
+        .animate-blob-2 { animation: float-reverse 15s ease-in-out infinite; }
+        .animate-blob-3 { animation: float 18s ease-in-out infinite reverse; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -48,9 +64,9 @@
 <body class="pb-10 pt-4 max-w-md mx-auto relative min-h-screen">
     <!-- Decorative Background -->
     <div class="fixed inset-0 z-[-1] bg-[#f0f7ff] overflow-hidden pointer-events-none">
-        <div class="absolute -top-[10%] -left-[10%] w-[300px] h-[300px] rounded-full bg-blue-300/40 blur-3xl"></div>
-        <div class="absolute top-[35%] -right-[15%] w-[350px] h-[350px] rounded-full bg-cyan-300/30 blur-3xl"></div>
-        <div class="absolute -bottom-[10%] left-[10%] w-[400px] h-[400px] rounded-full bg-indigo-300/20 blur-3xl"></div>
+        <div class="absolute -top-[10%] -left-[10%] w-[300px] h-[300px] rounded-full bg-blue-300/40 blur-3xl animate-blob-1"></div>
+        <div class="absolute top-[35%] -right-[15%] w-[350px] h-[350px] rounded-full bg-cyan-300/30 blur-3xl animate-blob-2"></div>
+        <div class="absolute -bottom-[10%] left-[10%] w-[400px] h-[400px] rounded-full bg-indigo-300/20 blur-3xl animate-blob-3"></div>
     </div>
     
     <!-- Global Loading Overlay -->
@@ -396,7 +412,7 @@
         </div>
     </div>
 
-    <script src="js/app.js?v=1781540707"></script>
+    <script src="js/app.js?v=1781540780"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
