@@ -118,18 +118,22 @@
 
         <main class="px-4 space-y-4">
             <!-- Unified Payslip Card -->
-            <div class="bg-white rounded-[20px] shadow-lg shadow-emerald-900/5 border border-emerald-50 overflow-hidden mb-6 flex flex-col relative">
-                <!-- Top decorative pattern -->
-                <div class="absolute top-0 left-0 right-0 h-1.5 bg-emerald-500 z-10"></div>
+            <!-- Unified Payslip Card -->
+            <div class="bg-white rounded-[20px] shadow-lg shadow-emerald-900/5 border border-emerald-50 mb-6 flex flex-col relative">
                 
-                <!-- Period Selector Section -->
-                <div class="px-5 py-3.5 bg-slate-50/50 flex items-center justify-between gap-3">
-                    <label class="font-bold text-[11px] text-slate-500 uppercase tracking-wide whitespace-nowrap">เลือกรอบเวลา</label>
-                    <button type="button" onclick="togglePeriodDropdown()" class="custom-select-btn !w-auto flex-1 text-sm shadow-sm bg-white border-emerald-100/50 hover:border-emerald-200 transition-colors !py-2">
-                        <span id="period-btn-text" class="truncate text-slate-800 font-bold text-[14px] text-left">- กรุณารอสักครู่ -</span>
-                        <svg class="w-4 h-4 text-emerald-500 shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <input type="hidden" id="period-select" value="">
+                <!-- Period Selector Section (Sticky) -->
+                <div class="sticky top-0 z-40 bg-slate-50/95 backdrop-blur-md rounded-t-[20px] shadow-sm pb-1 border-b border-slate-100">
+                    <!-- Top decorative pattern -->
+                    <div class="absolute top-0 left-0 right-0 h-1.5 bg-emerald-500 rounded-t-[20px] z-10"></div>
+                    
+                    <div class="px-5 pt-4 pb-2.5 flex items-center justify-between gap-3 relative z-10">
+                        <label class="font-bold text-[11px] text-slate-500 uppercase tracking-wide whitespace-nowrap">เลือกรอบเวลา</label>
+                        <button type="button" onclick="togglePeriodDropdown()" class="custom-select-btn !w-auto flex-1 text-sm shadow-sm bg-white border-emerald-100/50 hover:border-emerald-200 transition-colors !py-2">
+                            <span id="period-btn-text" class="truncate text-slate-800 font-bold text-[14px] text-left">- กรุณารอสักครู่ -</span>
+                            <svg class="w-4 h-4 text-emerald-500 shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <input type="hidden" id="period-select" value="">
+                    </div>
                 </div>
 
                 <!-- Salary Summary Section -->
@@ -380,7 +384,7 @@
         </div>
     </div>
 
-    <script src="js/app.js?v=1781528333"></script>
+    <script src="js/app.js?v=1781528478"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
