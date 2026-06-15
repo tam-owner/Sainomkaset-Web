@@ -699,7 +699,7 @@ function renderEmployeeDashboard() {
                 <div class="text-center flex flex-col items-center justify-start font-black pt-[1px] ${row.otHours > 0 ? 'text-orange-500' : 'text-slate-400'}">${row.otHours > 0 ? row.otHours.toFixed(1) : ''}</div>
             </div>
             ${(row.noteIn || row.noteOut) ? `
-            <div class="remark-box mt-2 text-[11px] text-yellow-800 bg-yellow-50 p-2.5 rounded-lg border border-yellow-200 mx-1 shadow-sm">
+            <div class="remark-box text-left mt-2 text-[11px] text-yellow-800 bg-yellow-50 p-2.5 rounded-lg border border-yellow-200 mx-1 shadow-sm">
                 ${row.noteIn ? `<div><b class="text-yellow-600">หมายเหตุเข้า:</b> ${row.noteIn}</div>` : ''}
                 ${row.noteOut ? `<div class="${row.noteIn?'mt-1':''}"><b class="text-yellow-600">หมายเหตุออก:</b> ${row.noteOut}</div>` : ''}
             </div>` : ''}
