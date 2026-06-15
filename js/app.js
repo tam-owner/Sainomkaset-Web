@@ -286,6 +286,10 @@ function populateLoginNames() {
     adminOpt.text = "--- ผู้ดูแลระบบ (Admin) ---";
     adminOpt.className = "font-bold text-indigo-600";
     select.appendChild(adminOpt);
+
+    if (typeof initCustomSelect === 'function') {
+        initCustomSelect(select);
+    }
 }
 
 // ----------------------------------------------------
@@ -337,10 +341,22 @@ function logout() {
     isAdmin = false;
     sessionStorage.removeItem('snk_payroll_user');
     
-    document.getElementById('view-login').classList.remove('hidden');
-    document.getElementById('view-employee').classList.add('hidden');
-    document.getElementById('view-admin-dashboard').classList.add('hidden');
-    document.getElementById('view-admin-employees').classList.add('hidden');
+    const loginNameSelect = document.getElementById('login-name');
+    if (loginNameSelect) {
+        loginNameSelect.value = "";
+        if (loginNameSelect.dataset.customized === "true") {
+            const wrapper = loginNameSelect.nextElementSibling;
+            if (wrapper && wrapper.classList.contains('custom-select-wrapper')) {
+                const displaySpan = wrapper.querySelector('span.truncate');
+                if (displaySpan && loginNameSelect.options[0]) {
+                    displaySpan.innerText = loginNameSelect.options[0].text;
+                }
+            }
+        }
+    }
+    document.getElementById('login-pin').value = '';
+    
+    showView('view-login', true);
 }
 
 // ----------------------------------------------------
