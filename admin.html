@@ -64,6 +64,7 @@
         .animate-blob-4 { animation: float 4.5s ease-in-out infinite; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="pb-10 pt-4 max-w-md mx-auto relative min-h-screen">
@@ -753,6 +754,13 @@
                         </div>
                     </div>
                 </div>
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div class="col-span-2">
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">เบิกล่วงหน้า (รอบนี้)</label>
+                        <input type="number" id="emp-advancepayment" class="w-full border border-red-300 bg-red-50 text-red-700 rounded-lg px-2 py-2 text-center font-bold" placeholder="0">
+                        <p class="text-[10px] text-red-500 mt-1 text-center">หักออกจากค่าแรงในรอบจ่ายที่กำลังจะถึง</p>
+                    </div>
+                </div>
                 <input type="hidden" id="emp-hourlyrate">
                 <input type="hidden" id="emp-otrate">
                 <div class="grid grid-cols-2 gap-3">
@@ -767,6 +775,19 @@
                 <button onclick="saveEmployee()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl active:scale-95 transition">บันทึก</button>
                 <button onclick="closeEmployeeModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2.5 rounded-xl active:scale-95 transition">ยกเลิก</button>
                 <button id="btn-delete-employee" class="hidden px-4 bg-red-100 hover:bg-red-200 text-red-600 font-bold py-2.5 rounded-xl active:scale-95 transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Time Logs Modal -->
+    <div id="timelogs-modal" class="hidden fixed inset-0 bg-slate-900/60 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4 backdrop-blur-sm transition-all duration-300 opacity-0 pointer-events-none">
+        <div id="timelogs-modal-box" class="bg-white rounded-t-[24px] sm:rounded-[24px] w-full max-w-lg h-[80vh] sm:h-auto sm:max-h-[85vh] shadow-2xl flex flex-col transform translate-y-full sm:translate-y-4 sm:scale-95 transition-all duration-300">
+            <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-white rounded-t-[24px] shrink-0 sticky top-0 z-10">
+                <h3 class="text-xl font-black text-slate-800" id="timelogs-title">ประวัติเวลาเข้าออก</h3>
+                <button onclick="closeTimeLogsModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            </div>
+            <div class="p-4 flex-1 overflow-y-auto bg-slate-50" id="timelogs-content">
+                <!-- Logs will be injected here -->
             </div>
         </div>
     </div>
@@ -787,7 +808,7 @@
 
     <script>sessionStorage.setItem('snk_payroll_user', 'ADMIN');</script>
     <script src="js/customSelect.js?v=1"></script>
-    <script src="js/app.js?v=20260616_7"></script>
+    <script src="js/app.js?v=20260616_9"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {

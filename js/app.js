@@ -1,4 +1,4 @@
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwpilIh2DfKmtUjpVSg_EPyOtap1BoNcDnmMATcAGaZop8jeNtMevXBjLtQXupx1_4/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzt5sbGh0P6Rg-cvxrLLpNllywkoF5UkGCrz-7UHHJYTqxw3rB4FtDUwf_Ene3oR8I/exec';
 
 let rawAttendance = [];
 let employees = [];
@@ -65,7 +65,7 @@ async function initData() {
         }
     } catch (e) {
         console.error(e);
-        alert("เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาลองใหม่อีกครั้ง");
+        Swal.fire("เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาลองใหม่อีกครั้ง");
         overlay.classList.add('hidden');
     }
 }
@@ -314,7 +314,7 @@ function handleLogin() {
     const pin = document.getElementById('login-pin').value;
     
     if (!name || !pin) {
-        alert("กรุณาเลือกชื่อและใส่รหัสผ่าน");
+        Swal.fire("กรุณาเลือกชื่อและใส่รหัสผ่าน");
         return;
     }
 
@@ -326,7 +326,7 @@ function handleLogin() {
             document.getElementById('login-pin').value = '';
             showAdminDashboard();
         } else {
-            alert("รหัสผ่านแอดมินไม่ถูกต้อง");
+            Swal.fire("รหัสผ่านแอดมินไม่ถูกต้อง");
             document.getElementById('login-pin').value = '';
         }
         return;
@@ -334,7 +334,7 @@ function handleLogin() {
 
     const emp = employees.find(e => e.name === name);
     if (!emp) {
-        alert("ไม่พบข้อมูลพนักงานในระบบ");
+        Swal.fire("ไม่พบข้อมูลพนักงานในระบบ");
         return;
     }
 
@@ -345,7 +345,7 @@ function handleLogin() {
         document.getElementById('login-pin').value = '';
         showEmployeeDashboard();
     } else {
-        alert("รหัสผ่านไม่ถูกต้อง");
+        Swal.fire("รหัสผ่านไม่ถูกต้อง");
         document.getElementById('login-pin').value = '';
     }
 }
@@ -923,11 +923,11 @@ async function changePin() {
     const confirmPin = document.getElementById('confirm-pin').value;
 
     if (!oldPin || !newPin || !confirmPin) {
-        alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+        Swal.fire("กรุณากรอกข้อมูลให้ครบถ้วน");
         return;
     }
     if (newPin !== confirmPin) {
-        alert("รหัสผ่านใหม่ไม่ตรงกัน");
+        Swal.fire("รหัสผ่านใหม่ไม่ตรงกัน");
         return;
     }
 
@@ -951,17 +951,17 @@ async function changePin() {
         const json = await res.json();
         
         if (json.status === "success") {
-            alert("เปลี่ยนรหัสผ่านสำเร็จ!");
+            Swal.fire("เปลี่ยนรหัสผ่านสำเร็จ!");
             loggedInEmployee.pin = newPin; 
             sessionStorage.setItem('snk_payroll_user', JSON.stringify(loggedInEmployee));
             let idx = employees.findIndex(e => e.name === loggedInEmployee.name);
             if (idx > -1) employees[idx].pin = newPin;
         } else {
-            alert("Error: " + json.message);
+            Swal.fire("Error: " + json.message);
         }
     } catch (e) {
         console.error(e);
-        alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+        Swal.fire("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
     } finally {
         overlay.classList.add('hidden');
     }
@@ -1029,7 +1029,9 @@ function renderAdminSummary() {
             else customDeductTotal += d.amount;
         });
 
-        let payBeforeTax = grossPay + customBonusTotal - customDeductTotal;
+        let advanceDeduct = emp.advancePayment || 0;
+
+        let payBeforeTax = grossPay + customBonusTotal - customDeductTotal - advanceDeduct;
 
         let standardDeduct = 0;
         let deductLabel = '';
@@ -1054,7 +1056,16 @@ function renderAdminSummary() {
         html += `
         <div class="card p-4 bg-white rounded-2xl shadow-sm border border-emerald-100 hover:shadow-md transition">
             <div class="flex justify-between items-center border-b border-emerald-50 pb-3 mb-3">
-                <div class="font-black text-lg text-emerald-900">${emp.name} ${emp.fullName ? `<span class="text-xs font-semibold text-emerald-600/60 ml-1">${emp.fullName}</span>` : ''}</div>
+                <div class="flex flex-col">
+                    <div class="font-black text-lg text-emerald-900 flex items-center gap-2">
+                        ${emp.name}
+                        <button onclick="openTimeLogsModal('${emp.name}')" class="text-[10px] font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-2 py-1 rounded transition flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            ประวัติเวลา
+                        </button>
+                    </div>
+                    ${emp.fullName ? `<div class="text-xs font-semibold text-emerald-600/60 mt-0.5">${emp.fullName}</div>` : ''}
+                </div>
                 <div class="text-right">
                     <div class="text-[10px] font-bold text-emerald-500/70 uppercase">ยอดสุทธิ</div>
                     <div class="font-black text-xl text-emerald-600 leading-none">฿${formatCurrency(netPay)}</div>
@@ -1072,6 +1083,12 @@ function renderAdminSummary() {
                     <span>฿${otPay.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
                 </div>` : ''}
                 
+                ${advanceDeduct > 0 ? `
+                <div class="flex justify-between text-red-500 font-bold">
+                    <span>เบิกล่วงหน้า</span>
+                    <span>-฿${advanceDeduct.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
+                </div>` : ''}
+
                 ${standardDeduct > 0 ? `
                 <div class="flex justify-between text-red-500">
                     <span>${deductLabel}</span>
@@ -1193,7 +1210,7 @@ async function saveDeduction() {
     const amount = parseFloat(document.getElementById('deduction-amount').value);
 
     if (!reason || isNaN(amount) || amount <= 0) {
-        alert("กรุณากรอกเหตุผลและจำนวนเงินให้ถูกต้อง");
+        Swal.fire("กรุณากรอกเหตุผลและจำนวนเงินให้ถูกต้อง");
         return;
     }
 
@@ -1227,11 +1244,11 @@ async function saveDeduction() {
             }
             renderAdminSummary();
         } else {
-            alert("Error: " + json.message);
+            Swal.fire("Error: " + json.message);
         }
     } catch (e) {
         console.error(e);
-        alert("ไม่สามารถบันทึกข้อมูลได้");
+        Swal.fire("ไม่สามารถบันทึกข้อมูลได้");
     } finally {
         overlay.classList.add('hidden');
     }
@@ -1259,11 +1276,11 @@ async function deleteDeduction() {
             deductions = deductions.filter(d => d.id !== id);
             renderAdminSummary();
         } else {
-            alert("Error: " + json.message);
+            Swal.fire("Error: " + json.message);
         }
     } catch (e) {
         console.error(e);
-        alert("ไม่สามารถลบข้อมูลได้");
+        Swal.fire("ไม่สามารถลบข้อมูลได้");
     } finally {
         overlay.classList.add('hidden');
     }
@@ -1316,8 +1333,8 @@ async function updateLeaveStatus(id, status) {
             let idx = leaves.findIndex(l => l.id === id);
             if (idx > -1) leaves[idx].status = status;
             renderAdminLeaves();
-        } else alert("Error: " + json.message);
-    } catch(e) { console.error(e); alert("เชื่อมต่อไม่สำเร็จ"); }
+        } else Swal.fire("Error: " + json.message);
+    } catch(e) { console.error(e); Swal.fire("เชื่อมต่อไม่สำเร็จ"); }
     finally { overlay.classList.add('hidden'); }
 }
 
@@ -1620,7 +1637,7 @@ async function saveEmployee() {
     const oldFullName = document.getElementById('old-fullname').value;
 
     const nickname = document.getElementById('emp-nickname').value.trim();
-    if (!nickname) return alert("กรุณากรอกชื่อเล่น");
+    if (!nickname) return Swal.fire("กรุณากรอกชื่อเล่น");
 
     const empObj = {
         name: nickname, // 'name' corresponds to nickname in data structure
@@ -1635,6 +1652,7 @@ async function saveEmployee() {
         bankAccount: document.getElementById('emp-bank').value.trim(),
         employeeType: document.getElementById('emp-type').value,
         status: document.getElementById('emp-status').value,
+        advancePayment: parseFloat(document.getElementById('emp-advancepayment').value) || 0,
         photo: currentEmployeePhotoBase64
     };
 
@@ -1649,10 +1667,19 @@ async function saveEmployee() {
                 action: "saveEmployee",
                 oldNickname: oldNickname,
                 oldFullName: oldFullName,
-                employee: {
-                    ...empObj,
-                    hourlyRate: empObj.normalRate // mapping for the backend
-                }
+                nickname: empObj.nickname,
+                fullName: empObj.fullName,
+                pin: empObj.pin,
+                monthlyRate: empObj.monthlyRate,
+                dailyRate: empObj.dailyRate,
+                hourlyRate: empObj.normalRate,
+                otRate: empObj.otRate,
+                deductionType: empObj.deductionType,
+                bankAccount: empObj.bankAccount,
+                employeeType: empObj.employeeType,
+                status: empObj.status,
+                advancePayment: empObj.advancePayment,
+                photo: empObj.photo
             })
         });
         let json = await res.json();
@@ -1669,11 +1696,11 @@ async function saveEmployee() {
             if (countEl) countEl.innerText = employees.length;
             renderAdminEmployees();
         } else {
-            alert("Error: " + json.message);
+            Swal.fire("Error: " + json.message);
         }
     } catch (e) {
         console.error(e);
-        alert("Failed to connect to server. Details: " + e.message);
+        Swal.fire("Failed to connect to server. Details: " + e.message);
     } finally {
         overlay.classList.add('hidden');
     }
@@ -1728,11 +1755,11 @@ async function confirmDeleteEmployee() {
             if (countEl) countEl.innerText = employees.length;
             renderAdminEmployees();
         } else {
-            alert("Error: " + json.message);
+            Swal.fire("Error: " + json.message);
         }
     } catch (e) {
         console.error(e);
-        alert("Failed to connect to server. Details: " + e.message);
+        Swal.fire("Failed to connect to server. Details: " + e.message);
     } finally {
         overlay.classList.add('hidden');
     }
@@ -1941,7 +1968,7 @@ function printSlip(idx) {
     // Create print iframe or popup window
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
-        alert("กรุณาอนุญาต Pop-up เพื่อเปิดสลิปเงินเดือน");
+        Swal.fire("กรุณาอนุญาต Pop-up เพื่อเปิดสลิปเงินเดือน");
         return;
     }
 
@@ -2105,7 +2132,7 @@ async function submitLeaveRequest() {
     const reason = document.getElementById('leave-reason').value;
 
     if (!start || !end || !reason) {
-        alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+        Swal.fire("กรุณากรอกข้อมูลให้ครบถ้วน");
         return;
     }
 
@@ -2143,14 +2170,14 @@ async function submitLeaveRequest() {
             renderEmployeeLeaves();
             
             overlay.classList.add('hidden');
-            alert("ส่งคำขอลางานเรียบร้อยแล้ว");
+            Swal.fire("ส่งคำขอลางานเรียบร้อยแล้ว");
         } else {
             overlay.classList.add('hidden');
-            alert("Error: " + json.message);
+            Swal.fire("Error: " + json.message);
         }
     } catch (e) {
         console.error(e);
-        alert("เชื่อมต่อเซิร์ฟเวอร์ล้มเหลว");
+        Swal.fire("เชื่อมต่อเซิร์ฟเวอร์ล้มเหลว");
     } finally {
         overlay.classList.add('hidden');
     }
@@ -2181,7 +2208,7 @@ function downloadPayslipPdf() {
         overlay.classList.add('hidden');
     }).catch(e => {
         console.error(e);
-        alert("เกิดข้อผิดพลาดในการสร้าง PDF");
+        Swal.fire("เกิดข้อผิดพลาดในการสร้าง PDF");
         overlay.classList.add('hidden');
     });
 }
@@ -2253,3 +2280,214 @@ window.addEventListener('scroll', () => {
         }
     }
 });
+// Time Logs Module
+let currentLogsEmp = null;
+let currentLogsData = [];
+
+async function openTimeLogsModal(nickname) {
+    currentLogsEmp = employees.find(e => e.name === nickname);
+    if (!currentLogsEmp) return;
+    
+    document.getElementById('timelogs-title').innerText = `ประวัติเวลาเข้าออก: ${currentLogsEmp.name}`;
+    
+    const modal = document.getElementById('timelogs-modal');
+    const modalBox = document.getElementById('timelogs-modal-box');
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modalBox.classList.remove('translate-y-full', 'sm:scale-95');
+        modalBox.classList.add('sm:scale-100');
+    }, 10);
+    
+    await fetchTimeLogs(currentLogsEmp.name);
+}
+
+function closeTimeLogsModal() {
+    const modal = document.getElementById('timelogs-modal');
+    const modalBox = document.getElementById('timelogs-modal-box');
+    modal.classList.add('opacity-0', 'pointer-events-none');
+    modalBox.classList.remove('sm:scale-100');
+    modalBox.classList.add('translate-y-full', 'sm:scale-95');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 300);
+}
+
+async function fetchTimeLogs(nickname) {
+    if (!currentPeriodVal) return;
+    const parts = currentPeriodVal.split('_');
+    const mStr = parts[1]; // e.g. "2026-06"
+    const [year, month] = mStr.split('-');
+    
+    document.getElementById('timelogs-content').innerHTML = `
+        <div class="flex justify-center items-center py-10">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+        </div>
+    `;
+    
+    try {
+        const res = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: "getEmployeeLogs",
+                nickname: nickname,
+                month: month,
+                year: year
+            })
+        });
+        const json = await res.json();
+        if (json.status === "success") {
+            currentLogsData = json.logs;
+            renderTimeLogs();
+        } else {
+            Swal.fire("Error: " + json.message);
+        }
+    } catch(e) {
+        console.error(e);
+        Swal.fire("ไม่สามารถโหลดข้อมูลได้");
+    }
+}
+
+function renderTimeLogs() {
+    const container = document.getElementById('timelogs-content');
+    
+    let html = `
+        <div class="mb-4 flex justify-end">
+            <button onclick="openEditLogModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-sm active:scale-95 transition flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                เพิ่มรายการ / ลา
+            </button>
+        </div>
+        <div class="space-y-2">
+    `;
+    
+    if (currentLogsData.length === 0) {
+        html += `<div class="text-center py-10 text-slate-400 font-bold text-sm bg-white rounded-xl border border-slate-200">ไม่พบประวัติในเดือนนี้</div>`;
+    } else {
+        currentLogsData.forEach(log => {
+            const isLeave = log.type && log.type.includes("Leave");
+            html += `
+                <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex justify-between items-center">
+                    <div>
+                        <div class="text-sm font-bold text-slate-800">${new Date(log.date).toLocaleDateString('th-TH', {weekday: 'short', day: 'numeric', month: 'short'})}</div>
+                        ${isLeave ? 
+                            `<div class="text-[11px] font-bold ${log.type === 'Leave_Paid' ? 'text-emerald-600 bg-emerald-50' : 'text-orange-600 bg-orange-50'} px-2 py-0.5 rounded inline-block mt-1">
+                                ${log.type === 'Leave_Paid' ? 'ลา (ได้ค่าแรง)' : 'ลา (หักค่าแรง)'}
+                            </div>` : 
+                            `<div class="text-[11px] text-slate-500 font-medium mt-0.5">เข้า: <span class="font-bold text-emerald-600">${log.in || '-'}</span> | ออก: <span class="font-bold text-rose-600">${log.out || '-'}</span></div>`
+                        }
+                    </div>
+                    <button onclick="openEditLogModal('${log.date}', '${log.in || ''}', '${log.out || ''}', '${log.type || 'Work'}')" class="w-8 h-8 flex justify-center items-center text-slate-400 hover:bg-slate-100 hover:text-indigo-600 rounded-lg transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                    </button>
+                </div>
+            `;
+        });
+    }
+    
+    html += `</div>`;
+    container.innerHTML = html;
+}
+// Time Logs Modals and Logic
+function openEditLogModal(dateStr = '', timeIn = '', timeOut = '', type = 'Work') {
+    // If we need a new modal HTML for edit
+    Swal.fire({
+        title: dateStr ? 'แก้ไขเวลาเข้าออก' : 'เพิ่มเวลา / ลา',
+        html: `
+            <div class="space-y-4 text-left">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">วันที่ (YYYY-MM-DD)</label>
+                    <input type="date" id="swal-log-date" class="w-full border border-slate-300 rounded-lg px-3 py-2" value="${dateStr}">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">ประเภท</label>
+                    <select id="swal-log-type" class="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white" onchange="document.getElementById('swal-time-inputs').style.display = this.value === 'Work' ? 'block' : 'none'">
+                        <option value="Work" ${type === 'Work' ? 'selected' : ''}>มาทำงาน</option>
+                        <option value="Leave_Paid" ${type === 'Leave_Paid' ? 'selected' : ''}>ลา (ไม่หักเงิน)</option>
+                        <option value="Leave_Unpaid" ${type === 'Leave_Unpaid' ? 'selected' : ''}>ลา (หักเงิน)</option>
+                    </select>
+                </div>
+                <div id="swal-time-inputs" style="display: ${type === 'Work' ? 'block' : 'none'};">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-1">เวลาเข้า (HH:mm)</label>
+                            <input type="time" id="swal-log-in" class="w-full border border-slate-300 rounded-lg px-3 py-2" value="${timeIn}">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-1">เวลาออก (HH:mm)</label>
+                            <input type="time" id="swal-log-out" class="w-full border border-slate-300 rounded-lg px-3 py-2" value="${timeOut}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `,
+        showCancelButton: true,
+        showDenyButton: dateStr !== '',
+        confirmButtonText: 'บันทึก',
+        cancelButtonText: 'ยกเลิก',
+        denyButtonText: 'ลบรายการ',
+        confirmButtonColor: '#4f46e5',
+        denyButtonColor: '#ef4444',
+        preConfirm: () => {
+            return {
+                date: document.getElementById('swal-log-date').value,
+                type: document.getElementById('swal-log-type').value,
+                in: document.getElementById('swal-log-in').value,
+                out: document.getElementById('swal-log-out').value
+            };
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            if (!result.value.date) return Swal.fire("กรุณาเลือกวันที่");
+            saveEmployeeLog(result.value, "update");
+        } else if (result.isDenied) {
+            Swal.fire({
+                title: 'ยืนยันการลบ?',
+                text: "ลบประวัติของวันนี้ใช่หรือไม่?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'ใช่, ลบเลย'
+            }).then((del) => {
+                if (del.isConfirmed) saveEmployeeLog({date: dateStr}, "delete");
+            });
+        }
+    });
+}
+
+async function saveEmployeeLog(data, actionType) {
+    if (!currentLogsEmp) return;
+    const overlay = document.getElementById('loading-overlay');
+    document.getElementById('loading-text').innerText = "กำลังบันทึก...";
+    overlay.classList.remove('hidden');
+    
+    try {
+        const res = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: "updateEmployeeLog",
+                nickname: currentLogsEmp.name,
+                date: data.date,
+                type: data.type,
+                in: data.in,
+                out: data.out,
+                actionType: actionType
+            })
+        });
+        const json = await res.json();
+        if (json.status === "success") {
+            // Need to reload attendance data
+            // We can just call init() to refresh everything or just fetchTimeLogs again
+            await fetchTimeLogs(currentLogsEmp.name);
+            fetchSummaryData(); // Re-trigger the whole admin refresh in background
+            Swal.fire({title: 'สำเร็จ', text: 'อัพเดตข้อมูลเรียบร้อย', icon: 'success', timer: 1500, showConfirmButton: false});
+        } else {
+            Swal.fire("Error: " + json.message);
+        }
+    } catch(e) {
+        console.error(e);
+        Swal.fire("ไม่สามารถบันทึกได้");
+    } finally {
+        overlay.classList.add('hidden');
+    }
+}
