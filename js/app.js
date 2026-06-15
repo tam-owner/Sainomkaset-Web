@@ -466,10 +466,7 @@ function openTimesheet(pushToHistory = true) {
 }
 
 function showAdminDashboard() {
-    document.getElementById('view-login').classList.add('hidden');
-    document.getElementById('view-admin-dashboard').classList.remove('hidden');
-    document.getElementById('view-admin-employees').classList.add('hidden');
-    document.getElementById('loading-overlay').classList.add('hidden');
+    showView('view-admin-dashboard');
 
     setupPeriods();
     currentPeriodVal = '';
@@ -1283,14 +1280,21 @@ async function deleteDeduction() {
 function renderAdminLeaves() {
     const container = document.getElementById('admin-leave-approvals');
     const list = document.getElementById('admin-leave-list');
+    const badge = document.getElementById('admin-dash-leave-badge');
     const pending = leaves.filter(l => l.status === "Pending");
     
     if (pending.length === 0) {
-        container.classList.add('hidden');
+        container.classList.remove('hidden');
+        list.innerHTML = `<div class="text-center text-slate-400 py-6 text-sm">ไม่มีคำขอลางานที่รออนุมัติ</div>`;
+        if (badge) badge.classList.add('hidden');
         return;
     }
     
     container.classList.remove('hidden');
+    if (badge) {
+        badge.innerText = pending.length;
+        badge.classList.remove('hidden');
+    }
     list.innerHTML = pending.map(l => `
         <div class="flex justify-between items-center bg-amber-50 p-3 rounded-xl border border-amber-100">
             <div>

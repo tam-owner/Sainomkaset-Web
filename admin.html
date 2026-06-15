@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#4f46e5">
+    <meta name="theme-color" content="#10B981">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="SNK Admin">
@@ -13,6 +13,7 @@
     <title>Sainom Kaset - Admin Dashboard</title>
     <!-- PWA Setup -->
     <link rel="manifest" href="manifest-admin.json">
+    <meta name="theme-color" content="#4f46e5">
     <link rel="apple-touch-icon" href="logo-admin.jpg">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -465,14 +466,64 @@
     </div>
 
     <!-- ===================================== -->
-    <!-- VIEW: ADMIN DASHBOARD                 -->
+    <!-- VIEW: ADMIN DASHBOARD (NEW)           -->
     <!-- ===================================== -->
-    <div id="view-admin-dashboard" class="hidden">
-        <div class="px-4 mb-4 flex justify-between items-center">
-            <h1 class="text-xl font-black text-slate-800">แอดมิน (ภาพรวม)</h1>
+    <div id="view-admin-dashboard" class="hidden px-4">
+        <div class="mb-8 mt-2 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-black text-xl shadow-inner relative overflow-hidden">
+                    <span>A</span>
+                </div>
+                <div>
+                    <h1 class="text-sm text-slate-500 font-bold leading-tight">Hello,</h1>
+                    <h2 class="text-xl font-black text-slate-800 leading-tight">Admin</h2>
+                </div>
+            </div>
             <div class="flex gap-2">
-                <button onclick="showAdminEmployees()" class="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg active:scale-95 transition-all">พนักงาน</button>
-                <button onclick="logout()" class="text-sm font-bold text-red-600 bg-red-50 px-3 py-1.5 rounded-lg active:scale-95 transition-all">ออกระบบ</button>
+                <button onclick="logout()" class="text-xs font-bold text-rose-600 bg-rose-100 px-3 py-2 rounded-lg active:scale-95 transition flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    ออกจากระบบ
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <button onclick="showView('view-admin-overview')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95">
+                <div class="w-14 h-14 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                </div>
+                <span class="font-bold text-slate-700 text-sm">ภาพรวมเงินเดือน</span>
+            </button>
+            <button onclick="showAdminEmployees()" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95">
+                <div class="w-14 h-14 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                </div>
+                <span class="font-bold text-slate-700 text-sm">จัดการพนักงาน</span>
+            </button>
+            <button onclick="showView('view-admin-leaves')" class="relative bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95">
+                <div class="w-14 h-14 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <span class="font-bold text-slate-700 text-sm">อนุมัติลางาน</span>
+                <span id="admin-dash-leave-badge" class="absolute top-3 right-3 bg-red-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center hidden"></span>
+            </button>
+            <button onclick="showView('view-stock')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95">
+                <div class="w-14 h-14 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                </div>
+                <span class="font-bold text-slate-700 text-sm">นับ Stock</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- VIEW: ADMIN OVERVIEW                  -->
+    <!-- ===================================== -->
+    <div id="view-admin-overview" class="hidden">
+        <div class="px-4 mb-4 flex justify-between items-center">
+            <h1 class="text-xl font-black text-slate-800">ภาพรวมเงินเดือน</h1>
+            <div class="flex gap-2">
+                <button onclick="showView('view-admin-dashboard')" class="text-sm font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg active:scale-95 transition-all">กลับ</button>
             </div>
         </div>
 
@@ -508,7 +559,23 @@
                 <div class="relative h-48 w-full"><canvas id="payrollChart"></canvas></div>
             </div>
 
-            <!-- Leave Approvals -->
+
+
+            <div id="admin-summary-list" class="space-y-4"></div>
+        </main>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- VIEW: ADMIN LEAVES                    -->
+    <!-- ===================================== -->
+    <div id="view-admin-leaves" class="hidden">
+        <div class="px-4 mb-4 flex justify-between items-center">
+            <h1 class="text-xl font-black text-slate-800">อนุมัติลางาน</h1>
+            <div class="flex gap-2">
+                <button onclick="showView('view-admin-dashboard')" class="text-sm font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg active:scale-95 transition-all">กลับ</button>
+            </div>
+        </div>
+        <main class="px-4">
             <div id="admin-leave-approvals" class="bg-white p-4 rounded-[16px] shadow-sm border border-slate-200 hidden">
                 <h3 class="text-sm font-black text-amber-600 flex items-center gap-2 mb-3">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -516,8 +583,6 @@
                 </h3>
                 <div id="admin-leave-list" class="space-y-2"></div>
             </div>
-
-            <div id="admin-summary-list" class="space-y-4"></div>
         </main>
     </div>
 
