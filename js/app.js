@@ -1410,3 +1410,133 @@ async function confirmDeleteEmployee() {
         overlay.classList.add('hidden');
     }
 }
+
+// ----------------------------------------------------
+// Employee Leave System
+// ----------------------------------------------------
+function renderEmployeeLeaves() {
+    const list = document.getElementById('employee-leaves-list');
+    const container = document.getElementById('employee-leaves-container');
+    
+    if (!loggedInEmployee || !list || !container) return;
+
+    let myLeaves = leaves.filter(l => l.name === loggedInEmployee.name);
+    
+    if (myLeaves.length === 0) {
+        container.classList.add('hidden');
+        return;
+    }
+    
+    container.classList.remove('hidden');
+    let html = '';
+    myLeaves.forEach(l => {
+        let statusBadge = '';
+        if (l.status === 'Pending') statusBadge = '<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-[10px] font-bold">รออนุมัติ</span>';
+        else if (l.status === 'Approved') statusBadge = '<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded text-[10px] font-bold">อนุมัติ</span>';
+        else statusBadge = '<span class="bg-rose-100 text-rose-700 px-2 py-0.5 rounded text-[10px] font-bold">ปฏิเสธ</span>';
+
+        html += `<div class="flex justify-between items-center p-2 border-b border-amber-50 last:border-0">
+            <div class="text-left">
+                <div class="font-bold text-slate-800 text-xs">${l.type} <span class="font-normal text-slate-500">(${l.start} - ${l.end})</span></div>
+                <div class="text-[10px] text-slate-400 mt-0.5">${l.reason}</div>
+            </div>
+            <div>${statusBadge}</div>
+        </div>`;
+    });
+    list.innerHTML = html;
+}
+
+function openRequestLeaveModal() {
+    const overlay = document.getElementById('leave-modal');
+    const box = document.getElementById('leave-modal-box');
+    if (!overlay) return;
+    overlay.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+    setTimeout(() => box.classList.remove('scale-95'), 10);
+}
+
+function closeRequestLeaveModal() {
+    const overlay = document.getElementById('leave-modal');
+    const box = document.getElementById('leave-modal-box');
+    if (!overlay) return;
+    box.classList.add('scale-95');
+    setTimeout(() => overlay.classList.add('hidden', 'opacity-0', 'pointer-events-none'), 300);
+}
+
+async function submitLeaveRequest() {
+    const type = document.getElementById('leave-type').value;
+    const start = document.getElementById('leave-start').value;
+    const end = document.getElementById('leave-end').value;
+    const reason = document.getElementById('leave-reason').value;
+
+    if (!start || !end || !reason) {
+        alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+        return;
+    }
+
+    const payload = {
+        action: "requestLeave",
+        leave: {
+            id: crypto.randomUUID(),
+            name: loggedInEmployee.name,
+            type: type,
+            start: start,
+            end: end,
+            reason: reason,
+            status: "Pending",
+            timestamp: new Date().toISOString()
+        }
+    };
+
+    const overlay = document.getElementById('loading-overlay');
+    document.getElementById('loading-text').innerText = "กำลังส่งคำขอ...";
+    overlay.classList.remove('hidden');
+    closeRequestLeaveModal();
+
+    try {
+        let res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
+        let json = await res.json();
+        if (json.status === "success") {
+            leaves.push(payload.leave);
+            renderEmployeeLeaves();
+            alert("ส่งคำขอลางานเรียบร้อยแล้ว");
+        } else {
+            alert("Error: " + json.message);
+        }
+    } catch (e) {
+        console.error(e);
+        alert("เชื่อมต่อเซิร์ฟเวอร์ล้มเหลว");
+    } finally {
+        overlay.classList.add('hidden');
+    }
+}
+
+// ----------------------------------------------------
+// PDF Generation
+// ----------------------------------------------------
+function downloadPayslipPdf() {
+    if (!loggedInEmployee || !currentPeriodVal) return;
+    
+    const element = document.getElementById('salary-summary-container');
+    if (!element) return;
+
+    const opt = {
+        margin:       10,
+        filename:     `Payslip_${loggedInEmployee.name}_${currentPeriodVal}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    const overlay = document.getElementById('loading-overlay');
+    document.getElementById('loading-text').innerText = "กำลังสร้าง PDF...";
+    overlay.classList.remove('hidden');
+
+    html2pdf().set(opt).from(element).save().then(() => {
+        overlay.classList.add('hidden');
+    }).catch(e => {
+        console.error(e);
+        alert("เกิดข้อผิดพลาดในการสร้าง PDF");
+        overlay.classList.add('hidden');
+    });
+}
+
