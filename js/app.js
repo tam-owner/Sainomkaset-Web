@@ -526,7 +526,7 @@ function renderEmployeeDashboard() {
     let standardDeduct = 0;
     let deductLabel = '';
     let empDedType = String(loggedInEmployee.deductionType).trim();
-    if (empDedType === "3%" || empDedType === "0.03" || empDedType.includes("3%")) {
+    if (empDedType === "3%" || empDedType === "0.03" || empDedType.includes("3%") || empDedType === "") {
         standardDeduct = payBeforeTax * 0.03;
         deductLabel = "หัก ณ ที่จ่าย 3%";
     } else if (empDedType === "5%" || empDedType === "0.05" || empDedType.includes("5%")) {
@@ -912,7 +912,7 @@ function renderAdminSummary() {
         let standardDeduct = 0;
         let deductLabel = '';
         let empDedType = String(emp.deductionType).trim();
-        if (empDedType === "3%" || empDedType === "0.03" || empDedType.includes("3%")) {
+        if (empDedType === "3%" || empDedType === "0.03" || empDedType.includes("3%") || empDedType === "") {
             standardDeduct = payBeforeTax * 0.03;
             deductLabel = "หักภาษี 3%";
         } else if (empDedType === "5%" || empDedType === "0.05" || empDedType.includes("5%")) {
