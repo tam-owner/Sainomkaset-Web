@@ -79,8 +79,9 @@ async function fetchFreshDataSilently() {
             
             // Re-render UI if already logged in
             if (loggedInEmployee) {
+                setupPeriods();
                 if (isAdmin) {
-                    renderAdminDashboard();
+                    if (currentPeriodVal) renderAdminSummary();
                     if (!document.getElementById('view-admin-employees').classList.contains('hidden')) {
                         document.getElementById('emp-setup-count').innerText = employees.length;
                         renderAdminEmployees();
@@ -90,8 +91,21 @@ async function fetchFreshDataSilently() {
                     if (freshEmp) {
                         loggedInEmployee = freshEmp;
                         sessionStorage.setItem('snk_payroll_user', JSON.stringify(freshEmp));
+                        document.getElementById('emp-user-name').innerText = loggedInEmployee.name;
+                        const photoImg = document.getElementById('emp-user-photo');
+                        const initialSpan = document.getElementById('emp-user-initial');
+                        if (loggedInEmployee.photo) {
+                            photoImg.src = loggedInEmployee.photo;
+                            photoImg.classList.remove('hidden');
+                            initialSpan.classList.add('hidden');
+                        } else {
+                            photoImg.src = "";
+                            photoImg.classList.add('hidden');
+                            initialSpan.classList.remove('hidden');
+                            initialSpan.innerText = loggedInEmployee.name.charAt(0);
+                        }
                     }
-                    showEmployeeDashboard(); // Updates header avatar and re-renders
+                    if (currentPeriodVal) renderEmployeeDashboard();
                 }
             }
         }
