@@ -2320,27 +2320,60 @@ async function fetchTimeLogs(nickname) {
         </div>
     `;
     
-    try {
-        const res = await fetch(WEB_APP_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: "getEmployeeLogs",
-                nickname: nickname,
-                month: month,
-                year: year
-            })
-        });
-        const json = await res.json();
-        if (json.status === "success") {
-            currentLogsData = json.logs;
-            renderTimeLogs();
-        } else {
-            Swal.fire("Error: " + json.message);
+    currentLogsData = [];
+    const targetMonth = parseInt(month, 10);
+    const targetYear = parseInt(year, 10);
+    
+    // Group from processedAttendance
+    processedAttendance.forEach(rec => {
+        if (rec.name === nickname && rec.dateObj.getMonth() + 1 === targetMonth && rec.dateObj.getFullYear() === targetYear) {
+            let inStr = rec.inTime ? `${String(rec.inTime.getHours()).padStart(2, '0')}:${String(rec.inTime.getMinutes()).padStart(2, '0')}` : '';
+            let outStr = rec.outTime ? `${String(rec.outTime.getHours()).padStart(2, '0')}:${String(rec.outTime.getMinutes()).padStart(2, '0')}` : '';
+            
+            let existing = currentLogsData.find(x => x.date === rec.date);
+            if (!existing) {
+                currentLogsData.push({
+                    date: rec.date,
+                    in: inStr,
+                    out: outStr,
+                    type: 'Work'
+                });
+            } else {
+                if (inStr) existing.in = inStr;
+                if (outStr) existing.out = outStr;
+            }
         }
-    } catch(e) {
-        console.error(e);
-        Swal.fire("ไม่สามารถโหลดข้อมูลได้");
-    }
+    });
+
+    // Add leaves
+    leaves.forEach(l => {
+        if (l.name === nickname && l.status === 'Approved') {
+            let sDate = new Date(l.startDate);
+            let eDate = new Date(l.endDate);
+            for (let d = new Date(sDate); d <= eDate; d.setDate(d.getDate() + 1)) {
+                if (d.getMonth() + 1 === targetMonth && d.getFullYear() === targetYear) {
+                    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                    let existing = currentLogsData.find(x => x.date === dateStr);
+                    if (!existing) {
+                        currentLogsData.push({
+                            date: dateStr,
+                            in: '',
+                            out: '',
+                            type: l.leaveType === 'ลาป่วย' ? 'Leave_Paid' : (l.leaveType === 'ลากิจ (ได้ค่าแรง)' ? 'Leave_Paid' : 'Leave_Unpaid')
+                        });
+                    } else {
+                        existing.type = l.leaveType === 'ลาป่วย' ? 'Leave_Paid' : (l.leaveType === 'ลากิจ (ได้ค่าแรง)' ? 'Leave_Paid' : 'Leave_Unpaid');
+                    }
+                }
+            }
+        }
+    });
+
+    currentLogsData.sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    setTimeout(() => {
+        renderTimeLogs();
+    }, 100);
 }
 
 function renderTimeLogs() {
