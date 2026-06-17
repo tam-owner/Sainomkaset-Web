@@ -601,7 +601,7 @@ function renderEmployeeDashboard() {
         if (r.name !== loggedInEmployee.name) return;
 
         const d = r.dateObj;
-        const rMstr = `${d.getFullYear()}-${d.getMonth()}`;
+        const rMstr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
         if (rMstr !== mStr) return;
         if (type === 'h1' && d.getDate() > 15) return;
         if (type === 'h2' && d.getDate() < 16) return;
@@ -988,7 +988,7 @@ function renderAdminSummary() {
 
     processedAttendance.forEach(r => {
         const d = r.dateObj;
-        const rMstr = `${d.getFullYear()}-${d.getMonth()}`;
+        const rMstr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
         if (rMstr !== mStr) return;
         if (type === 'h1' && d.getDate() > 15) return;
         if (type === 'h2' && d.getDate() < 16) return;
