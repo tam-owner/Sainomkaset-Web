@@ -2283,7 +2283,7 @@ async function openTimeLogsModal(nickname) {
     currentLogsEmp = employees.find(e => e.name === nickname);
     if (!currentLogsEmp) return;
     
-    let firstName = currentLogsEmp.fullName ? currentLogsEmp.fullName.trim().split(' ')[0] : '';
+    let firstName = currentLogsEmp.fullName ? currentLogsEmp.fullName.trim().split(/\s+/)[0] : '';
     let periodText = availablePeriods.find(p => p.value === currentPeriodVal)?.text || '';
     document.getElementById('timelogs-title').innerHTML = `<span class="ml-2">${currentLogsEmp.name}</span> <span class="text-base font-medium text-slate-500 ml-1 font-normal">${firstName} (${periodText})</span>`;
     
@@ -2387,11 +2387,12 @@ function renderTimeLogs() {
     let html = ``;
     
     if (currentLogsData.length === 0) {
-        html += `<div class="text-center py-10 text-slate-400 font-bold text-sm bg-white rounded-xl border border-slate-200">ไม่พบประวัติในเดือนนี้</div>`;
+        html += `<div class="p-4"><div class="text-center py-10 text-slate-400 font-bold text-sm bg-white rounded-xl border border-slate-200">ไม่พบประวัติในเดือนนี้</div></div>`;
     } else {
         html += `
+        <div class="p-4">
         <div class="border border-slate-200 rounded-xl bg-white shadow-sm">
-            <div id="employee-table-header" class="table-grid font-bold text-white bg-slate-800/95 backdrop-blur-md text-[12px] py-2.5 px-1 text-center shadow-md sticky top-0 z-40 border-b border-slate-700 rounded-t-xl">
+            <div id="employee-table-header" class="table-grid font-bold text-white bg-slate-800/95 backdrop-blur-md text-[12px] py-2.5 px-1 text-center shadow-md sticky top-0 z-40 border-b border-slate-700 rounded-t-xl items-center">
                 <div class="text-left pl-2">วันที่</div>
                 <div>เข้างาน</div>
                 <div>ออกงาน</div>
@@ -2496,7 +2497,7 @@ function renderTimeLogs() {
         html += `
             </div>
         </div>
-        `;
+        </div>`;
     }
     
     container.innerHTML = html;
