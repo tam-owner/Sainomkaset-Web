@@ -1,0 +1,543 @@
+diff --git a/js/app.js b/js/app.js
+index 2c314e0..badc0a1 100644
+--- a/js/app.js
++++ b/js/app.js
+@@ -1,4 +1,4 @@
+-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzt5sbGh0P6Rg-cvxrLLpNllywkoF5UkGCrz-7UHHJYTqxw3rB4FtDUwf_Ene3oR8I/exec';
++const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzFUKSmGgJI0N66zDJMCLeryob1Y0PTl3oVMS-VCR80_P2sZ5R7BJ7HpwW53VmTBJM/exec';
+ 
+ let rawAttendance = [];
+ let employees = [];
+@@ -497,7 +497,7 @@ function setupPeriods() {
+         if (!isAdmin && r.name !== loggedInEmployee.name) return;
+         
+         const d = r.dateObj;
+-        const mStr = `${d.getFullYear()}-${d.getMonth()}`;
++        const mStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+         monthsSet.add(mStr);
+         if (d.getDate() <= 15) {
+             periodsSet.add(`h1_${mStr}`);
+@@ -512,9 +512,9 @@ function setupPeriods() {
+     availablePeriods = [];
+     sortedMonths.forEach(mStr => {
+         let [y, m] = mStr.split('-').map(Number);
+-        let mName = monthNames[m];
++        let mName = monthNames[m - 1];
+         let yThai = y + 543;
+-        let lastDay = new Date(y, m + 1, 0).getDate();
++        let lastDay = new Date(y, m, 0).getDate();
+         
+         availablePeriods.push({ value: `all_${mStr}`, text: `1-${lastDay} ${mName} ${yThai}` });
+         if (periodsSet.has(`h1_${mStr}`)) {
+@@ -601,7 +601,7 @@ function renderEmployeeDashboard() {
+         if (r.name !== loggedInEmployee.name) return;
+ 
+         const d = r.dateObj;
+-        const rMstr = `${d.getFullYear()}-${d.getMonth()}`;
++        const rMstr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+         if (rMstr !== mStr) return;
+         if (type === 'h1' && d.getDate() > 15) return;
+         if (type === 'h2' && d.getDate() < 16) return;
+@@ -623,14 +623,14 @@ function renderEmployeeDashboard() {
+     empDeductions.forEach(d => {
+         if (d.type === 'Bonus') {
+             customBonusTotal += d.amount;
+-            customDeductHtml += `<div class="flex justify-between items-center text-xs py-1.5 border-b border-dashed border-indigo-100 last:border-0">
+-                <span class="text-indigo-600 font-bold">${d.reason}</span>
+-                <span class="font-black text-indigo-700">+฿${d.amount.toLocaleString()}</span>
++            customDeductHtml += `<div class="flex justify-between items-center text-xs py-1.5 border-b border-dashed border-emerald-100 last:border-0">
++                <span><span class="text-emerald-500 font-bold">[บวกเงิน]</span> <span class="text-slate-700 font-medium">${d.reason}</span></span>
++                <span class="font-black text-emerald-500">+฿${d.amount.toLocaleString()}</span>
+             </div>`;
+         } else {
+             customDeductTotal += d.amount;
+             customDeductHtml += `<div class="flex justify-between items-center text-xs py-1.5 border-b border-dashed border-red-100 last:border-0">
+-                <span class="text-red-500 font-bold">${d.reason}</span>
++                <span><span class="text-red-500 font-bold">[${d.type === 'Advance' ? 'เบิกล่วงหน้า' : (d.type === 'Damage' ? 'หักค่าเสียหาย' : 'หักค่าอื่นๆ')}]</span> <span class="text-slate-700 font-medium">${d.reason}</span></span>
+                 <span class="font-black text-red-600">-฿${d.amount.toLocaleString()}</span>
+             </div>`;
+         }
+@@ -988,7 +988,7 @@ function renderAdminSummary() {
+ 
+     processedAttendance.forEach(r => {
+         const d = r.dateObj;
+-        const rMstr = `${d.getFullYear()}-${d.getMonth()}`;
++        const rMstr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+         if (rMstr !== mStr) return;
+         if (type === 'h1' && d.getDate() > 15) return;
+         if (type === 'h2' && d.getDate() < 16) return;
+@@ -1014,8 +1014,6 @@ function renderAdminSummary() {
+     Object.values(empStats).forEach(emp => {
+         if (emp.totalNormalHours === 0 && emp.totalOTHours === 0 && (!emp.normalRate || emp.normalRate === 0)) return; 
+         
+-        activeEmployeesCount++;
+-        
+         let normalPay = emp.totalNormalHours * emp.normalRate;
+         let otPay = emp.totalOTHours * emp.otRate;
+         let grossPay = normalPay + otPay;
+@@ -1029,9 +1027,7 @@ function renderAdminSummary() {
+             else customDeductTotal += d.amount;
+         });
+ 
+-        let advanceDeduct = emp.advancePayment || 0;
+-
+-        let payBeforeTax = grossPay + customBonusTotal - customDeductTotal - advanceDeduct;
++        let payBeforeTax = grossPay + customBonusTotal - customDeductTotal;
+ 
+         let standardDeduct = 0;
+         let deductLabel = '';
+@@ -1045,6 +1041,9 @@ function renderAdminSummary() {
+         }
+ 
+         let netPay = payBeforeTax - standardDeduct;
++        if (netPay === 0) return;
++
++        activeEmployeesCount++;
+         totalPayroll += netPay;
+         
+         chartLabels.push(emp.name);
+@@ -1083,11 +1082,7 @@ function renderAdminSummary() {
+                     <span>฿${otPay.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
+                 </div>` : ''}
+                 
+-                ${advanceDeduct > 0 ? `
+-                <div class="flex justify-between text-red-500 font-bold">
+-                    <span>เบิกล่วงหน้า</span>
+-                    <span>-฿${advanceDeduct.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
+-                </div>` : ''}
++
+ 
+                 ${standardDeduct > 0 ? `
+                 <div class="flex justify-between text-red-500">
+@@ -1103,12 +1098,12 @@ function renderAdminSummary() {
+                 </div>
+                 ${empDeductions.length > 0 ? `<div class="space-y-1">
+                     ${empDeductions.map(d => `
+-                        <div class="flex justify-between items-center ${d.type === 'Bonus' ? 'bg-indigo-50' : 'bg-red-50'} px-2 py-1.5 rounded-lg text-xs">
++                        <div class="flex justify-between items-center ${d.type === 'Bonus' ? 'bg-emerald-50' : 'bg-red-50'} px-2 py-1.5 rounded-lg text-xs">
+                             <div class="flex flex-col">
+-                                <span class="font-bold ${d.type === 'Bonus' ? 'text-indigo-700' : 'text-red-700'}">${d.reason}</span>
++                                <span><span class="font-bold ${d.type === 'Bonus' ? 'text-emerald-500' : 'text-red-700'}">[${d.type === 'Bonus' ? 'บวกเงิน' : (d.type === 'Advance' ? 'เบิกล่วงหน้า' : (d.type === 'Damage' ? 'หักค่าเสียหาย' : 'หักค่าอื่นๆ'))}]</span> <span class="text-slate-700 font-medium">${d.reason}</span></span>
+                             </div>
+                             <div class="flex items-center gap-2">
+-                                <span class="font-black ${d.type === 'Bonus' ? 'text-indigo-600' : 'text-red-600'}">${d.type === 'Bonus' ? '+' : '-'}฿${d.amount.toLocaleString()}</span>
++                                <span class="font-black ${d.type === 'Bonus' ? 'text-emerald-500' : 'text-red-600'}">${d.type === 'Bonus' ? '+' : '-'}฿${d.amount.toLocaleString()}</span>
+                                 <button onclick="openDeductionModal('${emp.name}', '${d.id}')" class="text-slate-400 hover:text-indigo-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
+                             </div>
+                         </div>
+@@ -1127,9 +1122,9 @@ function renderAdminSummary() {
+     document.getElementById('total-employees').innerText = activeEmployeesCount;
+     document.getElementById('total-payroll').innerText = totalPayroll.toLocaleString('en-US', {minimumFractionDigits: 0});
+     
+-    // Render Chart
+-    document.getElementById('admin-chart-container').classList.remove('hidden');
+-    renderAdminChart(chartLabels, chartNormalPay, chartOTPay, chartBonus, chartDeduct);
++    // Render Chart (Hidden for now as requested)
++    // document.getElementById('admin-chart-container').classList.remove('hidden');
++    // renderAdminChart(chartLabels, chartNormalPay, chartOTPay, chartBonus, chartDeduct);
+ }
+ 
+ let payrollChartInstance = null;
+@@ -1172,14 +1167,14 @@ function openDeductionModal(empName, deductionId = null) {
+         title.innerText = "แก้ไขรายการ";
+         const d = deductions.find(x => x.id === deductionId);
+         document.getElementById('deduction-id').value = d.id;
+-        document.getElementById('deduction-type').value = d.type || 'Deduction';
++        document.getElementById('deduction-type').value = d.type || 'Advance';
+         document.getElementById('deduction-reason').value = d.reason;
+         document.getElementById('deduction-amount').value = d.amount;
+         btnDel.classList.remove('hidden');
+     } else {
+         title.innerText = "รายการปรับเพิ่ม/ลดเงิน";
+         document.getElementById('deduction-id').value = '';
+-        document.getElementById('deduction-type').value = 'Deduction';
++        document.getElementById('deduction-type').value = 'Advance';
+         document.getElementById('deduction-reason').value = '';
+         document.getElementById('deduction-amount').value = '';
+         btnDel.classList.add('hidden');
+@@ -1652,7 +1647,7 @@ async function saveEmployee() {
+         bankAccount: document.getElementById('emp-bank').value.trim(),
+         employeeType: document.getElementById('emp-type').value,
+         status: document.getElementById('emp-status').value,
+-        advancePayment: parseFloat(document.getElementById('emp-advancepayment').value) || 0,
++        advancePayment: 0,
+         photo: currentEmployeePhotoBase64
+     };
+ 
+@@ -2288,7 +2283,9 @@ async function openTimeLogsModal(nickname) {
+     currentLogsEmp = employees.find(e => e.name === nickname);
+     if (!currentLogsEmp) return;
+     
+-    document.getElementById('timelogs-title').innerText = `ประวัติเวลาเข้าออก: ${currentLogsEmp.name}`;
++    let firstName = currentLogsEmp.fullName ? currentLogsEmp.fullName.trim().split(/\s+/)[0] : '';
++    let periodText = availablePeriods.find(p => p.value === currentPeriodVal)?.text || '';
++    document.getElementById('timelogs-title').innerHTML = `<span class="ml-2">${currentLogsEmp.name}</span> <span class="text-base font-medium text-slate-500 ml-1 font-normal">${firstName} (${periodText})</span>`;
+     
+     const modal = document.getElementById('timelogs-modal');
+     const modalBox = document.getElementById('timelogs-modal-box');
+@@ -2325,133 +2322,272 @@ async function fetchTimeLogs(nickname) {
+         </div>
+     `;
+     
+-    try {
+-        const res = await fetch(WEB_APP_URL, {
+-            method: 'POST',
+-            body: JSON.stringify({
+-                action: "getEmployeeLogs",
+-                nickname: nickname,
+-                month: month,
+-                year: year
+-            })
+-        });
+-        const json = await res.json();
+-        if (json.status === "success") {
+-            currentLogsData = json.logs;
+-            renderTimeLogs();
+-        } else {
+-            Swal.fire("Error: " + json.message);
++    currentLogsData = [];
++    const targetMonth = parseInt(month, 10);
++    const targetYear = parseInt(year, 10);
++    
++    // Group from processedAttendance
++    processedAttendance.forEach(rec => {
++        if (rec.name === nickname && rec.dateObj.getMonth() + 1 === targetMonth && rec.dateObj.getFullYear() === targetYear) {
++            let inStr = rec.inTime ? `${String(rec.inTime.getHours()).padStart(2, '0')}:${String(rec.inTime.getMinutes()).padStart(2, '0')}` : '';
++            let outStr = rec.outTime ? `${String(rec.outTime.getHours()).padStart(2, '0')}:${String(rec.outTime.getMinutes()).padStart(2, '0')}` : '';
++            
++            let existing = currentLogsData.find(x => x.date === rec.date);
++            if (!existing) {
++                currentLogsData.push({
++                    date: rec.date,
++                    in: inStr,
++                    out: outStr,
++                    scheduledIn: rec.scheduledIn && rec.scheduledIn !== '-' ? rec.scheduledIn : '',
++                    scheduledOut: rec.scheduledOut && rec.scheduledOut !== '-' ? rec.scheduledOut : '',
++                    type: 'Work'
++                });
++            } else {
++                if (inStr) existing.in = inStr;
++                if (outStr) existing.out = outStr;
++            }
+         }
+-    } catch(e) {
+-        console.error(e);
+-        Swal.fire("ไม่สามารถโหลดข้อมูลได้");
+-    }
++    });
++
++    // Add leaves
++    leaves.forEach(l => {
++        if (l.name === nickname && l.status === 'Approved') {
++            let sDate = new Date(l.startDate);
++            let eDate = new Date(l.endDate);
++            for (let d = new Date(sDate); d <= eDate; d.setDate(d.getDate() + 1)) {
++                if (d.getMonth() + 1 === targetMonth && d.getFullYear() === targetYear) {
++                    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
++                    let existing = currentLogsData.find(x => x.date === dateStr);
++                    if (!existing) {
++                        currentLogsData.push({
++                            date: dateStr,
++                            in: '',
++                            out: '',
++                            type: l.leaveType === 'ลาป่วย' ? 'Leave_Paid' : (l.leaveType === 'ลากิจ (ได้ค่าแรง)' ? 'Leave_Paid' : 'Leave_Unpaid')
++                        });
++                    } else if (!existing.in && !existing.out) {
++                        existing.type = l.leaveType === 'ลาป่วย' ? 'Leave_Paid' : (l.leaveType === 'ลากิจ (ได้ค่าแรง)' ? 'Leave_Paid' : 'Leave_Unpaid');
++                    }
++                }
++            }
++        }
++    });
++
++    currentLogsData = currentLogsData.filter(log => log.in || log.out);
++    currentLogsData.sort((a, b) => new Date(a.date) - new Date(b.date));
++    
++    setTimeout(() => {
++        renderTimeLogs();
++    }, 100);
+ }
+ 
+ function renderTimeLogs() {
+     const container = document.getElementById('timelogs-content');
+     
+-    let html = `
+-        <div class="mb-4 flex justify-end">
+-            <button onclick="openEditLogModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-sm active:scale-95 transition flex items-center gap-2">
+-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+-                เพิ่มรายการ / ลา
+-            </button>
+-        </div>
+-        <div class="space-y-2">
+-    `;
++    let html = ``;
+     
+     if (currentLogsData.length === 0) {
+-        html += `<div class="text-center py-10 text-slate-400 font-bold text-sm bg-white rounded-xl border border-slate-200">ไม่พบประวัติในเดือนนี้</div>`;
++        html += `<div class="p-4"><div class="text-center py-10 text-slate-400 font-bold text-sm bg-white rounded-xl border border-slate-200">ไม่พบประวัติในเดือนนี้</div></div>`;
+     } else {
+-        currentLogsData.forEach(log => {
++        html += `
++        <div class="px-4 pb-4">
++        <div class="border-x border-b border-slate-200 rounded-b-xl bg-white shadow-sm">
++            <div id="employee-table-header" class="table-grid font-bold text-white bg-slate-800/95 backdrop-blur-md text-[12px] py-2.5 px-1 text-center shadow-md sticky top-0 z-40 border-b border-slate-700 items-center">
++                <div class="text-left pl-2">วันที่</div>
++                <div>เข้างาน</div>
++                <div>ออกงาน</div>
++                <div class="leading-tight">พัก<br>ชม.</div>
++                <div class="leading-tight">ปกติ<br>ชม.</div>
++                <div class="leading-tight">OT<br>ชม.</div>
++            </div>
++            <div class="bg-white">
++        `;
++        
++        function formatTime(tStr) {
++            if (!tStr || tStr === '-') return '';
++            return tStr;
++        }
++
++        currentLogsData.forEach((log, i) => {
+             const isLeave = log.type && log.type.includes("Leave");
++            const dateObj = new Date(log.date);
++            const dayNum = String(dateObj.getDate()).padStart(2, '0');
++            const monthNum = String(dateObj.getMonth()+1).padStart(2, '0');
++            const yearNum = dateObj.getFullYear().toString().substr(-2);
++            const shortDateStr = `${dayNum}/${monthNum}/${yearNum}`;
++            const dayStr = dateObj.toLocaleDateString('th-TH', { weekday: 'long' });
++            
++            let breakHrs = '';
++            let normalHrs = '';
++            let otHrs = '';
++            let bgColor = (i % 2 === 0) ? 'bg-white' : 'bg-slate-50';
++            
++            if (dateObj.getDay() === 0) {
++                bgColor = 'bg-rose-50/30';
++            }
++            
++            if (log.in && log.out && !isLeave) {
++                let t1 = new Date(`2000-01-01T${log.in}:00`);
++                let t2 = new Date(`2000-01-01T${log.out}:00`);
++                if (t2 < t1) t2.setDate(t2.getDate() + 1);
++                let diffMs = t2 - t1;
++                let diffHrs = diffMs / (1000 * 60 * 60);
++
++                if (diffHrs >= 9) {
++                    breakHrs = 1;
++                    normalHrs = 8.0;
++                    otHrs = diffHrs - 9;
++                } else if (diffHrs > 5) {
++                    breakHrs = 1;
++                    normalHrs = diffHrs - 1;
++                } else {
++                    normalHrs = diffHrs;
++                }
++                
++                if (otHrs === 0) otHrs = '';
++            }
++
++            let leaveBadge = '';
++            let rowClass = 'data-row px-1 py-3 cursor-pointer hover:bg-slate-100 transition relative ';
++            if (isLeave) {
++                leaveBadge = `<span class="text-[10px] ${log.type === 'Leave_Paid' ? 'text-emerald-600 bg-emerald-50' : 'text-orange-600 bg-orange-50'} px-2 py-0.5 rounded mt-1 inline-block">ลา</span>`;
++                rowClass += log.type === 'Leave_Paid' ? 'border-l-4 border-emerald-500' : 'border-l-4 border-orange-500';
++            }
++
++            let inStr = formatTime(log.in);
++            let outStr = formatTime(log.out);
++            const schedInStr = log.scheduledIn && log.scheduledIn !== '-' ? log.scheduledIn : '';
++            const schedOutStr = log.scheduledOut && log.scheduledOut !== '-' ? log.scheduledOut : '';
++            
++            let schedInClass = `font-black text-[13px] text-slate-800`;
++            let schedOutClass = `font-black text-[13px] text-slate-800`;
++            let inClass = `scan-time-text text-[11px] font-medium mt-1 text-slate-500`;
++            let outClass = `scan-time-text text-[11px] font-medium mt-1 text-slate-500`;
++
+             html += `
+-                <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex justify-between items-center">
+-                    <div>
+-                        <div class="text-sm font-bold text-slate-800">${new Date(log.date).toLocaleDateString('th-TH', {weekday: 'short', day: 'numeric', month: 'short'})}</div>
+-                        ${isLeave ? 
+-                            `<div class="text-[11px] font-bold ${log.type === 'Leave_Paid' ? 'text-emerald-600 bg-emerald-50' : 'text-orange-600 bg-orange-50'} px-2 py-0.5 rounded inline-block mt-1">
+-                                ${log.type === 'Leave_Paid' ? 'ลา (ได้ค่าแรง)' : 'ลา (หักค่าแรง)'}
+-                            </div>` : 
+-                            `<div class="text-[11px] text-slate-500 font-medium mt-0.5">เข้า: <span class="font-bold text-emerald-600">${log.in || '-'}</span> | ออก: <span class="font-bold text-rose-600">${log.out || '-'}</span></div>`
+-                        }
++            <div onclick="openEditLogModal('${log.date}', '${log.scheduledIn || ''}', '${log.scheduledOut || ''}', '${log.type || 'Work'}')" class="${rowClass} ${bgColor}">
++                <div class="table-grid text-[13px]">
++                    <div class="flex flex-col text-left pl-2 justify-start">
++                        <span class="font-black text-[13px] text-indigo-900 leading-tight date-text">${shortDateStr}</span>
++                        <span class="text-[11px] text-slate-500 font-medium leading-tight day-text mt-1">${dayStr}</span>
++                        ${leaveBadge}
++                    </div>
++                    
++                    <div class="text-center flex flex-col items-center justify-start">
++                        <span class="${schedInClass}">${schedInStr || inStr || '-'}</span>
++                        <span class="${inClass}">${schedInStr && inStr ? inStr : ''}</span>
++                    </div>
++                    
++                    <div class="text-center flex flex-col items-center justify-start">
++                        <span class="${schedOutClass}">${schedOutStr || outStr || '-'}</span>
++                        <span class="${outClass}">${schedOutStr && outStr ? outStr : ''}</span>
+                     </div>
+-                    <button onclick="openEditLogModal('${log.date}', '${log.in || ''}', '${log.out || ''}', '${log.type || 'Work'}')" class="w-8 h-8 flex justify-center items-center text-slate-400 hover:bg-slate-100 hover:text-indigo-600 rounded-lg transition">
+-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+-                    </button>
++                    
++                    <div class="text-center flex flex-col items-center justify-start pt-[2px]">
++                        <span class="text-slate-600 font-medium">${breakHrs || ''}</span>
++                    </div>
++                    
++                    <div class="text-center flex flex-col items-center justify-start font-black pt-[1px] ${normalHrs > 0 ? 'text-blue-600' : 'text-slate-400'}">${normalHrs > 0 ? Number(normalHrs).toFixed(1) : ''}</div>
++                    
++                    <div class="text-center flex flex-col items-center justify-start font-black pt-[1px] ${otHrs > 0 ? 'text-orange-500' : 'text-slate-400'}">${otHrs > 0 ? Number(otHrs).toFixed(1) : ''}</div>
+                 </div>
+-            `;
++            </div>`;
+         });
++        
++        html += `
++            </div>
++        </div>
++        </div>`;
+     }
+     
+-    html += `</div>`;
+     container.innerHTML = html;
+ }
+ // Time Logs Modals and Logic
++window.submitEditLogModal = function() {
++    const data = {
++        date: document.getElementById('swal-log-date').value,
++        type: document.getElementById('swal-log-type').value,
++        in: document.getElementById('swal-log-in').value,
++        out: document.getElementById('swal-log-out').value
++    };
++    if (!data.date) return Swal.fire("กรุณาเลือกวันที่");
++    Swal.close();
++    saveEmployeeLog(data, "update");
++};
++
++window.submitDeleteLogModal = function(dateStr) {
++    Swal.fire({
++        title: 'ยืนยันการลบ?',
++        text: "ลบประวัติของวันนี้ใช่หรือไม่?",
++        icon: 'warning',
++        showCancelButton: true,
++        confirmButtonColor: '#ef4444',
++        confirmButtonText: 'ใช่, ลบเลย'
++    }).then((del) => {
++        if (del.isConfirmed) saveEmployeeLog({date: dateStr}, "delete");
++    });
++};
++
+ function openEditLogModal(dateStr = '', timeIn = '', timeOut = '', type = 'Work') {
+-    // If we need a new modal HTML for edit
+     Swal.fire({
+-        title: dateStr ? 'แก้ไขเวลาเข้าออก' : 'เพิ่มเวลา / ลา',
++        showConfirmButton: false,
++        showCancelButton: false,
++        width: 500,
++        customClass: {
++            popup: 'rounded-[24px]',
++            htmlContainer: '!m-0 !p-2'
++        },
+         html: `
+-            <div class="space-y-4 text-left">
++            <div class="relative text-center mb-6 mt-2 flex justify-center items-center">
++                <h3 class="text-xl font-bold text-slate-800">${dateStr ? 'แก้ไขเวลาเข้าออก' : 'เพิ่มเวลา / ลา'}</h3>
++                ${dateStr ? `
++                <button onclick="submitDeleteLogModal('${dateStr}')" class="absolute right-0 text-red-500 hover:text-red-600 bg-red-50 border border-red-100 font-bold px-2 py-1 rounded-lg transition active:scale-95 text-xs flex items-center gap-1">
++                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
++                    ลบรายการ
++                </button>
++                ` : ''}
++            </div>
++            <div class="space-y-4 text-left px-2 pb-2">
+                 <div>
+-                    <label class="block text-sm font-bold text-slate-700 mb-1">วันที่ (YYYY-MM-DD)</label>
+-                    <input type="date" id="swal-log-date" class="w-full border border-slate-300 rounded-lg px-3 py-2" value="${dateStr}">
++                    <label class="block text-[13px] font-bold text-slate-700 mb-1.5">วันที่ (YYYY-MM-DD)</label>
++                    <div class="relative">
++                        <input type="date" id="swal-log-date" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition" value="${dateStr}">
++                    </div>
+                 </div>
+                 <div>
+-                    <label class="block text-sm font-bold text-slate-700 mb-1">ประเภท</label>
+-                    <select id="swal-log-type" class="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white" onchange="document.getElementById('swal-time-inputs').style.display = this.value === 'Work' ? 'block' : 'none'">
+-                        <option value="Work" ${type === 'Work' ? 'selected' : ''}>มาทำงาน</option>
+-                        <option value="Leave_Paid" ${type === 'Leave_Paid' ? 'selected' : ''}>ลา (ไม่หักเงิน)</option>
+-                        <option value="Leave_Unpaid" ${type === 'Leave_Unpaid' ? 'selected' : ''}>ลา (หักเงิน)</option>
+-                    </select>
++                    <label class="block text-[13px] font-bold text-slate-700 mb-1.5">ประเภท</label>
++                    <div class="relative">
++                        <select id="swal-log-type" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-700 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition appearance-none" onchange="document.getElementById('swal-time-inputs').style.display = this.value === 'Work' ? 'block' : 'none'">
++                            <option value="Work" ${type === 'Work' ? 'selected' : ''}>มาทำงาน</option>
++                            <option value="Leave_Paid" ${type === 'Leave_Paid' ? 'selected' : ''}>ลา (ได้ค่าแรง)</option>
++                            <option value="Leave_Unpaid" ${type === 'Leave_Unpaid' ? 'selected' : ''}>ลา (หักค่าแรง)</option>
++                        </select>
++                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
++                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
++                        </div>
++                    </div>
+                 </div>
+                 <div id="swal-time-inputs" style="display: ${type === 'Work' ? 'block' : 'none'};">
+-                    <div class="grid grid-cols-2 gap-3">
++                    <div class="grid grid-cols-2 gap-4">
+                         <div>
+-                            <label class="block text-sm font-bold text-slate-700 mb-1">เวลาเข้า (HH:mm)</label>
+-                            <input type="time" id="swal-log-in" class="w-full border border-slate-300 rounded-lg px-3 py-2" value="${timeIn}">
++                            <label class="block text-[13px] font-bold text-slate-700 mb-1.5">เวลาเข้า (HH:mm)</label>
++                            <input type="time" id="swal-log-in" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition" value="${timeIn}">
+                         </div>
+                         <div>
+-                            <label class="block text-sm font-bold text-slate-700 mb-1">เวลาออก (HH:mm)</label>
+-                            <input type="time" id="swal-log-out" class="w-full border border-slate-300 rounded-lg px-3 py-2" value="${timeOut}">
++                            <label class="block text-[13px] font-bold text-slate-700 mb-1.5">เวลาออก (HH:mm)</label>
++                            <input type="time" id="swal-log-out" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition" value="${timeOut}">
+                         </div>
+                     </div>
+                 </div>
++                
++                <div class="pt-5 pb-2">
++                    <div class="flex justify-center gap-3">
++                        <button onclick="Swal.close()" class="w-1/3 bg-[#6b7280] hover:bg-slate-600 text-white font-bold py-3 rounded-xl shadow-sm transition active:scale-95 text-base tracking-wide">ยกเลิก</button>
++                        <button onclick="submitEditLogModal()" class="w-2/3 bg-[#5b52f6] hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-sm transition active:scale-95 text-base tracking-wide">บันทึกข้อมูล</button>
++                    </div>
++                </div>
+             </div>
+-        `,
+-        showCancelButton: true,
+-        showDenyButton: dateStr !== '',
+-        confirmButtonText: 'บันทึก',
+-        cancelButtonText: 'ยกเลิก',
+-        denyButtonText: 'ลบรายการ',
+-        confirmButtonColor: '#4f46e5',
+-        denyButtonColor: '#ef4444',
+-        preConfirm: () => {
+-            return {
+-                date: document.getElementById('swal-log-date').value,
+-                type: document.getElementById('swal-log-type').value,
+-                in: document.getElementById('swal-log-in').value,
+-                out: document.getElementById('swal-log-out').value
+-            };
+-        }
+-    }).then((result) => {
+-        if (result.isConfirmed) {
+-            if (!result.value.date) return Swal.fire("กรุณาเลือกวันที่");
+-            saveEmployeeLog(result.value, "update");
+-        } else if (result.isDenied) {
+-            Swal.fire({
+-                title: 'ยืนยันการลบ?',
+-                text: "ลบประวัติของวันนี้ใช่หรือไม่?",
+-                icon: 'warning',
+-                showCancelButton: true,
+-                confirmButtonColor: '#ef4444',
+-                confirmButtonText: 'ใช่, ลบเลย'
+-            }).then((del) => {
+-                if (del.isConfirmed) saveEmployeeLog({date: dateStr}, "delete");
+-            });
+-        }
++        `
+     });
+ }
+ 

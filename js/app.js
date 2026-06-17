@@ -2532,16 +2532,16 @@ function openEditLogModal(dateStr = '', timeIn = '', timeOut = '', type = 'Work'
     Swal.fire({
         showConfirmButton: false,
         showCancelButton: false,
-        width: 500,
+        width: '95%',
         customClass: {
-            popup: 'rounded-[24px]',
+            popup: 'rounded-[24px] !w-[95%] sm:!w-[500px] !max-w-[500px]',
             htmlContainer: '!m-0 !p-2'
         },
         html: `
-            <div class="relative text-center mb-6 mt-2 flex justify-center items-center">
-                <h3 class="text-xl font-bold text-slate-800">${dateStr ? 'แก้ไขเวลาเข้าออก' : 'เพิ่มเวลา / ลา'}</h3>
+            <div class="flex justify-between items-center mb-6 mt-2 px-1 border-b border-slate-100 pb-3">
+                <h3 class="text-lg font-black text-slate-800 tracking-tight whitespace-nowrap">${dateStr ? 'แก้ไขเวลาเข้าออก' : 'เพิ่มเวลา / ลา'}</h3>
                 ${dateStr ? `
-                <button onclick="submitDeleteLogModal('${dateStr}')" class="absolute right-0 text-red-500 hover:text-red-600 bg-red-50 border border-red-100 font-bold px-2 py-1 rounded-lg transition active:scale-95 text-xs flex items-center gap-1">
+                <button onclick="submitDeleteLogModal('${dateStr}')" class="text-red-500 hover:text-red-600 bg-red-50 border border-red-100 font-bold px-2.5 py-1.5 rounded-lg transition active:scale-95 text-[11px] flex items-center gap-1 shrink-0 ml-2">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     ลบรายการ
                 </button>
