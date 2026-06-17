@@ -1127,9 +1127,9 @@ function renderAdminSummary() {
     document.getElementById('total-employees').innerText = activeEmployeesCount;
     document.getElementById('total-payroll').innerText = totalPayroll.toLocaleString('en-US', {minimumFractionDigits: 0});
     
-    // Render Chart
-    document.getElementById('admin-chart-container').classList.remove('hidden');
-    renderAdminChart(chartLabels, chartNormalPay, chartOTPay, chartBonus, chartDeduct);
+    // Render Chart (Hidden for now as requested)
+    // document.getElementById('admin-chart-container').classList.remove('hidden');
+    // renderAdminChart(chartLabels, chartNormalPay, chartOTPay, chartBonus, chartDeduct);
 }
 
 let payrollChartInstance = null;
