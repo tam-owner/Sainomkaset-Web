@@ -2532,8 +2532,9 @@ function openEditLogModal(dateStr = '', timeIn = '', timeOut = '', type = 'Work'
     Swal.fire({
         showConfirmButton: false,
         showCancelButton: false,
+        width: '95%',
         customClass: {
-            popup: 'rounded-[24px] !w-[90%] sm:!w-[400px]',
+            popup: 'rounded-[24px] max-w-lg',
             htmlContainer: '!m-0 !p-4'
         },
         html: `
@@ -2573,22 +2574,22 @@ function openEditLogModal(dateStr = '', timeIn = '', timeOut = '', type = 'Work'
                     </div>
                 </div>
                 
-                <div class="pt-6">
+                <div class="pt-6 mt-4 border-t border-slate-100">
                     ${dateStr ? `
-                    <div class="flex flex-col gap-3">
-                        <div class="flex gap-3">
-                            <button onclick="Swal.close()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 rounded-xl transition-all active:scale-95 text-sm">ยกเลิก</button>
-                            <button onclick="submitEditLogModal()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-md shadow-indigo-200 transition-all active:scale-95 text-sm">บันทึกข้อมูล</button>
-                        </div>
-                        <button onclick="submitDeleteLogModal('${dateStr}')" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-3.5 rounded-xl transition-all active:scale-95 text-sm flex justify-center items-center gap-2">
+                    <div class="flex justify-between items-center">
+                        <button onclick="submitDeleteLogModal('${dateStr}')" class="text-red-400 hover:text-red-600 text-xs font-bold px-2 py-2 rounded-lg hover:bg-red-50 transition-all flex items-center gap-1.5 active:scale-95">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                            ลบรายการนี้
+                            ลบรายการ
                         </button>
+                        <div class="flex gap-2">
+                            <button onclick="Swal.close()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 px-5 rounded-xl transition-all active:scale-95 text-sm">ยกเลิก</button>
+                            <button onclick="submitEditLogModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-md shadow-indigo-200 transition-all active:scale-95 text-sm">บันทึกข้อมูล</button>
+                        </div>
                     </div>
                     ` : `
-                    <div class="flex gap-3">
-                        <button onclick="Swal.close()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 rounded-xl transition-all active:scale-95 text-sm">ยกเลิก</button>
-                        <button onclick="submitEditLogModal()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-md shadow-indigo-200 transition-all active:scale-95 text-sm">บันทึกข้อมูล</button>
+                    <div class="flex justify-end gap-2">
+                        <button onclick="Swal.close()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 px-5 rounded-xl transition-all active:scale-95 text-sm">ยกเลิก</button>
+                        <button onclick="submitEditLogModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-md shadow-indigo-200 transition-all active:scale-95 text-sm">บันทึกข้อมูล</button>
                     </div>
                     `}
                 </div>
