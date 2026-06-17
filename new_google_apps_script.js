@@ -21,10 +21,8 @@ function doPost(e) {
     if (action === "clockout") return createJsonResponse(handleClock(p, "OUT"));
     if (action === "saveEmployee") return createJsonResponse(handleSaveEmployee(p));
     if (action === "deleteEmployee") return createJsonResponse(handleDeleteEmployee(p.oldNickname, p.oldFullName));
-    if (action === "saveDeduction") return createJsonResponse(handleSaveDeduction(p.oldDate, p.date, p.nickname, p.type, p.amount, p.note));
-    if (action === "deleteDeduction") return createJsonResponse(handleDeleteDeduction(p.date, p.nickname, p.type));
-    if (action === "saveReward") return createJsonResponse(handleSaveReward(p.oldDate, p.date, p.nickname, p.amount, p.note));
-    if (action === "deleteReward") return createJsonResponse(handleDeleteReward(p.date, p.nickname));
+    if (action === "saveDeduction") return createJsonResponse(handleSaveDeduction(p.deduction));
+    if (action === "deleteDeduction") return createJsonResponse(handleDeleteDeduction(p.id));
     if (action === "getEmployeeLogs") return createJsonResponse(handleGetEmployeeLogs(p.nickname, p.month, p.year));
     if (action === "updateEmployeeLog") return createJsonResponse(handleUpdateEmployeeLog(p));
     if (action == "requestLeave") return createJsonResponse(handleRequestLeave(p.leave));
@@ -479,4 +477,40 @@ function handleGetInitPayrollData() {
       leaves: getLeavesData()
     }
   };
+}
+
+function handleSaveDeduction(deduction) {
+  var sheet = getSheetByNameOrCreateNew("Deductions");
+  var timestamp = new Date().toISOString();
+  if (deduction.id) {
+    var data = sheet.getDataRange().getValues();
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][0]) === deduction.id) {
+        sheet.getRange(i + 1, 2).setValue(deduction.period);
+        sheet.getRange(i + 1, 3).setValue(deduction.name);
+        sheet.getRange(i + 1, 4).setValue(deduction.amount);
+        sheet.getRange(i + 1, 5).setValue(deduction.reason);
+        sheet.getRange(i + 1, 6).setValue(timestamp);
+        sheet.getRange(i + 1, 7).setValue(deduction.type || "Deduction");
+        return {status: "success", message: "Updated successfully", id: deduction.id};
+      }
+    }
+    return {status: "error", message: "Not found"};
+  } else {
+    var newId = Utilities.getUuid();
+    sheet.appendRow([newId, deduction.period, deduction.name, deduction.amount, deduction.reason, timestamp, deduction.type || "Deduction"]);
+    return {status: "success", message: "Added successfully", id: newId};
+  }
+}
+
+function handleDeleteDeduction(id) {
+  var sheet = getSheetByNameOrCreateNew("Deductions");
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === id) {
+      sheet.deleteRow(i + 1);
+      return {status: "success"};
+    }
+  }
+  return {status: "error"};
 }
