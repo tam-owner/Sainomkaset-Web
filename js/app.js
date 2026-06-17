@@ -309,6 +309,44 @@ function populateLoginNames() {
 // ----------------------------------------------------
 // Authentication Logic
 // ----------------------------------------------------
+window.adminLogoLogin = function() {
+    Swal.fire({
+        title: 'ผู้ดูแลระบบ',
+        input: 'password',
+        inputAttributes: {
+            inputmode: 'numeric',
+            pattern: '[0-9]*',
+            maxlength: 4,
+            autocapitalize: 'off',
+            autocorrect: 'off'
+        },
+        inputPlaceholder: 'ใส่รหัสผ่าน 4 หลัก',
+        showCancelButton: true,
+        confirmButtonText: 'เข้าสู่ระบบ',
+        cancelButtonText: 'ยกเลิก',
+        customClass: {
+            popup: 'rounded-[24px]',
+            confirmButton: 'bg-[#5b52f6] text-white rounded-xl px-6 py-2',
+            cancelButton: 'bg-slate-200 text-slate-700 rounded-xl px-6 py-2'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            if (result.value === "9999") { // Default Admin PIN
+                isAdmin = true;
+                loggedInEmployee = "ADMIN";
+                sessionStorage.setItem('snk_payroll_user', "ADMIN");
+                showAdminDashboard();
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'รหัสผ่านไม่ถูกต้อง',
+                    customClass: { popup: 'rounded-[24px]' }
+                });
+            }
+        }
+    });
+};
+
 function handleLogin() {
     const name = document.getElementById('login-name').value;
     const pin = document.getElementById('login-pin').value;
