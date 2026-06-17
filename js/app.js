@@ -624,8 +624,8 @@ function renderEmployeeDashboard() {
         if (d.type === 'Bonus') {
             customBonusTotal += d.amount;
             customDeductHtml += `<div class="flex justify-between items-center text-xs py-1.5 border-b border-dashed border-emerald-100 last:border-0">
-                <span><span class="text-emerald-700 font-bold">[บวกเงิน]</span> <span class="text-slate-700 font-medium">${d.reason}</span></span>
-                <span class="font-black text-emerald-600">+฿${d.amount.toLocaleString()}</span>
+                <span><span class="text-emerald-500 font-bold">[บวกเงิน]</span> <span class="text-slate-700 font-medium">${d.reason}</span></span>
+                <span class="font-black text-emerald-500">+฿${d.amount.toLocaleString()}</span>
             </div>`;
         } else {
             customDeductTotal += d.amount;
@@ -1100,10 +1100,10 @@ function renderAdminSummary() {
                     ${empDeductions.map(d => `
                         <div class="flex justify-between items-center ${d.type === 'Bonus' ? 'bg-emerald-50' : 'bg-red-50'} px-2 py-1.5 rounded-lg text-xs">
                             <div class="flex flex-col">
-                                <span><span class="font-bold ${d.type === 'Bonus' ? 'text-emerald-700' : 'text-red-700'}">[${d.type === 'Bonus' ? 'บวกเงิน' : (d.type === 'Advance' ? 'เบิกล่วงหน้า' : (d.type === 'Damage' ? 'หักค่าเสียหาย' : 'หักค่าอื่นๆ'))}]</span> <span class="text-slate-700 font-medium">${d.reason}</span></span>
+                                <span><span class="font-bold ${d.type === 'Bonus' ? 'text-emerald-500' : 'text-red-700'}">[${d.type === 'Bonus' ? 'บวกเงิน' : (d.type === 'Advance' ? 'เบิกล่วงหน้า' : (d.type === 'Damage' ? 'หักค่าเสียหาย' : 'หักค่าอื่นๆ'))}]</span> <span class="text-slate-700 font-medium">${d.reason}</span></span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <span class="font-black ${d.type === 'Bonus' ? 'text-emerald-600' : 'text-red-600'}">${d.type === 'Bonus' ? '+' : '-'}฿${d.amount.toLocaleString()}</span>
+                                <span class="font-black ${d.type === 'Bonus' ? 'text-emerald-500' : 'text-red-600'}">${d.type === 'Bonus' ? '+' : '-'}฿${d.amount.toLocaleString()}</span>
                                 <button onclick="openDeductionModal('${emp.name}', '${d.id}')" class="text-slate-400 hover:text-indigo-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
                             </div>
                         </div>
