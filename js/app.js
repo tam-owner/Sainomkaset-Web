@@ -2336,6 +2336,8 @@ async function fetchTimeLogs(nickname) {
                     date: rec.date,
                     in: inStr,
                     out: outStr,
+                    scheduledIn: rec.scheduledIn && rec.scheduledIn !== '-' ? rec.scheduledIn : '',
+                    scheduledOut: rec.scheduledOut && rec.scheduledOut !== '-' ? rec.scheduledOut : '',
                     type: 'Work'
                 });
             } else {
@@ -2459,7 +2461,7 @@ function renderTimeLogs() {
                     <td class="p-3 text-center font-bold text-indigo-600 text-[13px]">${normalHrs ? Number(normalHrs).toFixed(1) : '-'}</td>
                     <td class="p-3 text-center font-bold text-orange-600 text-[13px]">${otHrs ? Number(otHrs).toFixed(1) : '-'}</td>
                     <td class="p-3 text-center">
-                        <button onclick="openEditLogModal('${log.date}', '${log.in || ''}', '${log.out || ''}', '${log.type || 'Work'}')" class="w-7 h-7 inline-flex justify-center items-center text-slate-400 hover:bg-slate-200 hover:text-indigo-600 rounded-lg transition">
+                        <button onclick="openEditLogModal('${log.date}', '${log.scheduledIn || ''}', '${log.scheduledOut || ''}', '${log.type || 'Work'}')" class="w-7 h-7 inline-flex justify-center items-center text-slate-400 hover:bg-slate-200 hover:text-indigo-600 rounded-lg transition">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                         </button>
                     </td>
@@ -2477,69 +2479,94 @@ function renderTimeLogs() {
     container.innerHTML = html;
 }
 // Time Logs Modals and Logic
-function openEditLogModal(dateStr = '', timeIn = '', timeOut = '', type = 'Work') {
-    // If we need a new modal HTML for edit
+window.submitEditLogModal = function() {
+    const data = {
+        date: document.getElementById('swal-log-date').value,
+        type: document.getElementById('swal-log-type').value,
+        in: document.getElementById('swal-log-in').value,
+        out: document.getElementById('swal-log-out').value
+    };
+    if (!data.date) return Swal.fire("กรุณาเลือกวันที่");
+    Swal.close();
+    saveEmployeeLog(data, "update");
+};
+
+window.submitDeleteLogModal = function(dateStr) {
     Swal.fire({
-        title: dateStr ? 'แก้ไขเวลาเข้าออก' : 'เพิ่มเวลา / ลา',
+        title: 'ยืนยันการลบ?',
+        text: "ลบประวัติของวันนี้ใช่หรือไม่?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        confirmButtonText: 'ใช่, ลบเลย'
+    }).then((del) => {
+        if (del.isConfirmed) saveEmployeeLog({date: dateStr}, "delete");
+    });
+};
+
+function openEditLogModal(dateStr = '', timeIn = '', timeOut = '', type = 'Work') {
+    Swal.fire({
+        showConfirmButton: false,
+        showCancelButton: false,
+        customClass: {
+            popup: 'rounded-[24px]',
+            htmlContainer: '!m-0 !p-2'
+        },
         html: `
-            <div class="space-y-4 text-left">
+            <div class="text-center mb-6 mt-2">
+                <h3 class="text-xl font-bold text-slate-800">${dateStr ? 'แก้ไขเวลาเข้าออก' : 'เพิ่มเวลา / ลา'}</h3>
+            </div>
+            <div class="space-y-4 text-left px-2 pb-2">
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-1">วันที่ (YYYY-MM-DD)</label>
-                    <input type="date" id="swal-log-date" class="w-full border border-slate-300 rounded-lg px-3 py-2" value="${dateStr}">
+                    <label class="block text-[13px] font-bold text-slate-700 mb-1.5">วันที่ (YYYY-MM-DD)</label>
+                    <div class="relative">
+                        <input type="date" id="swal-log-date" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition" value="${dateStr}">
+                    </div>
                 </div>
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-1">ประเภท</label>
-                    <select id="swal-log-type" class="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white" onchange="document.getElementById('swal-time-inputs').style.display = this.value === 'Work' ? 'block' : 'none'">
-                        <option value="Work" ${type === 'Work' ? 'selected' : ''}>มาทำงาน</option>
-                        <option value="Leave_Paid" ${type === 'Leave_Paid' ? 'selected' : ''}>ลา (ไม่หักเงิน)</option>
-                        <option value="Leave_Unpaid" ${type === 'Leave_Unpaid' ? 'selected' : ''}>ลา (หักเงิน)</option>
-                    </select>
-                </div>
-                <div id="swal-time-inputs" style="display: ${type === 'Work' ? 'block' : 'none'};">
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-1">เวลาเข้า (HH:mm)</label>
-                            <input type="time" id="swal-log-in" class="w-full border border-slate-300 rounded-lg px-3 py-2" value="${timeIn}">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-1">เวลาออก (HH:mm)</label>
-                            <input type="time" id="swal-log-out" class="w-full border border-slate-300 rounded-lg px-3 py-2" value="${timeOut}">
+                    <label class="block text-[13px] font-bold text-slate-700 mb-1.5">ประเภท</label>
+                    <div class="relative">
+                        <select id="swal-log-type" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-700 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition appearance-none" onchange="document.getElementById('swal-time-inputs').style.display = this.value === 'Work' ? 'block' : 'none'">
+                            <option value="Work" ${type === 'Work' ? 'selected' : ''}>มาทำงาน</option>
+                            <option value="Leave_Paid" ${type === 'Leave_Paid' ? 'selected' : ''}>ลา (ได้ค่าแรง)</option>
+                            <option value="Leave_Unpaid" ${type === 'Leave_Unpaid' ? 'selected' : ''}>ลา (หักค่าแรง)</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                     </div>
                 </div>
+                <div id="swal-time-inputs" style="display: ${type === 'Work' ? 'block' : 'none'};">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[13px] font-bold text-slate-700 mb-1.5">เวลาเข้า (HH:mm)</label>
+                            <input type="time" id="swal-log-in" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition" value="${timeIn}">
+                        </div>
+                        <div>
+                            <label class="block text-[13px] font-bold text-slate-700 mb-1.5">เวลาออก (HH:mm)</label>
+                            <input type="time" id="swal-log-out" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition" value="${timeOut}">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pt-5 pb-2">
+                    ${dateStr ? `
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="submitEditLogModal()" class="w-full bg-[#5b52f6] hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-sm transition active:scale-95 text-base tracking-wide">บันทึก</button>
+                        <button onclick="submitDeleteLogModal('${dateStr}')" class="w-full bg-[#ef4444] hover:bg-rose-600 text-white font-bold py-3 rounded-xl shadow-sm transition active:scale-95 text-base tracking-wide">ลบรายการ</button>
+                    </div>
+                    <div class="mt-4 flex justify-center">
+                        <button onclick="Swal.close()" class="w-32 bg-[#6b7280] hover:bg-slate-600 text-white font-bold py-3 rounded-xl shadow-sm transition active:scale-95 text-base tracking-wide">ยกเลิก</button>
+                    </div>
+                    ` : `
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="submitEditLogModal()" class="w-full bg-[#5b52f6] hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-sm transition active:scale-95 text-base tracking-wide">บันทึก</button>
+                        <button onclick="Swal.close()" class="w-full bg-[#6b7280] hover:bg-slate-600 text-white font-bold py-3 rounded-xl shadow-sm transition active:scale-95 text-base tracking-wide">ยกเลิก</button>
+                    </div>
+                    `}
+                </div>
             </div>
-        `,
-        showCancelButton: true,
-        showDenyButton: dateStr !== '',
-        confirmButtonText: 'บันทึก',
-        cancelButtonText: 'ยกเลิก',
-        denyButtonText: 'ลบรายการ',
-        confirmButtonColor: '#4f46e5',
-        denyButtonColor: '#ef4444',
-        preConfirm: () => {
-            return {
-                date: document.getElementById('swal-log-date').value,
-                type: document.getElementById('swal-log-type').value,
-                in: document.getElementById('swal-log-in').value,
-                out: document.getElementById('swal-log-out').value
-            };
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            if (!result.value.date) return Swal.fire("กรุณาเลือกวันที่");
-            saveEmployeeLog(result.value, "update");
-        } else if (result.isDenied) {
-            Swal.fire({
-                title: 'ยืนยันการลบ?',
-                text: "ลบประวัติของวันนี้ใช่หรือไม่?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                confirmButtonText: 'ใช่, ลบเลย'
-            }).then((del) => {
-                if (del.isConfirmed) saveEmployeeLog({date: dateStr}, "delete");
-            });
-        }
+        `
     });
 }
 
