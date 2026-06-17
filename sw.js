@@ -1,4 +1,4 @@
-const CACHE_NAME = 'snk-cache-v51';
+const CACHE_NAME = 'snk-cache-v52';
 const urlsToCache = [
   '/',
   '/index.html',

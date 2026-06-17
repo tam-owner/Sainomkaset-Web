@@ -2534,10 +2534,10 @@ function openEditLogModal(dateStr = '', timeIn = '', timeOut = '', type = 'Work'
     Swal.fire({
         showConfirmButton: false,
         showCancelButton: false,
-        width: '100%',
+        width: '95vw',
         padding: '0',
         customClass: {
-            popup: 'rounded-[24px] !w-[98%] sm:!w-[500px] !max-w-[500px] !p-4',
+            popup: 'rounded-[24px] !w-[95vw] sm:!w-[500px] !max-w-[500px] !p-4',
             htmlContainer: '!m-0 !p-2'
         },
         html: `
@@ -2552,7 +2552,7 @@ function openEditLogModal(dateStr = '', timeIn = '', timeOut = '', type = 'Work'
             </div>
             <div class="space-y-4 text-left px-2 pb-2">
                 <div>
-                    <label class="block text-[13px] font-bold text-slate-700 mb-1.5">วันที่ (YYYY-MM-DD)</label>
+                    <label class="block text-[13px] font-bold text-slate-700 mb-1.5">วันที่</label>
                     <div class="relative">
                         <input type="date" id="swal-log-date" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition" value="${dateStr}">
                     </div>
@@ -2573,11 +2573,11 @@ function openEditLogModal(dateStr = '', timeIn = '', timeOut = '', type = 'Work'
                 <div id="swal-time-inputs" style="display: ${type === 'Work' ? 'block' : 'none'};">
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[13px] font-bold text-slate-700 mb-1.5">เวลาเข้า (HH:mm)</label>
+                            <label class="block text-[13px] font-bold text-slate-700 mb-1.5">เวลาเข้า</label>
                             <input type="time" id="swal-log-in" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition" value="${timeIn}">
                         </div>
                         <div>
-                            <label class="block text-[13px] font-bold text-slate-700 mb-1.5">เวลาออก (HH:mm)</label>
+                            <label class="block text-[13px] font-bold text-slate-700 mb-1.5">เวลาออก</label>
                             <input type="time" id="swal-log-out" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition" value="${timeOut}">
                         </div>
                     </div>
