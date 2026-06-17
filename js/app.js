@@ -2283,7 +2283,9 @@ async function openTimeLogsModal(nickname) {
     currentLogsEmp = employees.find(e => e.name === nickname);
     if (!currentLogsEmp) return;
     
-    document.getElementById('timelogs-title').innerHTML = `<span class="ml-2">${currentLogsEmp.name}</span> <span class="text-base font-medium text-slate-500 ml-1 font-normal">${currentLogsEmp.fullName || ''}</span>`;
+    let firstName = currentLogsEmp.fullName ? currentLogsEmp.fullName.trim().split(' ')[0] : '';
+    let periodText = availablePeriods.find(p => p.value === currentPeriodVal)?.text || '';
+    document.getElementById('timelogs-title').innerHTML = `<span class="ml-2">${currentLogsEmp.name}</span> <span class="text-base font-medium text-slate-500 ml-1 font-normal">${firstName} (${periodText})</span>`;
     
     const modal = document.getElementById('timelogs-modal');
     const modalBox = document.getElementById('timelogs-modal-box');
@@ -2371,6 +2373,7 @@ async function fetchTimeLogs(nickname) {
         }
     });
 
+    currentLogsData = currentLogsData.filter(log => log.in || log.out);
     currentLogsData.sort((a, b) => new Date(a.date) - new Date(b.date));
     
     setTimeout(() => {
