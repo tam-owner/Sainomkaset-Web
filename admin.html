@@ -615,6 +615,7 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
             </button>
             <h1 class="text-xl font-black text-slate-800">อนุมัติลางาน</h1>
+            
         </div>
         <main class="px-4">
             <div id="admin-leave-approvals" class="bg-white p-4 rounded-[16px] shadow-sm border border-slate-200 hidden">
@@ -628,34 +629,10 @@
     </div>
 
     <!-- ===================================== -->
-    <!-- VIEW: ADMIN TIME EDITS                -->
-    <!-- ===================================== -->
-    <div id="view-admin-time-edits" class="hidden">
-        <div class="px-4 mb-4 flex items-center gap-3">
-            <button onclick="showView('view-admin-dashboard')" class="p-2 bg-white rounded-full shadow-sm border border-slate-200 text-slate-600 active:scale-95 shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-            </button>
-            <h1 class="text-xl font-black text-slate-800">อนุมัติแก้ไขเวลา</h1>
-        </div>
-        <main class="px-4">
-            <div id="admin-time-edit-approvals" class="bg-white p-4 rounded-[16px] shadow-sm border border-slate-200">
-                <h3 class="text-sm font-black text-indigo-600 flex items-center gap-2 mb-3">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    รออนุมัติแก้ไขเวลาเข้าออก
-                </h3>
-                <div id="admin-time-edit-list" class="space-y-2"></div>
-            </div>
-        </main>
-    </div>
-
-    <!-- ===================================== -->
     <!-- VIEW: ADMIN EMPLOYEES SETUP           -->
     <!-- ===================================== -->
     <div id="view-admin-employees" class="hidden">
         <div class="px-4 mb-4 mt-2 flex items-center gap-3">
-            <button onclick="showAdminDashboard()" class="p-2 bg-white rounded-full shadow-sm border border-slate-200 text-slate-600 active:scale-95">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-            </button>
             <h1 class="text-xl font-black text-slate-800">จัดการพนักงาน</h1>
             <div class="flex gap-2 ml-auto items-center">
                 <button onclick="toggleEmpSearch()" class="text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg active:scale-95 transition-all flex items-center justify-center">
@@ -663,6 +640,10 @@
                 </button>
                 <button onclick="openEmployeeModal()" class="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg active:scale-95 transition-all flex items-center gap-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> เพิ่ม
+                </button>
+            
+                <button onclick="showAdminDashboard()" class="p-2 bg-white rounded-full shadow-sm border border-slate-200 text-slate-600 active:scale-95 shrink-0 ml-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                 </button>
             </div>
         </div>
@@ -732,12 +713,14 @@
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">ประเภท</label>
                     <select id="deduction-type" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm font-semibold focus:border-indigo-500 outline-none">
-                        <option value="Deduction">หักเงิน</option>
+                        <option value="Advance">เบิกล่วงหน้า</option>
                         <option value="Bonus">บวกเงิน</option>
+                        <option value="Damage">หักค่าเสียหาย</option>
+                        <option value="OtherDeduct">หักค่าอื่นๆ</option>
                     </select>
                 </div>
-                <div><label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">เหตุผล</label><input type="text" id="deduction-reason" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm font-semibold outline-none"></div>
                 <div><label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">จำนวนเงิน (฿)</label><input type="number" id="deduction-amount" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm font-semibold outline-none"></div>
+                <div><label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">เหตุผล</label><input type="text" id="deduction-reason" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm font-semibold outline-none"></div>
             </div>
             <div class="mt-6 flex gap-3">
                 <button onclick="saveDeduction()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl">บันทึกข้อมูล</button>
@@ -815,7 +798,13 @@
                         </div>
                     </div>
                 </div>
-
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div class="col-span-2">
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">เบิกล่วงหน้า (รอบนี้)</label>
+                        <input type="number" id="emp-advancepayment" class="w-full border border-red-300 bg-red-50 text-red-700 rounded-lg px-2 py-2 text-center font-bold" placeholder="0">
+                        <p class="text-[10px] text-red-500 mt-1 text-center">หักออกจากค่าแรงในรอบจ่ายที่กำลังจะถึง</p>
+                    </div>
+                </div>
                 <input type="hidden" id="emp-hourlyrate">
                 <input type="hidden" id="emp-otrate">
                 <div class="grid grid-cols-2 gap-3">
@@ -836,12 +825,20 @@
 
     <!-- Admin Time Logs Modal -->
     <div id="timelogs-modal" class="hidden fixed inset-0 bg-slate-900/60 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4 backdrop-blur-sm transition-all duration-300 opacity-0 pointer-events-none">
-        <div id="timelogs-modal-box" class="bg-white rounded-t-[24px] sm:rounded-[24px] w-full max-w-lg h-[80vh] sm:h-auto sm:max-h-[85vh] shadow-2xl flex flex-col transform translate-y-full sm:translate-y-4 sm:scale-95 transition-all duration-300">
-            <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-white rounded-t-[24px] shrink-0 sticky top-0 z-10">
-                <h3 class="text-xl font-black text-slate-800" id="timelogs-title">ประวัติเวลาเข้าออก</h3>
-                <button onclick="closeTimeLogsModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+        <div id="timelogs-modal-box" class="bg-white rounded-none sm:rounded-[24px] w-full max-w-2xl h-[100dvh] sm:h-auto sm:max-h-[90vh] shadow-2xl flex flex-col transform translate-y-full sm:translate-y-4 sm:scale-95 transition-all duration-300">
+            <div class="p-4 sm:px-6 border-b border-slate-100 flex justify-between items-center bg-white rounded-none sm:rounded-t-[24px] shrink-0 sticky top-0 z-10">
+                <div class="flex flex-wrap items-center gap-3">
+                    <h3 class="text-xl font-black text-slate-800 flex items-baseline gap-2" id="timelogs-title">ประวัติเวลาเข้าออก</h3>
+                </div>
+                <div class="flex items-center gap-2 ml-2">
+                    <button onclick="openEditLogModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-sm font-bold shadow-sm active:scale-95 transition flex items-center gap-1.5 whitespace-nowrap">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        เพิ่มรายการ
+                    </button>
+                    <button onclick="closeTimeLogsModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                </div>
             </div>
-            <div class="p-4 flex-1 overflow-y-auto bg-slate-50" id="timelogs-content">
+            <div class="flex-1 overflow-y-auto bg-slate-50" id="timelogs-content">
                 <!-- Logs will be injected here -->
             </div>
         </div>
@@ -861,8 +858,9 @@
         </div>
     </div>
 
-    <script src="js/customSelect.js"></script>
-    <script src="js/app.js?v=20260618_01"></script>
+    <script>sessionStorage.setItem('snk_payroll_user', 'ADMIN');</script>
+    <script src="js/customSelect.js?v=1"></script>
+    <script src="js/app.js?v=20260617_32"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
