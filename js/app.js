@@ -2627,3 +2627,26 @@ async function saveEmployeeLog(data, actionType) {
         overlay.classList.add('hidden');
     }
 }
+
+// Universal Scroll Lock for Modals
+document.addEventListener('DOMContentLoaded', () => {
+    const checkModals = () => {
+        const customModals = document.querySelectorAll('[id$="-modal"]');
+        let anyOpen = false;
+        customModals.forEach(m => {
+            if (!m.classList.contains('hidden') && m.classList.contains('fixed')) {
+                anyOpen = true;
+            }
+        });
+        if (anyOpen) {
+            document.body.classList.add('custom-modal-open');
+        } else {
+            document.body.classList.remove('custom-modal-open');
+        }
+    };
+
+    const observer = new MutationObserver(checkModals);
+    document.querySelectorAll('[id$="-modal"]').forEach(m => {
+        observer.observe(m, { attributes: true, attributeFilter: ['class'] });
+    });
+});
