@@ -713,8 +713,8 @@
                         <option value="Advance">เบิกล่วงหน้า (Advance)</option>
                     </select>
                 </div>
-                <div><label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">เหตุผล</label><input type="text" id="deduction-reason" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm font-semibold outline-none"></div>
                 <div><label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">จำนวนเงิน (฿)</label><input type="number" id="deduction-amount" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm font-semibold outline-none"></div>
+                <div><label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">เหตุผล</label><input type="text" id="deduction-reason" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm font-semibold outline-none"></div>
             </div>
             <div class="mt-6 flex gap-3">
                 <button onclick="saveDeduction()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl">บันทึกข้อมูล</button>
@@ -846,7 +846,7 @@
 
     <script>sessionStorage.setItem('snk_payroll_user', 'ADMIN');</script>
     <script src="js/customSelect.js?v=1"></script>
-    <script src="js/app.js?v=20260617_2"></script>
+    <script src="js/app.js?v=20260617_3"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
