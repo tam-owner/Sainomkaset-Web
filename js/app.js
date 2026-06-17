@@ -2389,15 +2389,14 @@ function renderTimeLogs() {
         html += `
         <div class="overflow-x-auto border border-slate-200 rounded-xl bg-white shadow-sm">
             <table class="w-full text-left border-collapse min-w-[500px]">
-                <thead>
-                    <tr class="bg-slate-800 text-white text-[11px] font-bold tracking-wider">
+                <thead class="sticky top-0 z-10 shadow-sm">
+                    <tr class="bg-[#2A3441] text-white text-[12px] font-bold tracking-wider">
                         <th class="p-3">วันที่</th>
                         <th class="p-3 text-center">เข้างาน</th>
                         <th class="p-3 text-center">ออกงาน</th>
                         <th class="p-3 text-center">พัก<br>ชม.</th>
                         <th class="p-3 text-center">ปกติ<br>ชม.</th>
                         <th class="p-3 text-center">OT<br>ชม.</th>
-                        <th class="p-3 text-center"></th>
                     </tr>
                 </thead>
                 <tbody class="text-sm divide-y divide-slate-100">
@@ -2446,25 +2445,22 @@ function renderTimeLogs() {
             }
 
             html += `
-                <tr class="${rowColor} hover:bg-slate-50 transition relative ${log.type === 'Leave_Paid' ? 'border-l-4 border-l-emerald-500' : (log.type === 'Leave_Unpaid' ? 'border-l-4 border-l-orange-500' : 'border-l-4 border-l-transparent')}">
+                <tr onclick="openEditLogModal('${log.date}', '${log.scheduledIn || ''}', '${log.scheduledOut || ''}', '${log.type || 'Work'}')" class="${rowColor} cursor-pointer hover:bg-slate-50 transition relative ${log.type === 'Leave_Paid' ? 'border-l-4 border-l-emerald-500' : (log.type === 'Leave_Unpaid' ? 'border-l-4 border-l-orange-500' : 'border-l-4 border-l-transparent')}">
                     <td class="p-3">
                         <div class="font-bold text-[13px] ${dateColor}">${dateStr}</div>
                         <div class="text-[11px] text-slate-500">${dayStr} ${leaveBadge}</div>
                     </td>
                     <td class="p-3 text-center">
-                        <div class="font-black text-[13px] text-slate-800">${log.in || '-'}</div>
+                        <div class="font-black text-[13px] text-slate-800">${log.scheduledIn || log.in || '-'}</div>
+                        ${(log.scheduledIn && log.in) ? `<div class="text-[12px] text-slate-500 mt-0.5">${log.in}</div>` : ''}
                     </td>
                     <td class="p-3 text-center">
-                        <div class="font-black text-[13px] text-slate-800">${log.out || '-'}</div>
+                        <div class="font-black text-[13px] text-slate-800">${log.scheduledOut || log.out || '-'}</div>
+                        ${(log.scheduledOut && log.out) ? `<div class="text-[12px] text-slate-500 mt-0.5">${log.out}</div>` : ''}
                     </td>
                     <td class="p-3 text-center text-slate-600 font-medium text-[13px]">${breakHrs || '-'}</td>
                     <td class="p-3 text-center font-bold text-indigo-600 text-[13px]">${normalHrs ? Number(normalHrs).toFixed(1) : '-'}</td>
                     <td class="p-3 text-center font-bold text-orange-600 text-[13px]">${otHrs ? Number(otHrs).toFixed(1) : '-'}</td>
-                    <td class="p-3 text-center">
-                        <button onclick="openEditLogModal('${log.date}', '${log.scheduledIn || ''}', '${log.scheduledOut || ''}', '${log.type || 'Work'}')" class="w-7 h-7 inline-flex justify-center items-center text-slate-400 hover:bg-slate-200 hover:text-indigo-600 rounded-lg transition">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                        </button>
-                    </td>
                 </tr>
             `;
         });
