@@ -2427,8 +2427,10 @@ function renderTimeLogs() {
             }
             
             if (log.in && log.out && !isLeave) {
-                let t1 = new Date(`2000-01-01T${log.in}:00`);
-                let t2 = new Date(`2000-01-01T${log.out}:00`);
+                let calcIn = log.scheduledIn && log.scheduledIn !== '-' ? log.scheduledIn : log.in;
+                let calcOut = log.scheduledOut && log.scheduledOut !== '-' ? log.scheduledOut : log.out;
+                let t1 = new Date(`2000-01-01T${calcIn}:00`);
+                let t2 = new Date(`2000-01-01T${calcOut}:00`);
                 if (t2 < t1) t2.setDate(t2.getDate() + 1);
                 let diffMs = t2 - t1;
                 let diffHrs = diffMs / (1000 * 60 * 60);
@@ -2532,9 +2534,10 @@ function openEditLogModal(dateStr = '', timeIn = '', timeOut = '', type = 'Work'
     Swal.fire({
         showConfirmButton: false,
         showCancelButton: false,
-        width: '95%',
+        width: '100%',
+        padding: '0',
         customClass: {
-            popup: 'rounded-[24px] !w-[95%] sm:!w-[500px] !max-w-[500px]',
+            popup: 'rounded-[24px] !w-[98%] sm:!w-[500px] !max-w-[500px] !p-4',
             htmlContainer: '!m-0 !p-2'
         },
         html: `
