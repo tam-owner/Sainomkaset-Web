@@ -2353,34 +2353,101 @@ function renderTimeLogs() {
                 เพิ่มรายการ / ลา
             </button>
         </div>
-        <div class="space-y-2">
     `;
     
     if (currentLogsData.length === 0) {
         html += `<div class="text-center py-10 text-slate-400 font-bold text-sm bg-white rounded-xl border border-slate-200">ไม่พบประวัติในเดือนนี้</div>`;
     } else {
+        html += `
+        <div class="overflow-x-auto border border-slate-200 rounded-xl bg-white shadow-sm">
+            <table class="w-full text-left border-collapse min-w-[500px]">
+                <thead>
+                    <tr class="bg-slate-800 text-white text-[11px] font-bold tracking-wider">
+                        <th class="p-3">วันที่</th>
+                        <th class="p-3 text-center">เข้างาน</th>
+                        <th class="p-3 text-center">ออกงาน</th>
+                        <th class="p-3 text-center">พัก<br>ชม.</th>
+                        <th class="p-3 text-center">ปกติ<br>ชม.</th>
+                        <th class="p-3 text-center">OT<br>ชม.</th>
+                        <th class="p-3 text-center"></th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm divide-y divide-slate-100">
+        `;
+        
         currentLogsData.forEach(log => {
             const isLeave = log.type && log.type.includes("Leave");
+            const dateObj = new Date(log.date);
+            const dateStr = dateObj.toLocaleDateString('th-TH', {day: '2-digit', month: '2-digit', year: '2-digit'}).replace(/\//g, '/');
+            const dayStr = dateObj.toLocaleDateString('th-TH', {weekday: 'long'});
+            
+            let breakHrs = '';
+            let normalHrs = '';
+            let otHrs = '';
+            let rowColor = 'bg-white';
+            let dateColor = 'text-indigo-800';
+            
+            if (dateObj.getDay() === 0) {
+                rowColor = 'bg-rose-50/30';
+            }
+            
+            if (log.in && log.out && !isLeave) {
+                let t1 = new Date(`2000-01-01T${log.in}:00`);
+                let t2 = new Date(`2000-01-01T${log.out}:00`);
+                if (t2 < t1) t2.setDate(t2.getDate() + 1);
+                let diffMs = t2 - t1;
+                let diffHrs = diffMs / (1000 * 60 * 60);
+
+                if (diffHrs >= 9) {
+                    breakHrs = 1;
+                    normalHrs = 8.0;
+                    otHrs = diffHrs - 9;
+                } else if (diffHrs > 5) {
+                    breakHrs = 1;
+                    normalHrs = diffHrs - 1;
+                } else {
+                    normalHrs = diffHrs;
+                }
+                
+                if (otHrs === 0) otHrs = '';
+            }
+
+            let leaveBadge = '';
+            if (isLeave) {
+                leaveBadge = `<span class="text-[10px] ${log.type === 'Leave_Paid' ? 'text-emerald-600 bg-emerald-50' : 'text-orange-600 bg-orange-50'} px-2 py-0.5 rounded ml-2">ลา</span>`;
+            }
+
             html += `
-                <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex justify-between items-center">
-                    <div>
-                        <div class="text-sm font-bold text-slate-800">${new Date(log.date).toLocaleDateString('th-TH', {weekday: 'short', day: 'numeric', month: 'short'})}</div>
-                        ${isLeave ? 
-                            `<div class="text-[11px] font-bold ${log.type === 'Leave_Paid' ? 'text-emerald-600 bg-emerald-50' : 'text-orange-600 bg-orange-50'} px-2 py-0.5 rounded inline-block mt-1">
-                                ${log.type === 'Leave_Paid' ? 'ลา (ได้ค่าแรง)' : 'ลา (หักค่าแรง)'}
-                            </div>` : 
-                            `<div class="text-[11px] text-slate-500 font-medium mt-0.5">เข้า: <span class="font-bold text-emerald-600">${log.in || '-'}</span> | ออก: <span class="font-bold text-rose-600">${log.out || '-'}</span></div>`
-                        }
-                    </div>
-                    <button onclick="openEditLogModal('${log.date}', '${log.in || ''}', '${log.out || ''}', '${log.type || 'Work'}')" class="w-8 h-8 flex justify-center items-center text-slate-400 hover:bg-slate-100 hover:text-indigo-600 rounded-lg transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                    </button>
-                </div>
+                <tr class="${rowColor} hover:bg-slate-50 transition relative ${log.type === 'Leave_Paid' ? 'border-l-4 border-l-emerald-500' : (log.type === 'Leave_Unpaid' ? 'border-l-4 border-l-orange-500' : 'border-l-4 border-l-transparent')}">
+                    <td class="p-3">
+                        <div class="font-bold text-[13px] ${dateColor}">${dateStr}</div>
+                        <div class="text-[11px] text-slate-500">${dayStr} ${leaveBadge}</div>
+                    </td>
+                    <td class="p-3 text-center">
+                        <div class="font-black text-[13px] text-slate-800">${log.in || '-'}</div>
+                    </td>
+                    <td class="p-3 text-center">
+                        <div class="font-black text-[13px] text-slate-800">${log.out || '-'}</div>
+                    </td>
+                    <td class="p-3 text-center text-slate-600 font-medium text-[13px]">${breakHrs || '-'}</td>
+                    <td class="p-3 text-center font-bold text-indigo-600 text-[13px]">${normalHrs ? Number(normalHrs).toFixed(1) : '-'}</td>
+                    <td class="p-3 text-center font-bold text-orange-600 text-[13px]">${otHrs ? Number(otHrs).toFixed(1) : '-'}</td>
+                    <td class="p-3 text-center">
+                        <button onclick="openEditLogModal('${log.date}', '${log.in || ''}', '${log.out || ''}', '${log.type || 'Work'}')" class="w-7 h-7 inline-flex justify-center items-center text-slate-400 hover:bg-slate-200 hover:text-indigo-600 rounded-lg transition">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        </button>
+                    </td>
+                </tr>
             `;
         });
+        
+        html += `
+                </tbody>
+            </table>
+        </div>
+        `;
     }
     
-    html += `</div>`;
     container.innerHTML = html;
 }
 // Time Logs Modals and Logic
