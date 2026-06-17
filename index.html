@@ -118,15 +118,17 @@
     <!-- ===================================== -->
     <!-- VIEW: LOGIN                           -->
     <!-- ===================================== -->
+    <!-- Decorative Background -->
+    <div class="fixed inset-0 z-[-1] bg-[#eef2f6] overflow-hidden pointer-events-none">
+        <div class="absolute -top-[10%] -left-[10%] w-[350px] h-[350px] rounded-full bg-blue-400/30 blur-[70px] animate-blob-1"></div>
+        <div class="absolute top-[35%] -right-[15%] w-[400px] h-[400px] rounded-full bg-cyan-300/30 blur-[70px] animate-blob-2"></div>
+        <div class="absolute -bottom-[10%] left-[10%] w-[450px] h-[450px] rounded-full bg-indigo-400/20 blur-[80px] animate-blob-3"></div>
+        <div class="absolute top-[20%] left-[30%] w-[300px] h-[300px] rounded-full bg-white/70 blur-[60px] animate-blob-4"></div>
+    </div>
+    
     <div id="view-login">
         <div class="px-4 flex flex-col justify-center min-h-[80vh]">
-        <!-- Decorative Background -->
-        <div class="fixed inset-0 z-[-1] bg-[#eef2f6] overflow-hidden pointer-events-none">
-            <div class="absolute -top-[10%] -left-[10%] w-[350px] h-[350px] rounded-full bg-blue-400/30 blur-[70px] animate-blob-1"></div>
-            <div class="absolute top-[35%] -right-[15%] w-[400px] h-[400px] rounded-full bg-cyan-300/30 blur-[70px] animate-blob-2"></div>
-            <div class="absolute -bottom-[10%] left-[10%] w-[450px] h-[450px] rounded-full bg-indigo-400/20 blur-[80px] animate-blob-3"></div>
-            <div class="absolute top-[20%] left-[30%] w-[300px] h-[300px] rounded-full bg-white/70 blur-[60px] animate-blob-4"></div>
-        </div>
+
         <div class="text-center mb-6 relative">
             <div onclick="adminLogoLogin()" class="cursor-pointer w-24 h-24 mx-auto mb-4 overflow-hidden rounded-[20px] shadow-[0_8px_30px_rgba(59,130,246,0.2)] bg-slate-50 flex items-center justify-center relative z-10 transition-transform duration-500 hover:scale-105">
                 <img src="logo.jpg" alt="Sainom Kaset Logo" class="w-full h-full object-cover">
