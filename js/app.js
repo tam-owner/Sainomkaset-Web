@@ -2533,59 +2533,62 @@ function openEditLogModal(dateStr = '', timeIn = '', timeOut = '', type = 'Work'
         showConfirmButton: false,
         showCancelButton: false,
         customClass: {
-            popup: 'rounded-[24px]',
-            htmlContainer: '!m-0 !p-2'
+            popup: 'rounded-[24px] !w-[90%] sm:!w-[400px]',
+            htmlContainer: '!m-0 !p-4'
         },
         html: `
-            <div class="text-center mb-6 mt-2">
-                <h3 class="text-xl font-bold text-slate-800">${dateStr ? 'แก้ไขเวลาเข้าออก' : 'เพิ่มเวลา / ลา'}</h3>
+            <div class="text-center mb-5 mt-1">
+                <h3 class="text-xl font-black text-slate-800 tracking-tight">${dateStr ? 'แก้ไขเวลาเข้าออก' : 'เพิ่มรายการ / ลา'}</h3>
             </div>
-            <div class="space-y-4 text-left px-2 pb-2">
+            <div class="space-y-4 text-left px-1 pb-1">
                 <div>
-                    <label class="block text-[13px] font-bold text-slate-700 mb-1.5">วันที่ (YYYY-MM-DD)</label>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">วันที่ (YYYY-MM-DD)</label>
                     <div class="relative">
-                        <input type="date" id="swal-log-date" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition" value="${dateStr}">
+                        <input type="date" id="swal-log-date" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-[15px] font-bold text-slate-700 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all" value="${dateStr}">
                     </div>
                 </div>
                 <div>
-                    <label class="block text-[13px] font-bold text-slate-700 mb-1.5">ประเภท</label>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">ประเภท</label>
                     <div class="relative">
-                        <select id="swal-log-type" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-700 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition appearance-none" onchange="document.getElementById('swal-time-inputs').style.display = this.value === 'Work' ? 'block' : 'none'">
+                        <select id="swal-log-type" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-[15px] font-bold text-slate-700 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all appearance-none" onchange="document.getElementById('swal-time-inputs').style.display = this.value === 'Work' ? 'block' : 'none'">
                             <option value="Work" ${type === 'Work' ? 'selected' : ''}>มาทำงาน</option>
                             <option value="Leave_Paid" ${type === 'Leave_Paid' ? 'selected' : ''}>ลา (ได้ค่าแรง)</option>
                             <option value="Leave_Unpaid" ${type === 'Leave_Unpaid' ? 'selected' : ''}>ลา (หักค่าแรง)</option>
                         </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                     </div>
                 </div>
                 <div id="swal-time-inputs" style="display: ${type === 'Work' ? 'block' : 'none'};">
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[13px] font-bold text-slate-700 mb-1.5">เวลาเข้า (HH:mm)</label>
-                            <input type="time" id="swal-log-in" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition" value="${timeIn}">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">เวลาเข้า</label>
+                            <input type="time" id="swal-log-in" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-[15px] font-bold text-slate-700 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all" value="${timeIn}">
                         </div>
                         <div>
-                            <label class="block text-[13px] font-bold text-slate-700 mb-1.5">เวลาออก (HH:mm)</label>
-                            <input type="time" id="swal-log-out" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition" value="${timeOut}">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">เวลาออก</label>
+                            <input type="time" id="swal-log-out" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-[15px] font-bold text-slate-700 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all" value="${timeOut}">
                         </div>
                     </div>
                 </div>
                 
-                <div class="pt-5 pb-2">
+                <div class="pt-6">
                     ${dateStr ? `
-                    <div class="grid grid-cols-2 gap-3">
-                        <button onclick="submitEditLogModal()" class="w-full bg-[#5b52f6] hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-sm transition active:scale-95 text-base tracking-wide">บันทึก</button>
-                        <button onclick="submitDeleteLogModal('${dateStr}')" class="w-full bg-[#ef4444] hover:bg-rose-600 text-white font-bold py-3 rounded-xl shadow-sm transition active:scale-95 text-base tracking-wide">ลบรายการ</button>
-                    </div>
-                    <div class="mt-4 flex justify-center">
-                        <button onclick="Swal.close()" class="w-32 bg-[#6b7280] hover:bg-slate-600 text-white font-bold py-3 rounded-xl shadow-sm transition active:scale-95 text-base tracking-wide">ยกเลิก</button>
+                    <div class="flex flex-col gap-3">
+                        <div class="flex gap-3">
+                            <button onclick="Swal.close()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 rounded-xl transition-all active:scale-95 text-sm">ยกเลิก</button>
+                            <button onclick="submitEditLogModal()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-md shadow-indigo-200 transition-all active:scale-95 text-sm">บันทึกข้อมูล</button>
+                        </div>
+                        <button onclick="submitDeleteLogModal('${dateStr}')" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-3.5 rounded-xl transition-all active:scale-95 text-sm flex justify-center items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            ลบรายการนี้
+                        </button>
                     </div>
                     ` : `
-                    <div class="grid grid-cols-2 gap-3">
-                        <button onclick="submitEditLogModal()" class="w-full bg-[#5b52f6] hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-sm transition active:scale-95 text-base tracking-wide">บันทึก</button>
-                        <button onclick="Swal.close()" class="w-full bg-[#6b7280] hover:bg-slate-600 text-white font-bold py-3 rounded-xl shadow-sm transition active:scale-95 text-base tracking-wide">ยกเลิก</button>
+                    <div class="flex gap-3">
+                        <button onclick="Swal.close()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 rounded-xl transition-all active:scale-95 text-sm">ยกเลิก</button>
+                        <button onclick="submitEditLogModal()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-md shadow-indigo-200 transition-all active:scale-95 text-sm">บันทึกข้อมูล</button>
                     </div>
                     `}
                 </div>
