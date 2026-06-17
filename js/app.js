@@ -2283,7 +2283,7 @@ async function openTimeLogsModal(nickname) {
     currentLogsEmp = employees.find(e => e.name === nickname);
     if (!currentLogsEmp) return;
     
-    document.getElementById('timelogs-title').innerHTML = `${currentLogsEmp.name} <span class="text-base font-medium text-slate-500 ml-1 font-normal">${currentLogsEmp.fullName || ''}</span>`;
+    document.getElementById('timelogs-title').innerHTML = `<span class="ml-2">${currentLogsEmp.name}</span> <span class="text-base font-medium text-slate-500 ml-1 font-normal">${currentLogsEmp.fullName || ''}</span>`;
     
     const modal = document.getElementById('timelogs-modal');
     const modalBox = document.getElementById('timelogs-modal-box');
