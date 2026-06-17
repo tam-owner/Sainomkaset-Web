@@ -1,9 +1,10 @@
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzFUKSmGgJI0N66zDJMCLeryob1Y0PTl3oVMS-VCR80_P2sZ5R7BJ7HpwW53VmTBJM/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyV3STelLbtJ_b3wdGeyOfA01vQyCW_zHQhlX5oNtKoher4QTSd-INxGD0Ou7mrwHs/exec';
 
 let rawAttendance = [];
 let employees = [];
 let deductions = [];
 let leaves = [];
+let timeEditRequests = [];
 
 let processedAttendance = [];
 let availablePeriods = [];
@@ -129,6 +130,7 @@ function applyInitData(data, isSilent = false) {
     });
     deductions = data.deductions || [];
     leaves = data.leaves || [];
+    timeEditRequests = data.timeEditRequests || [];
 
     // Auto-register missing names
     let attendanceNames = new Set(rawAttendance.map(r => r.name).filter(n => n));
@@ -515,6 +517,8 @@ function showAdminDashboard() {
     }
     
     renderAdminLeaves();
+    renderAdminTimeEdits();
+    renderAdminDashboardNotifications();
 }
 
 function showAdminEmployees() {
@@ -851,7 +855,7 @@ function renderEmployeeDashboard() {
         tableHtml += `
         <div class="data-row px-1 py-3 ${bgColor} ${hasMissing ? 'border-l-4 border-red-500' : ''}">
             <div class="table-grid text-[13px]">
-                <div class="flex flex-col text-left pl-1 justify-start">
+                <div class="flex flex-col text-left pl-1 justify-start cursor-pointer transition-transform hover:scale-105 active:scale-95" onclick="openRequestTimeEditModal('${row.date}', '${inStr}', '${outStr}', '${schedInStr}', '${schedOutStr}')">
                     <span class="font-black text-[13px] text-indigo-900 leading-tight date-text">${shortDateStr}</span>
                     <span class="text-[11px] text-slate-500 font-medium leading-tight day-text mt-1">${dayStr}</span>
                     ${row.isLate ? `<span class="text-[10px] font-normal text-red-500 leading-tight late-text mt-0.5">สาย ${row.lateMins} น.${row.lateDeduction > 0 ? `<br>(-${row.lateDeduction} ชม)` : ''}</span>` : ''}
@@ -887,6 +891,7 @@ function renderEmployeeDashboard() {
         tableHtml = `<div class="text-center py-8 text-slate-400 font-bold text-sm">ไม่พบข้อมูลเวลาเข้า-ออกในรอบนี้</div>`;
     }
 
+    renderEmployeeTimeEditRequests();
     document.getElementById('table-container').innerHTML = tableHtml;
 }
 
@@ -1366,6 +1371,7 @@ async function updateLeaveStatus(id, status) {
             let idx = leaves.findIndex(l => l.id === id);
             if (idx > -1) leaves[idx].status = status;
             renderAdminLeaves();
+            renderAdminDashboardNotifications();
         } else Swal.fire("Error: " + json.message);
     } catch(e) { console.error(e); Swal.fire("เชื่อมต่อไม่สำเร็จ"); }
     finally { overlay.classList.add('hidden'); }
@@ -2109,6 +2115,7 @@ function printSlip(idx) {
 function openLeave(pushToHistory = true) {
     showView('view-leave', pushToHistory);
     renderEmployeeLeaves();
+    renderEmployeeTimeEditRequests();
 }
 
 // ----------------------------------------------------
@@ -2201,6 +2208,7 @@ async function submitLeaveRequest() {
             document.getElementById('leave-reason').value = '';
             
             renderEmployeeLeaves();
+            renderEmployeeTimeEditRequests();
             
             overlay.classList.add('hidden');
             Swal.fire("ส่งคำขอลางานเรียบร้อยแล้ว");
@@ -2691,3 +2699,250 @@ document.addEventListener('DOMContentLoaded', () => {
         observer.observe(m, { attributes: true, attributeFilter: ['class'] });
     });
 });
+
+// ----------------------------------------------------
+// Time Edit Requests (Employee)
+// ----------------------------------------------------
+function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) {
+    const formatTime = t => (t && t.trim() !== '') ? t : '-';
+
+    Swal.fire({
+        title: '<div class="text-xl font-black text-slate-800">ขอแก้ไขเวลาเข้า-ออกงาน</div>',
+        html: `
+            <div class="text-left mt-2">
+                <div class="bg-indigo-50/50 rounded-2xl p-4 mb-4 border border-indigo-100/50 shadow-sm">
+                    <p class="text-lg font-bold text-slate-700 mb-1"><span class="text-indigo-600">${formatDateStr(date)}</span></p>
+                    <p class="text-xs text-slate-500">เวลาเดิมที่บันทึก: เข้า <span class="font-bold text-slate-700">${formatTime(actualIn)}</span> - ออก <span class="font-bold text-slate-700">${formatTime(actualOut)}</span></p>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">เวลาเข้างานใหม่</label>
+                        <input type="time" id="req-time-in" value="${schedIn || actualIn || ''}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">เวลาออกงานใหม่</label>
+                        <input type="time" id="req-time-out" value="${schedOut || actualOut || ''}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-red-500 uppercase tracking-wider mb-1.5 ml-1">เหตุผลที่ขอแก้ไข (บังคับ)</label>
+                        <textarea id="req-reason" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm" placeholder="โปรดระบุเหตุผลที่ชัดเจน"></textarea>
+                    </div>
+                </div>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'ส่งคำขอ',
+        cancelButtonText: 'ยกเลิก',
+        width: '95%',
+        customClass: {
+            popup: 'rounded-[24px] max-w-2xl w-full',
+            confirmButton: 'bg-[#5b52f6] text-white rounded-xl px-6 py-2.5 font-bold shadow-sm',
+            cancelButton: 'bg-slate-100 text-slate-600 rounded-xl px-6 py-2.5 font-bold'
+        },
+        preConfirm: () => {
+            const newIn = document.getElementById('req-time-in').value;
+            const newOut = document.getElementById('req-time-out').value;
+            const reason = document.getElementById('req-reason').value.trim();
+
+            if (!reason) {
+                Swal.showValidationMessage('กรุณาระบุเหตุผลในการแก้ไขเวลา');
+                return false;
+            }
+            if (!newIn && !newOut) {
+                Swal.showValidationMessage('กรุณาระบุเวลาใหม่อย่างน้อย 1 อย่าง');
+                return false;
+            }
+
+            return {
+                name: loggedInEmployee.name,
+                date: date,
+                originalIn: formatTime(actualIn),
+                originalOut: formatTime(actualOut),
+                newIn: newIn || '-',
+                newOut: newOut || '-',
+                reason: reason
+            };
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            submitTimeEditRequest(result.value);
+        }
+    });
+}
+
+async function submitTimeEditRequest(data) {
+    const overlay = document.getElementById('loading-overlay');
+    document.getElementById('loading-text').innerText = "กำลังส่งคำขอ...";
+    overlay.classList.remove('hidden');
+
+    try {
+        const res = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'requestTimeEdit',
+                timeEditRequest: data
+            })
+        });
+        const json = await res.json();
+        overlay.classList.add('hidden');
+        if (json.status === 'success') {
+            Swal.fire({
+                icon: 'success',
+                title: 'ส่งคำขอสำเร็จ',
+                text: 'กรุณารอแอดมินอนุมัติ',
+                customClass: { popup: 'rounded-[24px]' }
+            });
+            fetchFreshDataSilently();
+        } else {
+            Swal.fire('เกิดข้อผิดพลาด', json.message, 'error');
+        }
+    } catch (e) {
+        overlay.classList.add('hidden');
+        Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error');
+    }
+}
+
+function renderEmployeeTimeEditRequests() {
+    const list = document.getElementById('employee-time-edit-requests-list');
+    const container = document.getElementById('employee-time-edit-requests-container');
+    
+    if (!loggedInEmployee || !list || !container) return;
+
+    let myReqs = timeEditRequests.filter(r => r.name === loggedInEmployee.name);
+    
+    if (myReqs.length === 0) {
+        container.classList.add('hidden');
+        return;
+    }
+    
+    container.classList.remove('hidden');
+    let html = '';
+    myReqs.forEach(r => {
+        let statusBadge = '';
+        if (r.status === 'Pending') statusBadge = '<span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-[10px] font-bold">รออนุมัติ</span>';
+        else if (r.status === 'Approved') statusBadge = '<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded text-[10px] font-bold">อนุมัติ</span>';
+        else statusBadge = '<span class="bg-rose-100 text-rose-700 px-2 py-0.5 rounded text-[10px] font-bold">ปฏิเสธ</span>';
+
+        html += `<div class="flex justify-between items-center p-2 text-left">
+            <div>
+                <div class="font-bold text-slate-800 text-xs">${formatDateStr(r.date)}</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">เดิม: ${r.originalIn} - ${r.originalOut} <br> ใหม่: ${r.newIn} - ${r.newOut}</div>
+                <div class="text-[10px] text-indigo-600 mt-0.5">เหตุผล: ${r.reason}</div>
+            </div>
+            <div>${statusBadge}</div>
+        </div>`;
+    });
+    list.innerHTML = html;
+}
+
+// Admin Time Edits
+function renderAdminTimeEdits() {
+    const container = document.getElementById('admin-time-edit-approvals');
+    const list = document.getElementById('admin-time-edit-list');
+    const badge = document.getElementById('admin-dash-time-edit-badge');
+    
+    if (!list || !container) return;
+
+    const pending = timeEditRequests.filter(r => r.status === "Pending");
+    
+    if (pending.length === 0) {
+        container.classList.remove('hidden');
+        list.innerHTML = `<div class="text-center text-slate-400 py-6 text-sm">ไม่มีคำขอแก้ไขเวลาที่รออนุมัติ</div>`;
+        if (badge) badge.classList.add('hidden');
+        return;
+    }
+    
+    container.classList.remove('hidden');
+    if (badge) {
+        badge.innerText = pending.length;
+        badge.classList.remove('hidden');
+    }
+    list.innerHTML = pending.map(r => `
+        <div class="flex justify-between items-center bg-indigo-50 p-3 rounded-xl border border-indigo-100 mb-2">
+            <div>
+                <div class="font-black text-indigo-900">${r.name}</div>
+                <div class="text-[11px] font-bold text-indigo-700 mt-0.5">วันที่: ${formatDateStr(r.date)}</div>
+                <div class="text-[11px] text-slate-600 mt-1">เดิม: ${r.originalIn} - ${r.originalOut} <br> ใหม่: <span class="font-bold text-indigo-600">${r.newIn} - ${r.newOut}</span></div>
+                <div class="text-[10px] text-indigo-500 mt-1 bg-white p-1.5 rounded-lg border border-indigo-100">เหตุผล: ${r.reason}</div>
+            </div>
+            <div class="flex flex-col gap-1 ml-2">
+                <button onclick="updateTimeEditStatus('${r.id}', 'Approved')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold px-3 py-1.5 rounded active:scale-95 transition">อนุมัติ</button>
+                <button onclick="updateTimeEditStatus('${r.id}', 'Rejected')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-[10px] font-bold px-3 py-1.5 rounded active:scale-95 transition">ปฏิเสธ</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function updateTimeEditStatus(id, status) {
+    const payload = { action: "updateEditRequestStatus", id, status };
+    const overlay = document.getElementById('loading-overlay');
+    document.getElementById('loading-text').innerText = "กำลังอัปเดต...";
+    overlay.classList.remove('hidden');
+
+    try {
+        const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const json = await res.json();
+        if (json.status === "success") {
+            let idx = timeEditRequests.findIndex(r => r.id === id);
+            if (idx > -1) timeEditRequests[idx].status = status;
+            renderAdminTimeEdits();
+            renderAdminDashboardNotifications();
+            if (status === 'Approved') fetchFreshDataSilently(); // To update the actual logs in memory
+        } else Swal.fire("Error: " + json.message);
+    } catch(e) { console.error(e); Swal.fire("เชื่อมต่อไม่สำเร็จ"); }
+    finally { overlay.classList.add('hidden'); }
+}
+
+function renderAdminDashboardNotifications() {
+    const list = document.getElementById('admin-dashboard-notifications');
+    if (!list) return;
+
+    const pendingLeaves = leaves.filter(l => l.status === "Pending");
+    const pendingEdits = timeEditRequests.filter(r => r.status === "Pending");
+
+    if (pendingLeaves.length === 0 && pendingEdits.length === 0) {
+        list.innerHTML = `<div class="text-center py-4 text-slate-400 text-xs font-bold">ไม่มีรายการใหม่</div>`;
+        return;
+    }
+
+    let html = '';
+
+    pendingLeaves.forEach(l => {
+        html += `
+        <div class="bg-amber-50 p-3 rounded-xl border border-amber-100 flex justify-between items-center shadow-sm">
+            <div>
+                <div class="flex items-center gap-1.5 mb-1">
+                    <span class="bg-amber-500 text-white text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">ลางาน</span>
+                    <span class="font-black text-amber-900 text-xs">${l.name}</span>
+                </div>
+                <div class="text-[10px] text-amber-700">${l.leaveType}: ${new Date(l.startDate).toLocaleDateString('th-TH', {day: 'numeric', month: 'short'})} - ${new Date(l.endDate).toLocaleDateString('th-TH', {day: 'numeric', month: 'short'})}</div>
+            </div>
+            <button onclick="showView('view-admin-leaves')" class="text-[10px] font-bold text-amber-600 bg-white border border-amber-200 px-3 py-1.5 rounded-lg active:scale-95">ตรวจสอบ</button>
+        </div>`;
+    });
+
+    pendingEdits.forEach(r => {
+        html += `
+        <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100 flex justify-between items-center shadow-sm">
+            <div>
+                <div class="flex items-center gap-1.5 mb-1">
+                    <span class="bg-indigo-500 text-white text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">แก้ไขเวลา</span>
+                    <span class="font-black text-indigo-900 text-xs">${r.name}</span>
+                </div>
+                <div class="text-[10px] text-indigo-700">วันที่: ${formatDateStr(r.date)}</div>
+            </div>
+            <button onclick="showView('view-admin-time-edits')" class="text-[10px] font-bold text-indigo-600 bg-white border border-indigo-200 px-3 py-1.5 rounded-lg active:scale-95">ตรวจสอบ</button>
+        </div>`;
+    });
+
+    list.innerHTML = html;
+}
+
+
+function formatDateStr(dateStr) {
+    if (!dateStr) return "-";
+    const d = new Date(dateStr);
+    if (isNaN(d)) return dateStr;
+    return d.toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" });
+}

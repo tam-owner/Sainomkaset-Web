@@ -1,4 +1,5 @@
 var OLD_SHEET_ID = "1rS2XH04BgcY_bRRHIFiyb4M1utvDnNsfzsSd11dUbbk";
+var LINE_NOTIFY_TOKEN = ""; // ใส่ Token ของ Line Notify ที่นี่
 
 function doGet(e) {
   var action = e.parameter.action;
@@ -31,7 +32,8 @@ function doPost(e) {
     // From new attendance system
     if (action == "processData") return createJsonResponse(handleProcessData(p.payload));
     if (action == "getInitPayrollData") return createJsonResponse(handleGetInitPayrollData());
-
+    if (action == "requestTimeEdit") return createJsonResponse(handleRequestTimeEdit(p.timeEditRequest));
+    if (action == "updateEditRequestStatus") return createJsonResponse(handleUpdateEditRequestStatus(p.id, p.status));
     return createJsonResponse({status: "error", message: "Unknown action"});
   } catch (error) {
     return createJsonResponse({status: "error", message: error.toString()});
@@ -45,6 +47,17 @@ function createJsonResponse(data) {
   var output = ContentService.createTextOutput(JSON.stringify(data));
   output.setMimeType(ContentService.MimeType.JSON);
   return output;
+}
+
+function sendLineNotify(message) {
+  if (!LINE_NOTIFY_TOKEN) return;
+  try {
+    UrlFetchApp.fetch("https://notify-api.line.me/api/notify", {
+      method: "post",
+      headers: { "Authorization": "Bearer " + LINE_NOTIFY_TOKEN },
+      payload: { "message": message }
+    });
+  } catch(e) {}
 }
 
 function getOldSpreadsheet() {
@@ -80,6 +93,8 @@ function getSheetByNameOrCreateNew(name) {
       sheet.appendRow(["ID", "Period", "Name", "Amount", "Reason", "Timestamp", "Type"]);
     } else if (name === "Leaves") {
       sheet.appendRow(["ID", "Name", "StartDate", "EndDate", "LeaveType", "Reason", "Status", "Timestamp"]);
+    } else if (name === "TimeEditRequests") {
+      sheet.appendRow(["ID", "Timestamp", "Name", "Date", "OriginalIn", "OriginalOut", "NewIn", "NewOut", "Reason", "Status"]);
     }
   }
   return sheet;
@@ -229,30 +244,22 @@ function handleProcessData(payload) {
   return { status: "success", message: "Recorded to new sheet successfully." };
 }
 
-function handleGetInitPayrollData() {
-  var emps = getEmployeesData().map(function(e) {
-    return { name: e.name, status: 'active' };
-  });
-
-  var history = [];
-  var allAtt = getMergedAttendanceData();
-  allAtt.reverse();
-  var limit = Math.min(allAtt.length, 50);
-  for (var i = 0; i < limit; i++) {
-    var r = allAtt[i];
-    history.push({
-      name: r.name,
-      mode: r.type === 'เข้า' ? 'in' : 'out',
-      actualTime: r.scheduledTime,
-      fullDateTime: r.timestamp,
-      remark: r.note
-    });
-  }
-
-  return {
-    status: "success",
-    data: { history: history, master: emps }
-  };
+function getTimeEditRequestsData() {
+  try {
+    var sheet = getSheetByNameOrCreateNew("TimeEditRequests");
+    var data = sheet.getDataRange().getValues();
+    var result = [];
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      if (!row[0] || row[0] == "") continue;
+      result.push({
+        id: String(row[0]), timestamp: String(row[1]), name: String(row[2]), date: String(row[3]),
+        originalIn: String(row[4] || ""), originalOut: String(row[5] || ""), newIn: String(row[6] || ""),
+        newOut: String(row[7] || ""), reason: String(row[8] || ""), status: String(row[9] || "Pending")
+      });
+    }
+    return result;
+  } catch (e) { return []; }
 }
 
 function handleSaveEmployee(p) {
@@ -474,7 +481,8 @@ function handleGetInitPayrollData() {
       attendance: getMergedAttendanceData(),
       employees: getEmployeesData(),
       deductions: getDeductionsData(),
-      leaves: getLeavesData()
+      leaves: getLeavesData(),
+      timeEditRequests: getTimeEditRequestsData()
     }
   };
 }
@@ -513,4 +521,66 @@ function handleDeleteDeduction(id) {
     }
   }
   return {status: "error"};
+}
+
+function handleRequestLeave(leave) {
+  var sheet = getSheetByNameOrCreateNew("Leaves");
+  var newId = Utilities.getUuid();
+  var timestamp = new Date().toISOString();
+  sheet.appendRow([newId, leave.name, leave.startDate, leave.endDate, leave.leaveType, leave.reason, "Pending", timestamp]);
+  
+  var msg = "\n📌 มีคำขอลางานใหม่\nพนักงาน: " + leave.name + "\nประเภท: " + leave.leaveType + "\nวันที่: " + leave.startDate + " ถึง " + leave.endDate + "\nเหตุผล: " + leave.reason;
+  sendLineNotify(msg);
+  
+  return {status: "success", message: "Requested successfully", id: newId};
+}
+
+function handleUpdateLeaveStatus(id, newStatus) {
+  var sheet = getSheetByNameOrCreateNew("Leaves");
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === id) {
+      sheet.getRange(i + 1, 7).setValue(newStatus);
+      return {status: "success"};
+    }
+  }
+  return {status: "error", message: "Not found"};
+}
+
+function handleRequestTimeEdit(req) {
+  var sheet = getSheetByNameOrCreateNew("TimeEditRequests");
+  var newId = Utilities.getUuid();
+  var timestamp = new Date().toISOString();
+  sheet.appendRow([newId, timestamp, req.name, req.date, req.originalIn, req.originalOut, req.newIn, req.newOut, req.reason, "Pending"]);
+  
+  var msg = "\n⏳ มีคำขอแก้ไขเวลาเข้าออกงาน\nพนักงาน: " + req.name + "\nวันที่: " + req.date + "\nเดิม: " + req.originalIn + " - " + req.originalOut + "\nใหม่: " + req.newIn + " - " + req.newOut + "\nเหตุผล: " + req.reason;
+  sendLineNotify(msg);
+  
+  return {status: "success", message: "Requested successfully", id: newId};
+}
+
+function handleUpdateEditRequestStatus(id, newStatus) {
+  var sheet = getSheetByNameOrCreateNew("TimeEditRequests");
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === id) {
+      sheet.getRange(i + 1, 10).setValue(newStatus);
+      
+      // If approved, update the actual log
+      if (newStatus === "Approved") {
+        var req = {
+          nickname: String(data[i][2]),
+          date: String(data[i][3]),
+          in: String(data[i][6]),
+          out: String(data[i][7]),
+          type: "Work",
+          actionType: "update"
+        };
+        handleUpdateEmployeeLog(req);
+      }
+      
+      return {status: "success"};
+    }
+  }
+  return {status: "error", message: "Not found"};
 }
