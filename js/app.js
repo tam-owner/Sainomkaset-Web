@@ -156,18 +156,38 @@ function applyInitData(data, isSilent = false) {
     if (currentSelection && select) select.value = currentSelection;
     
     if (!isSilent) {
+        let hash = window.location.hash;
+        if (hash) {
+            hash = hash.substring(1); // remove #
+        }
+        
         if (isAdmin) {
             showAdminDashboard();
+            if (hash && hash !== 'view-admin-dashboard' && document.getElementById(hash)) {
+                if (hash === 'view-admin-employees') {
+                    showAdminEmployees();
+                } else {
+                    showView(hash, false);
+                }
+            }
         } else if (loggedInEmployee) {
             const updatedEmp = employees.find(e => e.name === loggedInEmployee.name);
             if (updatedEmp) {
                 loggedInEmployee = updatedEmp;
                 showEmployeeDashboard();
+                if (hash && hash !== 'view-dashboard' && document.getElementById(hash)) {
+                    if (hash === 'view-profile') openProfile(false);
+                    else if (hash === 'view-leave') openLeave(false);
+                    else showView(hash, false);
+                }
             } else {
                 logout();
             }
         } else {
             overlay.classList.add('hidden');
+            if (hash && document.getElementById(hash)) {
+                showView(hash, false);
+            }
         }
     }
 }
