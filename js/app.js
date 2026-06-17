@@ -1014,8 +1014,6 @@ function renderAdminSummary() {
     Object.values(empStats).forEach(emp => {
         if (emp.totalNormalHours === 0 && emp.totalOTHours === 0 && (!emp.normalRate || emp.normalRate === 0)) return; 
         
-        activeEmployeesCount++;
-        
         let normalPay = emp.totalNormalHours * emp.normalRate;
         let otPay = emp.totalOTHours * emp.otRate;
         let grossPay = normalPay + otPay;
@@ -1043,6 +1041,9 @@ function renderAdminSummary() {
         }
 
         let netPay = payBeforeTax - standardDeduct;
+        if (netPay === 0) return;
+
+        activeEmployeesCount++;
         totalPayroll += netPay;
         
         chartLabels.push(emp.name);
