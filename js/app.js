@@ -1099,7 +1099,7 @@ function renderAdminSummary() {
                     ${empDeductions.map(d => `
                         <div class="flex justify-between items-center ${d.type === 'Bonus' ? 'bg-emerald-50' : 'bg-red-50'} px-2 py-1.5 rounded-lg text-xs">
                             <div class="flex flex-col">
-                                <span class="font-bold ${d.type === 'Bonus' ? 'text-emerald-700' : 'text-red-700'}">[${d.type === 'Bonus' ? 'บวกเงิน' : (d.type === 'Advance' ? 'เบิกล่วงหน้า' : 'หักเงิน')}] ${d.reason}</span>
+                                <span class="font-bold ${d.type === 'Bonus' ? 'text-emerald-700' : 'text-red-700'}">[${d.type === 'Bonus' ? 'บวกเงิน' : (d.type === 'Advance' ? 'เบิกล่วงหน้า' : (d.type === 'Damage' ? 'หักค่าเสียหาย' : 'หักค่าอื่นๆ'))}] ${d.reason}</span>
                             </div>
                             <div class="flex items-center gap-2">
                                 <span class="font-black ${d.type === 'Bonus' ? 'text-emerald-600' : 'text-red-600'}">${d.type === 'Bonus' ? '+' : '-'}฿${d.amount.toLocaleString()}</span>
@@ -1166,14 +1166,14 @@ function openDeductionModal(empName, deductionId = null) {
         title.innerText = "แก้ไขรายการ";
         const d = deductions.find(x => x.id === deductionId);
         document.getElementById('deduction-id').value = d.id;
-        document.getElementById('deduction-type').value = d.type || 'Deduction';
+        document.getElementById('deduction-type').value = d.type || 'Advance';
         document.getElementById('deduction-reason').value = d.reason;
         document.getElementById('deduction-amount').value = d.amount;
         btnDel.classList.remove('hidden');
     } else {
         title.innerText = "รายการปรับเพิ่ม/ลดเงิน";
         document.getElementById('deduction-id').value = '';
-        document.getElementById('deduction-type').value = 'Deduction';
+        document.getElementById('deduction-type').value = 'Advance';
         document.getElementById('deduction-reason').value = '';
         document.getElementById('deduction-amount').value = '';
         btnDel.classList.add('hidden');
