@@ -2365,7 +2365,7 @@ async function fetchTimeLogs(nickname) {
                             out: '',
                             type: l.leaveType === 'ลาป่วย' ? 'Leave_Paid' : (l.leaveType === 'ลากิจ (ได้ค่าแรง)' ? 'Leave_Paid' : 'Leave_Unpaid')
                         });
-                    } else {
+                    } else if (!existing.in && !existing.out) {
                         existing.type = l.leaveType === 'ลาป่วย' ? 'Leave_Paid' : (l.leaveType === 'ลากิจ (ได้ค่าแรง)' ? 'Leave_Paid' : 'Leave_Unpaid');
                     }
                 }
