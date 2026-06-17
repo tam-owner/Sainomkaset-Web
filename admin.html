@@ -710,6 +710,7 @@
                     <select id="deduction-type" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm font-semibold focus:border-indigo-500 outline-none">
                         <option value="Deduction">หักเงิน (Deduct)</option>
                         <option value="Bonus">บวกเงิน (Bonus/OT พิเศษ)</option>
+                        <option value="Advance">เบิกล่วงหน้า (Advance)</option>
                     </select>
                 </div>
                 <div><label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">เหตุผล</label><input type="text" id="deduction-reason" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm font-semibold outline-none"></div>
@@ -845,7 +846,7 @@
 
     <script>sessionStorage.setItem('snk_payroll_user', 'ADMIN');</script>
     <script src="js/customSelect.js?v=1"></script>
-    <script src="js/app.js?v=20260616_11"></script>
+    <script src="js/app.js?v=20260616_13"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {

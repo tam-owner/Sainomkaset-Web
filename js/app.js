@@ -1029,9 +1029,7 @@ function renderAdminSummary() {
             else customDeductTotal += d.amount;
         });
 
-        let advanceDeduct = emp.advancePayment || 0;
-
-        let payBeforeTax = grossPay + customBonusTotal - customDeductTotal - advanceDeduct;
+        let payBeforeTax = grossPay + customBonusTotal - customDeductTotal;
 
         let standardDeduct = 0;
         let deductLabel = '';
@@ -1083,11 +1081,7 @@ function renderAdminSummary() {
                     <span>฿${otPay.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
                 </div>` : ''}
                 
-                ${advanceDeduct > 0 ? `
-                <div class="flex justify-between text-red-500 font-bold">
-                    <span>เบิกล่วงหน้า</span>
-                    <span>-฿${advanceDeduct.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
-                </div>` : ''}
+
 
                 ${standardDeduct > 0 ? `
                 <div class="flex justify-between text-red-500">
@@ -1652,7 +1646,7 @@ async function saveEmployee() {
         bankAccount: document.getElementById('emp-bank').value.trim(),
         employeeType: document.getElementById('emp-type').value,
         status: document.getElementById('emp-status').value,
-        advancePayment: parseFloat(document.getElementById('emp-advancepayment').value) || 0,
+        advancePayment: 0,
         photo: currentEmployeePhotoBase64
     };
 
