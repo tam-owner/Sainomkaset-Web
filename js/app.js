@@ -623,14 +623,14 @@ function renderEmployeeDashboard() {
     empDeductions.forEach(d => {
         if (d.type === 'Bonus') {
             customBonusTotal += d.amount;
-            customDeductHtml += `<div class="flex justify-between items-center text-xs py-1.5 border-b border-dashed border-indigo-100 last:border-0">
-                <span class="text-indigo-600 font-bold">${d.reason}</span>
-                <span class="font-black text-indigo-700">+฿${d.amount.toLocaleString()}</span>
+            customDeductHtml += `<div class="flex justify-between items-center text-xs py-1.5 border-b border-dashed border-emerald-100 last:border-0">
+                <span class="text-emerald-700 font-bold">[บวกเงิน] ${d.reason}</span>
+                <span class="font-black text-emerald-600">+฿${d.amount.toLocaleString()}</span>
             </div>`;
         } else {
             customDeductTotal += d.amount;
             customDeductHtml += `<div class="flex justify-between items-center text-xs py-1.5 border-b border-dashed border-red-100 last:border-0">
-                <span class="text-red-500 font-bold">${d.reason}</span>
+                <span class="text-red-500 font-bold">[${d.type === 'Advance' ? 'เบิกล่วงหน้า' : (d.type === 'Damage' ? 'หักค่าเสียหาย' : 'หักค่าอื่นๆ')}] ${d.reason}</span>
                 <span class="font-black text-red-600">-฿${d.amount.toLocaleString()}</span>
             </div>`;
         }
