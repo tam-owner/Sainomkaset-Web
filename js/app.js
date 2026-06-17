@@ -2387,35 +2387,39 @@ function renderTimeLogs() {
         html += `<div class="text-center py-10 text-slate-400 font-bold text-sm bg-white rounded-xl border border-slate-200">ไม่พบประวัติในเดือนนี้</div>`;
     } else {
         html += `
-        <div class="overflow-x-auto border border-slate-200 rounded-xl bg-white shadow-sm">
-            <table class="w-full text-left border-collapse min-w-[500px]">
-                <thead class="sticky top-0 z-10 shadow-sm">
-                    <tr class="bg-[#2A3441] text-white text-[12px] font-bold tracking-wider">
-                        <th class="p-3">วันที่</th>
-                        <th class="p-3 text-center">เข้างาน</th>
-                        <th class="p-3 text-center">ออกงาน</th>
-                        <th class="p-3 text-center">พัก<br>ชม.</th>
-                        <th class="p-3 text-center">ปกติ<br>ชม.</th>
-                        <th class="p-3 text-center">OT<br>ชม.</th>
-                    </tr>
-                </thead>
-                <tbody class="text-sm divide-y divide-slate-100">
+        <div class="overflow-hidden border border-slate-200 rounded-xl bg-white shadow-sm">
+            <div id="employee-table-header" class="table-grid font-bold text-white bg-slate-800/95 backdrop-blur-md text-[12px] py-2.5 px-1 text-center shadow-md sticky top-0 z-40 border-b border-slate-700">
+                <div class="text-left pl-2">วันที่</div>
+                <div>เข้างาน</div>
+                <div>ออกงาน</div>
+                <div class="leading-tight">พัก<br>ชม.</div>
+                <div class="leading-tight">ปกติ<br>ชม.</div>
+                <div class="leading-tight">OT<br>ชม.</div>
+            </div>
+            <div class="bg-white">
         `;
         
-        currentLogsData.forEach(log => {
+        function formatTime(tStr) {
+            if (!tStr || tStr === '-') return '';
+            return tStr;
+        }
+
+        currentLogsData.forEach((log, i) => {
             const isLeave = log.type && log.type.includes("Leave");
             const dateObj = new Date(log.date);
-            const dateStr = dateObj.toLocaleDateString('th-TH', {day: '2-digit', month: '2-digit', year: '2-digit'}).replace(/\//g, '/');
-            const dayStr = dateObj.toLocaleDateString('th-TH', {weekday: 'long'});
+            const dayNum = String(dateObj.getDate()).padStart(2, '0');
+            const monthNum = String(dateObj.getMonth()+1).padStart(2, '0');
+            const yearNum = dateObj.getFullYear().toString().substr(-2);
+            const shortDateStr = `${dayNum}/${monthNum}/${yearNum}`;
+            const dayStr = dateObj.toLocaleDateString('th-TH', { weekday: 'long' });
             
             let breakHrs = '';
             let normalHrs = '';
             let otHrs = '';
-            let rowColor = 'bg-white';
-            let dateColor = 'text-indigo-800';
+            let bgColor = (i % 2 === 0) ? 'bg-white' : 'bg-slate-50';
             
             if (dateObj.getDay() === 0) {
-                rowColor = 'bg-rose-50/30';
+                bgColor = 'bg-rose-50/30';
             }
             
             if (log.in && log.out && !isLeave) {
@@ -2440,34 +2444,54 @@ function renderTimeLogs() {
             }
 
             let leaveBadge = '';
+            let rowClass = 'data-row px-1 py-3 cursor-pointer hover:bg-slate-100 transition relative ';
             if (isLeave) {
-                leaveBadge = `<span class="text-[10px] ${log.type === 'Leave_Paid' ? 'text-emerald-600 bg-emerald-50' : 'text-orange-600 bg-orange-50'} px-2 py-0.5 rounded ml-2">ลา</span>`;
+                leaveBadge = `<span class="text-[10px] ${log.type === 'Leave_Paid' ? 'text-emerald-600 bg-emerald-50' : 'text-orange-600 bg-orange-50'} px-2 py-0.5 rounded mt-1 inline-block">ลา</span>`;
+                rowClass += log.type === 'Leave_Paid' ? 'border-l-4 border-emerald-500' : 'border-l-4 border-orange-500';
             }
 
+            let inStr = formatTime(log.in);
+            let outStr = formatTime(log.out);
+            const schedInStr = log.scheduledIn && log.scheduledIn !== '-' ? log.scheduledIn : '';
+            const schedOutStr = log.scheduledOut && log.scheduledOut !== '-' ? log.scheduledOut : '';
+            
+            let schedInClass = `font-black text-[13px] text-slate-800`;
+            let schedOutClass = `font-black text-[13px] text-slate-800`;
+            let inClass = `scan-time-text text-[11px] font-medium mt-1 text-slate-500`;
+            let outClass = `scan-time-text text-[11px] font-medium mt-1 text-slate-500`;
+
             html += `
-                <tr onclick="openEditLogModal('${log.date}', '${log.scheduledIn || ''}', '${log.scheduledOut || ''}', '${log.type || 'Work'}')" class="${rowColor} cursor-pointer hover:bg-slate-50 transition relative ${log.type === 'Leave_Paid' ? 'border-l-4 border-l-emerald-500' : (log.type === 'Leave_Unpaid' ? 'border-l-4 border-l-orange-500' : 'border-l-4 border-l-transparent')}">
-                    <td class="p-3">
-                        <div class="font-bold text-[13px] ${dateColor}">${dateStr}</div>
-                        <div class="text-[11px] text-slate-500">${dayStr} ${leaveBadge}</div>
-                    </td>
-                    <td class="p-3 text-center">
-                        <div class="font-black text-[13px] text-slate-800">${log.scheduledIn || log.in || '-'}</div>
-                        ${(log.scheduledIn && log.in) ? `<div class="text-[12px] text-slate-500 mt-0.5">${log.in}</div>` : ''}
-                    </td>
-                    <td class="p-3 text-center">
-                        <div class="font-black text-[13px] text-slate-800">${log.scheduledOut || log.out || '-'}</div>
-                        ${(log.scheduledOut && log.out) ? `<div class="text-[12px] text-slate-500 mt-0.5">${log.out}</div>` : ''}
-                    </td>
-                    <td class="p-3 text-center text-slate-600 font-medium text-[13px]">${breakHrs || '-'}</td>
-                    <td class="p-3 text-center font-bold text-indigo-600 text-[13px]">${normalHrs ? Number(normalHrs).toFixed(1) : '-'}</td>
-                    <td class="p-3 text-center font-bold text-orange-600 text-[13px]">${otHrs ? Number(otHrs).toFixed(1) : '-'}</td>
-                </tr>
-            `;
+            <div onclick="openEditLogModal('${log.date}', '${log.scheduledIn || ''}', '${log.scheduledOut || ''}', '${log.type || 'Work'}')" class="${rowClass} ${bgColor}">
+                <div class="table-grid text-[13px]">
+                    <div class="flex flex-col text-left pl-2 justify-start">
+                        <span class="font-black text-[13px] text-indigo-900 leading-tight date-text">${shortDateStr}</span>
+                        <span class="text-[11px] text-slate-500 font-medium leading-tight day-text mt-1">${dayStr}</span>
+                        ${leaveBadge}
+                    </div>
+                    
+                    <div class="text-center flex flex-col items-center justify-start">
+                        <span class="${schedInClass}">${schedInStr || inStr || '-'}</span>
+                        <span class="${inClass}">${schedInStr && inStr ? inStr : ''}</span>
+                    </div>
+                    
+                    <div class="text-center flex flex-col items-center justify-start">
+                        <span class="${schedOutClass}">${schedOutStr || outStr || '-'}</span>
+                        <span class="${outClass}">${schedOutStr && outStr ? outStr : ''}</span>
+                    </div>
+                    
+                    <div class="text-center flex flex-col items-center justify-start pt-[2px]">
+                        <span class="text-slate-600 font-medium">${breakHrs || ''}</span>
+                    </div>
+                    
+                    <div class="text-center flex flex-col items-center justify-start font-black pt-[1px] ${normalHrs > 0 ? 'text-blue-600' : 'text-slate-400'}">${normalHrs > 0 ? Number(normalHrs).toFixed(1) : ''}</div>
+                    
+                    <div class="text-center flex flex-col items-center justify-start font-black pt-[1px] ${otHrs > 0 ? 'text-orange-500' : 'text-slate-400'}">${otHrs > 0 ? Number(otHrs).toFixed(1) : ''}</div>
+                </div>
+            </div>`;
         });
         
         html += `
-                </tbody>
-            </table>
+            </div>
         </div>
         `;
     }
