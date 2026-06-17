@@ -497,7 +497,7 @@ function setupPeriods() {
         if (!isAdmin && r.name !== loggedInEmployee.name) return;
         
         const d = r.dateObj;
-        const mStr = `${d.getFullYear()}-${d.getMonth()}`;
+        const mStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
         monthsSet.add(mStr);
         if (d.getDate() <= 15) {
             periodsSet.add(`h1_${mStr}`);
@@ -512,9 +512,9 @@ function setupPeriods() {
     availablePeriods = [];
     sortedMonths.forEach(mStr => {
         let [y, m] = mStr.split('-').map(Number);
-        let mName = monthNames[m];
+        let mName = monthNames[m - 1];
         let yThai = y + 543;
-        let lastDay = new Date(y, m + 1, 0).getDate();
+        let lastDay = new Date(y, m, 0).getDate();
         
         availablePeriods.push({ value: `all_${mStr}`, text: `1-${lastDay} ${mName} ${yThai}` });
         if (periodsSet.has(`h1_${mStr}`)) {
@@ -2387,8 +2387,8 @@ function renderTimeLogs() {
         html += `<div class="text-center py-10 text-slate-400 font-bold text-sm bg-white rounded-xl border border-slate-200">ไม่พบประวัติในเดือนนี้</div>`;
     } else {
         html += `
-        <div class="overflow-hidden border border-slate-200 rounded-xl bg-white shadow-sm">
-            <div id="employee-table-header" class="table-grid font-bold text-white bg-slate-800/95 backdrop-blur-md text-[12px] py-2.5 px-1 text-center shadow-md sticky top-0 z-40 border-b border-slate-700">
+        <div class="border border-slate-200 rounded-xl bg-white shadow-sm">
+            <div id="employee-table-header" class="table-grid font-bold text-white bg-slate-800/95 backdrop-blur-md text-[12px] py-2.5 px-1 text-center shadow-md sticky top-0 z-40 border-b border-slate-700 rounded-t-xl">
                 <div class="text-left pl-2">วันที่</div>
                 <div>เข้างาน</div>
                 <div>ออกงาน</div>
