@@ -1099,7 +1099,7 @@ function renderAdminSummary() {
                     ${empDeductions.map(d => `
                         <div class="flex justify-between items-center ${d.type === 'Bonus' ? 'bg-indigo-50' : 'bg-red-50'} px-2 py-1.5 rounded-lg text-xs">
                             <div class="flex flex-col">
-                                <span class="font-bold ${d.type === 'Bonus' ? 'text-indigo-700' : 'text-red-700'}">${d.reason}</span>
+                                <span class="font-bold ${d.type === 'Bonus' ? 'text-indigo-700' : 'text-red-700'}">[${d.type === 'Bonus' ? 'บวกเงิน' : (d.type === 'Advance' ? 'เบิกล่วงหน้า' : 'หักเงิน')}] ${d.reason}</span>
                             </div>
                             <div class="flex items-center gap-2">
                                 <span class="font-black ${d.type === 'Bonus' ? 'text-indigo-600' : 'text-red-600'}">${d.type === 'Bonus' ? '+' : '-'}฿${d.amount.toLocaleString()}</span>
