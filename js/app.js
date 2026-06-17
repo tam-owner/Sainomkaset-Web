@@ -2283,7 +2283,7 @@ async function openTimeLogsModal(nickname) {
     currentLogsEmp = employees.find(e => e.name === nickname);
     if (!currentLogsEmp) return;
     
-    document.getElementById('timelogs-title').innerText = `ประวัติเวลาเข้าออก: ${currentLogsEmp.name}`;
+    document.getElementById('timelogs-title').innerHTML = `${currentLogsEmp.name} <span class="text-base font-medium text-slate-500 ml-1 font-normal">${currentLogsEmp.fullName || ''}</span>`;
     
     const modal = document.getElementById('timelogs-modal');
     const modalBox = document.getElementById('timelogs-modal-box');
@@ -2379,14 +2379,7 @@ async function fetchTimeLogs(nickname) {
 function renderTimeLogs() {
     const container = document.getElementById('timelogs-content');
     
-    let html = `
-        <div class="mb-4 flex justify-end">
-            <button onclick="openEditLogModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-sm active:scale-95 transition flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                เพิ่มรายการ / ลา
-            </button>
-        </div>
-    `;
+    let html = ``;
     
     if (currentLogsData.length === 0) {
         html += `<div class="text-center py-10 text-slate-400 font-bold text-sm bg-white rounded-xl border border-slate-200">ไม่พบประวัติในเดือนนี้</div>`;
