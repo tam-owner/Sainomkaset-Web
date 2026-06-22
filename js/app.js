@@ -509,6 +509,84 @@ function showEmployeeDashboard(pushToHistory = true) {
     if (document.getElementById('dash-user-name') && loggedInEmployee) {
         document.getElementById('dash-user-name').innerText = loggedInEmployee.name;
     }
+    
+    updateDashboardAttendanceStatus();
+}
+
+function updateDashboardAttendanceStatus() {
+    if (!loggedInEmployee) return;
+    const name = loggedInEmployee.name.trim();
+    const now = new Date(); 
+    let rd = new Date(now.getTime()); 
+    if (rd.getHours() < 5) rd.setDate(rd.getDate() - 1);
+    const todayStr = `${rd.getFullYear()}-${String(rd.getMonth() + 1).padStart(2, '0')}-${String(rd.getDate()).padStart(2, '0')}`;
+    
+    let inTime = null;
+    let outTime = null;
+    
+    for(let i = rawAttendance.length - 1; i >= 0; i--) {
+        const r = rawAttendance[i];
+        if (r.name && r.name.trim() === name) {
+            let d;
+            let timestampStr = String(r.timestamp).trim();
+            const dtMatch = timestampStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:\s+(\d{1,2}:\d{2}(?::\d{2})?))?/);
+            if (dtMatch) {
+                let day = dtMatch[1].padStart(2, '0');
+                let month = dtMatch[2].padStart(2, '0');
+                let year = dtMatch[3];
+                let time = dtMatch[4] || '00:00:00';
+                d = new Date(`${year}-${month}-${day}T${time}`);
+            } else {
+                d = new Date(timestampStr);
+            }
+            if (!isNaN(d.getTime())) {
+                let rDate = new Date(d.getTime());
+                if (rDate.getHours() < 5) rDate.setDate(rDate.getDate() - 1);
+                const rDateStr = `${rDate.getFullYear()}-${String(rDate.getMonth() + 1).padStart(2, '0')}-${String(rDate.getDate()).padStart(2, '0')}`;
+                
+                if (rDateStr === todayStr) {
+                    if (r.type === 'เข้า' && !inTime) {
+                        inTime = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                    }
+                    if (r.type === 'ออก' && !outTime) {
+                        outTime = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                    }
+                }
+            }
+        }
+    }
+    
+    const btnIn = document.getElementById('btn-dash-in');
+    const btnInText = document.getElementById('btn-dash-in-text');
+    const iconIn = document.getElementById('icon-dash-in');
+    
+    const btnOut = document.getElementById('btn-dash-out');
+    const btnOutText = document.getElementById('btn-dash-out-text');
+    const iconOut = document.getElementById('icon-dash-out');
+    
+    if (inTime) {
+        btnInText.innerText = `เข้างานแล้ว (${inTime})`;
+        btnIn.className = 'bg-blue-600 text-white p-4 rounded-2xl shadow-[0_8px_20px_-6px_rgba(37,99,235,0.6)] border border-blue-500 flex flex-col items-center justify-center gap-2 transition-all active:scale-95 group relative overflow-hidden';
+        iconIn.className = 'w-8 h-8 text-white transition-colors';
+        iconIn.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+    } else {
+        btnInText.innerText = `เข้างาน (IN)`;
+        btnIn.className = 'bg-blue-600/10 text-blue-700 hover:bg-blue-600 hover:text-white p-4 rounded-2xl shadow-sm border border-blue-200 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all active:scale-95 group';
+        iconIn.className = 'w-8 h-8 text-blue-500 group-hover:text-white transition-colors';
+        iconIn.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>';
+    }
+    
+    if (outTime) {
+        btnOutText.innerText = `ออกงานแล้ว (${outTime})`;
+        btnOut.className = 'bg-rose-600 text-white p-4 rounded-2xl shadow-[0_8px_20px_-6px_rgba(225,29,72,0.6)] border border-rose-500 flex flex-col items-center justify-center gap-2 transition-all active:scale-95 group relative overflow-hidden';
+        iconOut.className = 'w-8 h-8 text-white transition-colors';
+        iconOut.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+    } else {
+        btnOutText.innerText = `ออกงาน (OUT)`;
+        btnOut.className = 'bg-rose-600/10 text-rose-700 hover:bg-rose-600 hover:text-white p-4 rounded-2xl shadow-sm border border-rose-200 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all active:scale-95 group';
+        iconOut.className = 'w-8 h-8 text-rose-500 group-hover:text-white transition-colors';
+        iconOut.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>';
+    }
 }
 
 function openTimesheet(pushToHistory = true) {
