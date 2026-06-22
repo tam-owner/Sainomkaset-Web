@@ -798,7 +798,7 @@
 
     <div id="pin-modal" class="hidden fixed inset-0 bg-slate-900/60 z-[120] flex items-center justify-center p-4 backdrop-blur-sm transition-all duration-300 opacity-0 pointer-events-none">
         <div id="pin-modal-box" class="bg-white rounded-[24px] p-6 w-full max-w-sm shadow-2xl transform scale-95 transition-transform duration-300">
-            <h3 class="text-lg font-black text-indigo-900 border-b border-slate-100 pb-3 mb-4">เปลี่ยนรหัสผ่าน (PIN)</h3>
+            <h3 onclick="if(typeof handleSecretIPUpdate === 'function') handleSecretIPUpdate()" class="text-lg font-black text-indigo-900 border-b border-slate-100 pb-3 mb-4 select-none cursor-pointer">เปลี่ยนรหัสผ่าน (PIN)</h3>
             <div class="space-y-4">
                 <div><label class="block text-xs font-bold text-slate-500 mb-1">รหัสผ่านเดิม</label><input type="password" id="old-pin" pattern="[0-9]*" inputmode="numeric" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-center tracking-widest font-bold focus:border-indigo-500 focus:ring-2"></div>
                 <div><label class="block text-xs font-bold text-slate-500 mb-1">รหัสผ่านใหม่</label><input type="password" id="new-pin" pattern="[0-9]*" inputmode="numeric" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-center tracking-widest font-bold focus:border-indigo-500 focus:ring-2"></div>
@@ -960,7 +960,7 @@
     </div>
 
     <script src="js/customSelect.js"></script>
-    <script src="js/app.js?v=20260623_17"></script>
+    <script src="js/app.js?v=20260623_19"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -973,7 +973,7 @@
       }
     </script>
     <div id="app-version-display" class="fixed bottom-2 right-2 text-[10px] text-slate-400 font-medium z-[9999] pointer-events-none opacity-50">
-        v1.3.6 (23 มิ.ย. 26 03:40)
+        v1.3.8 (23 มิ.ย. 26 03:55)
     </div>
 </body>
 </html>

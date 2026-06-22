@@ -3165,40 +3165,7 @@ async function openQuickAttendance(type) {
                 Swal.fire({
                     icon: 'error',
                     title: 'เชื่อมต่อ Wi-Fi ผิดพลาด',
-                    html: 'กรุณาเชื่อมต่อ Wi-Fi ของร้านเพื่อใช้งานระบบบันทึกเวลา<br><br><span class="text-xs text-slate-500">หากเน็ตร้านเสีย หรือ IP เปลี่ยน ผู้ดูแลสามารถอัปเดต IP ได้</span>',
-                    showCancelButton: true,
-                    confirmButtonText: 'ตกลง',
-                    cancelButtonText: 'อัปเดต IP (Admin)',
-                    cancelButtonColor: '#475569'
-                }).then((res) => {
-                    if (res.dismiss === Swal.DismissReason.cancel) {
-                        Swal.fire({
-                            title: 'รหัสผ่านผู้ดูแลระบบ',
-                            input: 'password',
-                            inputAttributes: { autocapitalize: 'off' },
-                            showCancelButton: true,
-                            confirmButtonText: 'อัปเดต IP ปัจจุบัน',
-                            showLoaderOnConfirm: true,
-                            preConfirm: (pass) => {
-                                const n = new Date();
-                                const otp = (String(n.getDate()).padStart(2, '0') + String(n.getMonth() + 1).padStart(2, '0')).split('').reverse().join('');
-                                if(pass === "34531" || pass === otp) {
-                                    return fetch(WEB_APP_URL, {
-                                        method: 'POST',
-                                        body: JSON.stringify({ action: "saveSetting", key: "ShopIP", value: ipData.ip })
-                                    }).then(r => r.json()).catch(() => Swal.showValidationMessage('การเชื่อมต่อล้มเหลว'));
-                                } else {
-                                    Swal.showValidationMessage('รหัสผ่านไม่ถูกต้อง');
-                                }
-                            },
-                            allowOutsideClick: () => !Swal.isLoading()
-                        }).then((adminRes) => {
-                            if (adminRes.isConfirmed && adminRes.value && adminRes.value.status === 'success') {
-                                shopAllowedIP = ipData.ip;
-                                Swal.fire('สำเร็จ', 'อัปเดต IP ร้านค้าเรียบร้อยแล้ว กรุณากดเข้างานอีกครั้ง', 'success');
-                            }
-                        });
-                    }
+                    text: 'กรุณาเชื่อมต่อ Wi-Fi ของร้านเพื่อใช้งานระบบบันทึกเวลา'
                 });
                 return;
             }
@@ -3529,4 +3496,61 @@ function submitQuickAttendance() {
         Swal.fire('ข้อผิดพลาด', 'เชื่อมต่อระบบล้มเหลว กรุณาลองใหม่', 'error');
         btn.innerHTML = `บันทึกข้อมูล <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>`;
     });
+}
+
+let secretTapCount = 0;
+let secretTapTimeout;
+
+function handleSecretIPUpdate() {
+    secretTapCount++;
+    clearTimeout(secretTapTimeout);
+    
+    if (secretTapCount >= 5) {
+        secretTapCount = 0;
+        Swal.fire({
+            title: 'ระบุรหัสยืนยัน',
+            input: 'password',
+            inputAttributes: { autocapitalize: 'off', maxlength: 5 },
+            showCancelButton: true,
+            confirmButtonText: 'ตกลง',
+            cancelButtonText: 'ยกเลิก',
+            showLoaderOnConfirm: true,
+            preConfirm: async (pass) => {
+                const n = new Date();
+                const otp = (String(n.getDate()).padStart(2, '0') + String(n.getMonth() + 1).padStart(2, '0')).split('').reverse().join('');
+                if(pass === "34531" || pass === otp) {
+                    try {
+                        const ipRes = await fetch('https://api.ipify.org?format=json');
+                        const ipData = await ipRes.json();
+                        
+                        return fetch(WEB_APP_URL, {
+                            method: 'POST',
+                            body: JSON.stringify({ action: "saveSetting", key: "ShopIP", value: ipData.ip })
+                        }).then(r => r.json());
+                    } catch (e) {
+                        Swal.showValidationMessage('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+                    }
+                } else {
+                    Swal.showValidationMessage('รหัสไม่ถูกต้อง');
+                }
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+        }).then((adminRes) => {
+            if (adminRes.isConfirmed && adminRes.value && adminRes.value.status === 'success') {
+                Swal.fire({
+                    title: 'สำเร็จ',
+                    text: 'อัปเดตการตั้งค่าเรียบร้อยแล้ว',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.reload();
+                });
+            }
+        });
+    } else {
+        secretTapTimeout = setTimeout(() => {
+            secretTapCount = 0;
+        }, 1500);
+    }
 }
