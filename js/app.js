@@ -651,6 +651,116 @@ function openTimesheet(pushToHistory = true) {
     }
 }
 
+function updateAdminTodayStatus() {
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const thaiDate = today.toLocaleDateString('th-TH', { year: '2-digit', month: 'short', day: 'numeric' });
+    const dateEl = document.getElementById('admin-today-date');
+    if (dateEl) dateEl.innerText = thaiDate;
+
+    let countIn = 0;
+    let countOut = 0;
+    let countLeave = 0;
+    let listIn = '';
+    let listLeave = '';
+    let listOut = '';
+
+    const empStatus = {};
+    employees.forEach(emp => {
+        empStatus[emp.name] = { status: 'out', inTime: null, scheduledIn: null, isLeave: false, leaveType: '' };
+    });
+
+    if (typeof leavesData !== 'undefined') {
+        leavesData.forEach(l => {
+            if (l.status === 'อนุมัติ' && l.startDate <= todayStr && l.endDate >= todayStr) {
+                if (empStatus[l.name]) {
+                    empStatus[l.name].status = 'leave';
+                    empStatus[l.name].isLeave = true;
+                    empStatus[l.name].leaveType = l.leaveType;
+                }
+            }
+        });
+    }
+
+    rawAttendance.forEach(r => {
+        if (!r.timestamp || !r.name) return;
+        let timestampStr = String(r.timestamp).trim();
+        let d;
+        const dtMatch = timestampStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:\s+(\d{1,2}:\d{2}(?::\d{2})?))?/);
+        if (dtMatch) {
+            d = new Date(`${dtMatch[3]}-${dtMatch[2].padStart(2, '0')}-${dtMatch[1].padStart(2, '0')}T${dtMatch[4] || '00:00:00'}`);
+        } else {
+            d = new Date(timestampStr);
+        }
+        if (isNaN(d.getTime())) return;
+        
+        const recDateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        if (recDateStr === todayStr && empStatus[r.name]) {
+            if (r.type === 'เข้า') {
+                empStatus[r.name].status = 'in';
+                if (!empStatus[r.name].inTime) {
+                    empStatus[r.name].inTime = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                    empStatus[r.name].scheduledIn = r.scheduledTime || '-';
+                }
+            }
+        }
+    });
+
+    Object.keys(empStatus).forEach(name => {
+        const info = empStatus[name];
+        if (info.status === 'in') {
+            countIn++;
+            listIn += `
+                <div class="flex justify-between items-center bg-white p-2 rounded-[14px] border border-emerald-100 shadow-[0_2px_10px_rgba(16,185,129,0.05)]">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                        <span class="text-sm font-bold text-slate-700">${name}</span>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-emerald-600 font-black tracking-wide">${info.inTime}</div>
+                        <div class="text-[9px] text-slate-400 font-medium">คิว: ${info.scheduledIn}</div>
+                    </div>
+                </div>
+            `;
+        } else if (info.status === 'leave') {
+            countLeave++;
+            listLeave += `
+                <div class="flex justify-between items-center bg-orange-50/50 p-2 rounded-[14px] border border-orange-100">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2.5 h-2.5 rounded-full bg-orange-400"></div>
+                        <span class="text-sm font-bold text-slate-700">${name}</span>
+                    </div>
+                    <div class="text-[11px] text-orange-600 font-bold px-2 py-0.5 bg-orange-100 rounded-md">${info.leaveType}</div>
+                </div>
+            `;
+        } else {
+            countOut++;
+            listOut += `
+                <div class="flex justify-between items-center bg-slate-50/80 p-2 rounded-[14px] border border-slate-100 opacity-70">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2.5 h-2.5 rounded-full bg-slate-300"></div>
+                        <span class="text-sm font-bold text-slate-500">${name}</span>
+                    </div>
+                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">ยังไม่เข้า</div>
+                </div>
+            `;
+        }
+    });
+
+    const statInEl = document.getElementById('admin-stat-in');
+    const statOutEl = document.getElementById('admin-stat-out');
+    const statLeaveEl = document.getElementById('admin-stat-leave');
+    if (statInEl) statInEl.innerText = countIn;
+    if (statOutEl) statOutEl.innerText = countOut;
+    if (statLeaveEl) statLeaveEl.innerText = countLeave;
+    
+    let listHTML = listIn + listLeave + listOut;
+    if (listHTML === '') listHTML = '<div class="text-center py-4 text-xs text-slate-400">ไม่มีข้อมูลพนักงาน</div>';
+    
+    const listEl = document.getElementById('admin-today-list');
+    if (listEl) listEl.innerHTML = listHTML;
+}
+
 function showAdminDashboard() {
     showView('view-admin-dashboard');
 
@@ -670,6 +780,7 @@ function showAdminDashboard() {
     renderAdminLeaves();
     renderAdminTimeEdits();
     renderAdminDashboardNotifications();
+    updateAdminTodayStatus();
 }
 
 function showAdminEmployees() {
