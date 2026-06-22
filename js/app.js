@@ -3054,7 +3054,7 @@ let qaShift = '';
 const qaValidCustomTimes = ["11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30","19:00","19:30","20:00","20:30","21:00","21:30","22:00","22:30","23:00","23:30","24:00"];
 
 async function openQuickAttendance(type) {
-    if(!currentUser) {
+    if(!loggedInEmployee) {
         Swal.fire('ข้อผิดพลาด', 'กรุณาล็อกอินก่อนใช้งาน', 'error');
         return;
     }
@@ -3109,7 +3109,7 @@ async function openQuickAttendance(type) {
     document.getElementById('qa-duplicate-warning').classList.add('hidden');
     
     // Set UI 
-    document.getElementById('qa-user-name').innerText = currentUser.name;
+    document.getElementById('qa-user-name').innerText = loggedInEmployee.name;
     const badge = document.getElementById('qa-status-badge');
     if (qaMode === 'in') {
         badge.innerText = 'เข้า (IN)';
@@ -3228,8 +3228,8 @@ function qaCheckTimeDiff(s) {
 }
 
 function qaCheckDuplicateLocal() {
-    if (!currentUser || !qaMode) return;
-    const name = currentUser.name.trim();
+    if (!loggedInEmployee || !qaMode) return;
+    const name = loggedInEmployee.name.trim();
     const now = new Date(); 
     let rd = new Date(now.getTime()); 
     if (rd.getHours() < 5) rd.setDate(rd.getDate() - 1);
@@ -3267,7 +3267,7 @@ function qaValidateFinal() {
         else document.getElementById('qa-remark-error').classList.remove('hidden'); 
     }
     
-    const ok = (currentUser && qaMode !== "" && qaShift !== "" && tOk && dOk && isRemarkValid && isTimeValid);
+    const ok = (loggedInEmployee && qaMode !== "" && qaShift !== "" && tOk && dOk && isRemarkValid && isTimeValid);
     document.getElementById('btn-qa-save').disabled = !ok;
 }
 
@@ -3280,7 +3280,7 @@ function submitQuickAttendance() {
     const remark = document.getElementById('qa-remark').value.trim();
     
     const payload = {
-        name: currentUser.name,
+        name: loggedInEmployee.name,
         mode: qaMode,
         shift: selectedTime,
         remark: remark,
