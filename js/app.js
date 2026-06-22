@@ -1,4 +1,13 @@
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyV3STelLbtJ_b3wdGeyOfA01vQyCW_zHQhlX5oNtKoher4QTSd-INxGD0Ou7mrwHs/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzFUKSmGgJI0N66zDJMCLeryob1Y0PTl3oVMS-VCR80_P2sZ5R7BJ7HpwW53VmTBJM/exec';
+
+window.onerror = function(msg, url, line, col, error) {
+    alert("Error: " + msg + "\nLine: " + line + "\nCol: " + col);
+    return false;
+};
+
+window.addEventListener("unhandledrejection", function(event) {
+    alert("Unhandled Promise Rejection: " + event.reason);
+});
 
 let rawAttendance = [];
 let employees = [];
@@ -156,18 +165,39 @@ function applyInitData(data, isSilent = false) {
     if (currentSelection && select) select.value = currentSelection;
     
     if (!isSilent) {
+        let hash = window.location.hash;
+        if (hash) {
+            hash = hash.substring(1); // Remove '#'
+        }
+
         if (isAdmin) {
             showAdminDashboard();
+            if (hash && hash !== 'view-admin-dashboard' && document.getElementById(hash)) {
+                if (hash === 'view-admin-employees') openAdminEmployees(false);
+                else if (hash === 'view-admin-leaves') showView('view-admin-leaves', false);
+                else showView(hash, false);
+            }
         } else if (loggedInEmployee) {
             const updatedEmp = employees.find(e => e.name === loggedInEmployee.name);
             if (updatedEmp) {
                 loggedInEmployee = updatedEmp;
                 showEmployeeDashboard();
+                if (hash && hash !== 'view-dashboard' && document.getElementById(hash)) {
+                    if (hash === 'view-profile') openProfile(false);
+                    else if (hash === 'view-leave') openLeave(false);
+                    else showView(hash, false);
+                }
             } else {
                 logout();
             }
         } else {
+            // Not logged in. Must stay on login page.
             overlay.classList.add('hidden');
+            if (hash && hash !== 'view-login') {
+                // If they tried to access a protected view, redirect to login by clearing the hash
+                history.replaceState(null, '', window.location.pathname);
+            }
+            showView('view-login', false);
         }
     }
 }
