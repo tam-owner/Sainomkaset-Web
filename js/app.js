@@ -567,27 +567,27 @@ function updateDashboardAttendanceStatus() {
     const iconOut = document.getElementById('icon-dash-out');
     
     if (inTime) {
-        btnInText.innerHTML = `เข้างานแล้ว<div class="text-[11px] font-semibold mt-1.5 bg-black/20 px-3 py-1 rounded-full backdrop-blur-md border border-white/10 flex items-center gap-1.5"><span class="opacity-80 font-normal">ตาราง: ${inSched}</span> <span class="opacity-50">|</span> <span class="text-emerald-100 drop-shadow-sm">จริง: ${inTime}</span></div>`;
-        btnIn.className = 'bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-600 text-white p-3.5 rounded-[24px] shadow-[0_12px_25px_-5px_rgba(16,185,129,0.5)] border-t border-l border-white/40 flex flex-col items-center justify-center gap-1 transition-all active:scale-[0.98] group relative overflow-hidden ring-4 ring-emerald-500/20 z-10';
-        iconIn.className = 'w-8 h-8 text-white drop-shadow-md transition-colors';
-        iconIn.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>';
+        btnInText.innerHTML = `<div class="flex flex-col items-start leading-tight"><span class="font-bold text-sm text-emerald-400">เข้างานแล้ว</span><div class="text-[10px] text-slate-400 mt-0.5">ตาราง: ${inSched} <span class="opacity-50 px-0.5">|</span> จริง: <span class="text-emerald-300">${inTime}</span></div></div>`;
+        btnIn.className = 'bg-slate-800/90 text-white py-2 px-3 rounded-xl border border-emerald-500/20 flex flex-row items-center justify-start gap-3 transition-all cursor-default shadow-sm';
+        iconIn.className = 'w-6 h-6 text-emerald-400 shrink-0';
+        iconIn.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
     } else {
-        btnInText.innerHTML = `<span class="font-bold tracking-wide text-sm text-slate-500 group-hover:text-blue-600 transition-colors duration-300">เข้างาน (IN)</span>`;
-        btnIn.className = 'bg-transparent p-4 flex flex-col items-center justify-center gap-3 transition-all duration-300 active:scale-95 group rounded-[24px] hover:bg-blue-50/50';
-        iconIn.className = 'w-11 h-11 text-blue-500 group-hover:scale-110 group-hover:-translate-y-1 transition-all duration-300 drop-shadow-sm';
-        iconIn.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>';
+        btnInText.innerHTML = `<span class="font-bold tracking-wide text-sm">เข้างาน (IN)</span>`;
+        btnIn.className = 'bg-slate-800 text-slate-300 py-3 px-4 flex flex-row items-center justify-center gap-2 transition-all duration-200 active:scale-95 group rounded-xl hover:bg-slate-700 shadow-sm border border-slate-700/50';
+        iconIn.className = 'w-5 h-5 text-blue-400 group-hover:text-blue-300 transition-colors duration-200 shrink-0';
+        iconIn.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>';
     }
     
     if (outTime) {
-        btnOutText.innerHTML = `ออกงานแล้ว<div class="text-[11px] font-semibold mt-1.5 bg-black/20 px-3 py-1 rounded-full backdrop-blur-md border border-white/10 flex items-center gap-1.5"><span class="opacity-80 font-normal">ตาราง: ${outSched}</span> <span class="opacity-50">|</span> <span class="text-rose-100 drop-shadow-sm">จริง: ${outTime}</span></div>`;
-        btnOut.className = 'bg-gradient-to-br from-rose-400 via-rose-500 to-pink-600 text-white p-3.5 rounded-[24px] shadow-[0_12px_25px_-5px_rgba(244,63,94,0.5)] border-t border-l border-white/40 flex flex-col items-center justify-center gap-1 transition-all active:scale-[0.98] group relative overflow-hidden ring-4 ring-rose-500/20 z-10';
-        iconOut.className = 'w-8 h-8 text-white drop-shadow-md transition-colors';
-        iconOut.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>';
+        btnOutText.innerHTML = `<div class="flex flex-col items-start leading-tight"><span class="font-bold text-sm text-rose-400">ออกงานแล้ว</span><div class="text-[10px] text-slate-400 mt-0.5">ตาราง: ${outSched} <span class="opacity-50 px-0.5">|</span> จริง: <span class="text-rose-300">${outTime}</span></div></div>`;
+        btnOut.className = 'bg-slate-800/90 text-white py-2 px-3 rounded-xl border border-rose-500/20 flex flex-row items-center justify-start gap-3 transition-all cursor-default shadow-sm';
+        iconOut.className = 'w-6 h-6 text-rose-400 shrink-0';
+        iconOut.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
     } else {
-        btnOutText.innerHTML = `<span class="font-bold tracking-wide text-sm text-slate-500 group-hover:text-rose-600 transition-colors duration-300">ออกงาน (OUT)</span>`;
-        btnOut.className = 'bg-transparent p-4 flex flex-col items-center justify-center gap-3 transition-all duration-300 active:scale-95 group rounded-[24px] hover:bg-rose-50/50';
-        iconOut.className = 'w-11 h-11 text-rose-500 group-hover:scale-110 group-hover:-translate-y-1 transition-all duration-300 drop-shadow-sm';
-        iconOut.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>';
+        btnOutText.innerHTML = `<span class="font-bold tracking-wide text-sm">ออกงาน (OUT)</span>`;
+        btnOut.className = 'bg-slate-800 text-slate-300 py-3 px-4 flex flex-row items-center justify-center gap-2 transition-all duration-200 active:scale-95 group rounded-xl hover:bg-slate-700 shadow-sm border border-slate-700/50';
+        iconOut.className = 'w-5 h-5 text-rose-400 group-hover:text-rose-300 transition-colors duration-200 shrink-0';
+        iconOut.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>';
     }
 }
 
