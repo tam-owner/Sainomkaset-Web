@@ -119,7 +119,7 @@
     <!-- VIEW: LOGIN                           -->
     <!-- ===================================== -->
     <!-- Decorative Background -->
-    <div class="fixed inset-0 z-[-1] bg-[#eef2f6] overflow-hidden pointer-events-none">
+    <div id="animated-bg" class="fixed inset-0 z-[-1] bg-[#eef2f6] overflow-hidden pointer-events-none transition-opacity duration-500">
         <div class="absolute -top-[10%] -left-[10%] w-[350px] h-[350px] rounded-full bg-blue-400/30 blur-[70px] animate-blob-1"></div>
         <div class="absolute top-[35%] -right-[15%] w-[400px] h-[400px] rounded-full bg-cyan-300/30 blur-[70px] animate-blob-2"></div>
         <div class="absolute -bottom-[10%] left-[10%] w-[450px] h-[450px] rounded-full bg-indigo-400/20 blur-[80px] animate-blob-3"></div>
@@ -960,7 +960,7 @@
     </div>
 
     <script src="js/customSelect.js"></script>
-    <script src="js/app.js?v=20260623_04"></script>
+    <script src="js/app.js?v=20260623_05"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -973,7 +973,7 @@
       }
     </script>
     <div id="app-version-display" class="fixed bottom-2 right-2 text-[10px] text-slate-400 font-medium z-[9999] pointer-events-none opacity-50">
-        v1.2.3 (23 มิ.ย. 26 02:20)
+        v1.2.4 (23 มิ.ย. 26 02:25)
     </div>
 </body>
 </html>

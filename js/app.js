@@ -460,6 +460,15 @@ function showView(viewId, pushToHistory = true) {
     let target = document.getElementById(viewId);
     if (target) target.classList.remove('hidden');
     
+    let animatedBg = document.getElementById('animated-bg');
+    if (animatedBg) {
+        if (viewId === 'view-login') {
+            animatedBg.classList.remove('opacity-0');
+        } else {
+            animatedBg.classList.add('opacity-0');
+        }
+    }
+    
     document.getElementById('loading-overlay').classList.add('hidden');
     
     if (pushToHistory) {
