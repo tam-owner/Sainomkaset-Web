@@ -572,10 +572,10 @@ function updateDashboardAttendanceStatus() {
         iconIn.className = 'w-8 h-8 text-white drop-shadow-md transition-colors';
         iconIn.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>';
     } else {
-        btnInText.innerHTML = `<span class="font-bold tracking-wide text-sm">เข้างาน (IN)</span>`;
-        btnIn.className = 'bg-slate-800 text-slate-200 p-4 rounded-[20px] shadow-lg border border-slate-700 hover:bg-slate-700 flex flex-col items-center justify-center gap-2 transition-all duration-300 active:scale-95 group';
-        iconIn.className = 'w-8 h-8 text-blue-400 group-hover:text-blue-300 transition-colors duration-300';
-        iconIn.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>';
+        btnInText.innerHTML = `<span class="font-bold tracking-wide text-sm text-slate-500 group-hover:text-blue-600 transition-colors duration-300">เข้างาน (IN)</span>`;
+        btnIn.className = 'bg-transparent p-4 flex flex-col items-center justify-center gap-3 transition-all duration-300 active:scale-95 group rounded-[24px] hover:bg-blue-50/50';
+        iconIn.className = 'w-11 h-11 text-blue-500 group-hover:scale-110 group-hover:-translate-y-1 transition-all duration-300 drop-shadow-sm';
+        iconIn.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>';
     }
     
     if (outTime) {
@@ -584,10 +584,10 @@ function updateDashboardAttendanceStatus() {
         iconOut.className = 'w-8 h-8 text-white drop-shadow-md transition-colors';
         iconOut.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>';
     } else {
-        btnOutText.innerHTML = `<span class="font-bold tracking-wide text-sm">ออกงาน (OUT)</span>`;
-        btnOut.className = 'bg-slate-800 text-slate-200 p-4 rounded-[20px] shadow-lg border border-slate-700 hover:bg-slate-700 flex flex-col items-center justify-center gap-2 transition-all duration-300 active:scale-95 group';
-        iconOut.className = 'w-8 h-8 text-rose-400 group-hover:text-rose-300 transition-colors duration-300';
-        iconOut.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>';
+        btnOutText.innerHTML = `<span class="font-bold tracking-wide text-sm text-slate-500 group-hover:text-rose-600 transition-colors duration-300">ออกงาน (OUT)</span>`;
+        btnOut.className = 'bg-transparent p-4 flex flex-col items-center justify-center gap-3 transition-all duration-300 active:scale-95 group rounded-[24px] hover:bg-rose-50/50';
+        iconOut.className = 'w-11 h-11 text-rose-500 group-hover:scale-110 group-hover:-translate-y-1 transition-all duration-300 drop-shadow-sm';
+        iconOut.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>';
     }
 }
 
