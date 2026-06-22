@@ -3166,9 +3166,9 @@ function qaSetShift(btn, s) {
     const chips = document.querySelectorAll('.qa-shift-chip'); 
     for(let i=0; i<chips.length; i++) { 
         chips[i].classList.remove('bg-indigo-600', 'text-white', 'border-indigo-600'); 
-        chips[i].classList.add('bg-white', 'text-slate-600', 'border-slate-200');
+        chips[i].classList.add('bg-white', 'text-slate-600', 'border-slate-200', 'hover:bg-slate-50');
     } 
-    btn.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
+    btn.classList.remove('bg-white', 'text-slate-600', 'border-slate-200', 'hover:bg-slate-50');
     btn.classList.add('bg-indigo-600', 'text-white', 'border-indigo-600');
     
     if(s !== 'อื่นๆ') { 
