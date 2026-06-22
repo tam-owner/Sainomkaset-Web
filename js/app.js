@@ -3534,7 +3534,7 @@ function handleSecretIPUpdate() {
                     Swal.showValidationMessage('รหัสไม่ถูกต้อง');
                 }
             },
-            allowOutsideClick: () => !Swal.isLoading()
+            allowOutsideClick: false
         }).then((adminRes) => {
             if (adminRes.isConfirmed && adminRes.value && adminRes.value.status === 'success') {
                 Swal.fire({
