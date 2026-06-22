@@ -567,10 +567,10 @@ function updateDashboardAttendanceStatus() {
     const iconOut = document.getElementById('icon-dash-out');
     
     if (inTime) {
-        btnInText.innerHTML = `เข้างานแล้ว<div class="text-sm font-medium mt-1 bg-white/20 px-2 py-0.5 rounded-md">ตาราง: ${inSched} | จริง: ${inTime}</div>`;
-        btnIn.className = 'bg-blue-600 text-white p-3 rounded-2xl shadow-[0_8px_20px_-6px_rgba(37,99,235,0.6)] border border-blue-500 flex flex-col items-center justify-center gap-1 transition-all active:scale-95 group relative overflow-hidden';
-        iconIn.className = 'w-7 h-7 text-white transition-colors';
-        iconIn.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+        btnInText.innerHTML = `เข้างานแล้ว<div class="text-[11px] font-semibold mt-1.5 bg-black/20 px-3 py-1 rounded-full backdrop-blur-md border border-white/10 flex items-center gap-1.5"><span class="opacity-80 font-normal">ตาราง: ${inSched}</span> <span class="opacity-50">|</span> <span class="text-emerald-100 drop-shadow-sm">จริง: ${inTime}</span></div>`;
+        btnIn.className = 'bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-600 text-white p-3.5 rounded-[24px] shadow-[0_12px_25px_-5px_rgba(16,185,129,0.5)] border-t border-l border-white/40 flex flex-col items-center justify-center gap-1 transition-all active:scale-[0.98] group relative overflow-hidden ring-4 ring-emerald-500/20 z-10';
+        iconIn.className = 'w-8 h-8 text-white drop-shadow-md transition-colors';
+        iconIn.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>';
     } else {
         btnInText.innerHTML = `เข้างาน (IN)`;
         btnIn.className = 'bg-blue-600/10 text-blue-700 hover:bg-blue-600 hover:text-white p-4 rounded-2xl shadow-sm border border-blue-200 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all active:scale-95 group';
@@ -579,10 +579,10 @@ function updateDashboardAttendanceStatus() {
     }
     
     if (outTime) {
-        btnOutText.innerHTML = `ออกงานแล้ว<div class="text-sm font-medium mt-1 bg-white/20 px-2 py-0.5 rounded-md">ตาราง: ${outSched} | จริง: ${outTime}</div>`;
-        btnOut.className = 'bg-rose-600 text-white p-3 rounded-2xl shadow-[0_8px_20px_-6px_rgba(225,29,72,0.6)] border border-rose-500 flex flex-col items-center justify-center gap-1 transition-all active:scale-95 group relative overflow-hidden';
-        iconOut.className = 'w-7 h-7 text-white transition-colors';
-        iconOut.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+        btnOutText.innerHTML = `ออกงานแล้ว<div class="text-[11px] font-semibold mt-1.5 bg-black/20 px-3 py-1 rounded-full backdrop-blur-md border border-white/10 flex items-center gap-1.5"><span class="opacity-80 font-normal">ตาราง: ${outSched}</span> <span class="opacity-50">|</span> <span class="text-rose-100 drop-shadow-sm">จริง: ${outTime}</span></div>`;
+        btnOut.className = 'bg-gradient-to-br from-rose-400 via-rose-500 to-pink-600 text-white p-3.5 rounded-[24px] shadow-[0_12px_25px_-5px_rgba(244,63,94,0.5)] border-t border-l border-white/40 flex flex-col items-center justify-center gap-1 transition-all active:scale-[0.98] group relative overflow-hidden ring-4 ring-rose-500/20 z-10';
+        iconOut.className = 'w-8 h-8 text-white drop-shadow-md transition-colors';
+        iconOut.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>';
     } else {
         btnOutText.innerHTML = `ออกงาน (OUT)`;
         btnOut.className = 'bg-rose-600/10 text-rose-700 hover:bg-rose-600 hover:text-white p-4 rounded-2xl shadow-sm border border-rose-200 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all active:scale-95 group';
