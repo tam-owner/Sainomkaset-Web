@@ -1,5 +1,6 @@
 var OLD_SHEET_ID = "1rS2XH04BgcY_bRRHIFiyb4M1utvDnNsfzsSd11dUbbk";
-var LINE_NOTIFY_TOKEN = ""; // ใส่ Token ของ Line Notify ที่นี่
+var LINE_CHANNEL_ACCESS_TOKEN = "yZtar1FpkznBAe/GebyzlNZMgSfsrVGhF4LHstpdlp2z+GSn8MN7fYbpN1LAZCyKky+GNtqUBJy53VyZP2v5M7bq9Uxt3vFjRQQPcoh+r+ZxXNleJUaG5rNa/8eMeI9JqnFTmngMN9C8R5x80ez3RwdB04t89/1O/w1cDnyilFU=";
+var LINE_ADMIN_USER_ID = "U3eae4dc25388348a9b7f4e44120fa23d";
 
 function doGet(e) {
   var action = e.parameter.action;
@@ -53,14 +54,25 @@ function createJsonResponse(data) {
 }
 
 function sendLineNotify(message) {
-  if (!LINE_NOTIFY_TOKEN) return;
+  if (!LINE_CHANNEL_ACCESS_TOKEN || !LINE_ADMIN_USER_ID) return;
   try {
-    UrlFetchApp.fetch("https://notify-api.line.me/api/notify", {
+    UrlFetchApp.fetch("https://api.line.me/v2/bot/message/push", {
       method: "post",
-      headers: { "Authorization": "Bearer " + LINE_NOTIFY_TOKEN },
-      payload: { "message": message }
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + LINE_CHANNEL_ACCESS_TOKEN 
+      },
+      payload: JSON.stringify({
+        "to": LINE_ADMIN_USER_ID,
+        "messages": [{
+          "type": "text",
+          "text": message
+        }]
+      })
     });
-  } catch(e) {}
+  } catch (err) {
+    Logger.log("LINE Error: " + err);
+  }
 }
 
 function getOldSpreadsheet() {
