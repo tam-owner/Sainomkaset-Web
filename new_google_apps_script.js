@@ -18,8 +18,10 @@ function doPost(e) {
     var p = JSON.parse(e.postData.contents);
     var action = p.action;
 
-    if (action === "clockin") return createJsonResponse(handleClock(p, "IN"));
-    if (action === "clockout") return createJsonResponse(handleClock(p, "OUT"));
+    if (action === "clockin" || action === "clockout") {
+      p.actualTime = p.shift;
+      return createJsonResponse(handleProcessData(p));
+    }
     if (action === "saveEmployee") return createJsonResponse(handleSaveEmployee(p));
     if (action === "deleteEmployee") return createJsonResponse(handleDeleteEmployee(p.oldNickname, p.oldFullName));
     if (action === "saveDeduction") return createJsonResponse(handleSaveDeduction(p.deduction));
