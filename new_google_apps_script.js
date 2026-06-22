@@ -12,7 +12,10 @@ function doGet(e) {
   if (action == "getInitPayrollData") return createJsonResponse(handleGetInitPayrollData());
   
   if (action == "testLine") {
-    sendLineNotify("🔥 ทดสอบการเชื่อมต่อ LINE จาก Google Apps Script สำเร็จ!");
+    var errMessage = sendLineNotify("🔥 ทดสอบการเชื่อมต่อ LINE จาก Google Apps Script สำเร็จ!");
+    if (errMessage) {
+      return HtmlService.createHtmlOutput('<h1 style="color:red; font-family:sans-serif; text-align:center; margin-top:50px;">❌ Error: ' + errMessage + '</h1>');
+    }
     return HtmlService.createHtmlOutput('<h1 style="color:green; font-family:sans-serif; text-align:center; margin-top:50px;">✅ ส่งข้อความทดสอบเข้า LINE เรียบร้อยแล้ว!<br>กรุณาเช็คในแอป LINE ของคุณครับ</h1>');
   }
   
@@ -59,7 +62,7 @@ function createJsonResponse(data) {
 }
 
 function sendLineNotify(message) {
-  if (!LINE_CHANNEL_ACCESS_TOKEN || !LINE_ADMIN_USER_ID) return;
+  if (!LINE_CHANNEL_ACCESS_TOKEN || !LINE_ADMIN_USER_ID) return "Token is missing";
   try {
     UrlFetchApp.fetch("https://api.line.me/v2/bot/message/push", {
       method: "post",
@@ -75,8 +78,10 @@ function sendLineNotify(message) {
         }]
       })
     });
+    return null; // Success
   } catch (err) {
     Logger.log("LINE Error: " + err);
+    return err.toString();
   }
 }
 
