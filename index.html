@@ -107,7 +107,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="pb-10 pt-4 max-w-md mx-auto relative min-h-screen">
+<body class="pb-10 max-w-md mx-auto relative min-h-[100dvh] bg-slate-50 overflow-x-hidden">
 
     <!-- Global Loading Overlay -->
     <div id="loading-overlay" class="fixed inset-0 bg-white/90 z-[999] flex flex-col items-center justify-center transition-all duration-300 backdrop-blur-sm">
@@ -172,26 +172,24 @@
     <!-- ===================================== -->
     <!-- VIEW: MAIN DASHBOARD (NEW)            -->
     <!-- ===================================== -->
-    <div id="view-dashboard" class="hidden px-4">
-        <div class="mb-8 mt-2 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-black text-xl shadow-inner relative overflow-hidden">
+    <div id="view-dashboard" class="hidden relative z-10 w-full pt-8">
+        <!-- Curved Dark Background -->
+        <div class="absolute top-0 left-0 w-full h-[280px] bg-[#0B1120] z-[-1] rounded-b-[50px] shadow-[0_15px_40px_-10px_rgba(11,17,32,0.4)]"></div>
+
+        <div class="mb-6 px-5 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-[20px] bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-black text-2xl shadow-[0_8px_20px_-4px_rgba(99,102,241,0.5)] border-2 border-white/20 relative overflow-hidden transition-transform hover:scale-105 cursor-pointer" onclick="openProfile()">
                     <img id="dash-user-photo" src="" class="absolute inset-0 w-full h-full object-cover hidden">
                     <span id="dash-user-initial"></span>
                 </div>
                 <div>
-                    <h1 class="text-sm text-slate-500 font-bold leading-tight">Hello,</h1>
-                    <h2 class="text-xl font-black text-slate-800 leading-tight truncate max-w-[250px]" id="dash-user-name"></h2>
+                    <h1 class="text-sm text-indigo-200/80 font-medium tracking-wide">ยินดีต้อนรับกลับมา,</h1>
+                    <h2 class="text-2xl font-black text-white leading-tight truncate max-w-[200px] drop-shadow-md" id="dash-user-name"></h2>
                 </div>
             </div>
-            <div class="flex gap-2">
-                <button onclick="openChangePinModal()" class="text-xs font-bold text-slate-600 bg-slate-200 px-3 py-2 rounded-lg active:scale-95 transition flex items-center gap-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    ตั้งค่า
-                </button>
-                <button onclick="logout()" class="text-xs font-bold text-rose-600 bg-rose-100 px-3 py-2 rounded-lg active:scale-95 transition flex items-center gap-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                    ออก
+            <div class="flex flex-col gap-2">
+                <button onclick="logout()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/10 text-white hover:bg-rose-500 hover:text-white transition-all duration-300 active:scale-90 shadow-sm border border-white/10">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                 </button>
             </div>
         </div>
@@ -207,41 +205,52 @@
         </div>
 
         <div class="grid grid-cols-2 gap-4">
-            <button onclick="openTimesheet()" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95">
-                <div class="w-14 h-14 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+            <button onclick="openTimesheet()" class="bg-white p-5 rounded-[28px] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.06)] border border-slate-100 flex flex-col items-center justify-center gap-3 hover:shadow-[0_20px_50px_-10px_rgba(79,70,229,0.15)] hover:border-indigo-100 transition-all duration-300 hover:-translate-y-1 active:scale-95 group relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-indigo-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div class="w-14 h-14 rounded-[20px] bg-gradient-to-br from-indigo-100 to-blue-50 text-indigo-600 flex items-center justify-center shadow-sm relative z-10">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
-                <span class="font-bold text-slate-700 text-sm">บันทึกเข้า-ออก</span>
+                <span class="font-bold text-slate-800 text-[13px] relative z-10 group-hover:text-indigo-700 transition-colors">บันทึกเข้า-ออก</span>
             </button>
-            <button onclick="openLeave()" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95">
-                <div class="w-14 h-14 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center">
+
+            <button onclick="openLeave()" class="bg-white p-5 rounded-[28px] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.06)] border border-slate-100 flex flex-col items-center justify-center gap-3 hover:shadow-[0_20px_50px_-10px_rgba(249,115,22,0.15)] hover:border-orange-100 transition-all duration-300 hover:-translate-y-1 active:scale-95 group relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-orange-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div class="w-14 h-14 rounded-[20px] bg-gradient-to-br from-orange-100 to-amber-50 text-orange-600 flex items-center justify-center shadow-sm relative z-10">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 </div>
-                <span class="font-bold text-slate-700 text-sm">ลางาน</span>
+                <span class="font-bold text-slate-800 text-[13px] relative z-10 group-hover:text-orange-700 transition-colors">ลางาน</span>
             </button>
-            <button onclick="openProfile()" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95">
-                <div class="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+
+            <button onclick="openProfile()" class="bg-white p-5 rounded-[28px] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.06)] border border-slate-100 flex flex-col items-center justify-center gap-3 hover:shadow-[0_20px_50px_-10px_rgba(16,185,129,0.15)] hover:border-emerald-100 transition-all duration-300 hover:-translate-y-1 active:scale-95 group relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-emerald-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div class="w-14 h-14 rounded-[20px] bg-gradient-to-br from-emerald-100 to-teal-50 text-emerald-600 flex items-center justify-center shadow-sm relative z-10">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                 </div>
-                <span class="font-bold text-slate-700 text-sm">ประวัติ & สลิป</span>
+                <span class="font-bold text-slate-800 text-[13px] relative z-10 group-hover:text-emerald-700 transition-colors">ประวัติ & สลิป</span>
             </button>
-            <button onclick="showView('view-stock')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95">
-                <div class="w-14 h-14 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
+
+            <button onclick="showView('view-stock')" class="bg-white p-5 rounded-[28px] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.06)] border border-slate-100 flex flex-col items-center justify-center gap-3 hover:shadow-[0_20px_50px_-10px_rgba(168,85,247,0.15)] hover:border-purple-100 transition-all duration-300 hover:-translate-y-1 active:scale-95 group relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-purple-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div class="w-14 h-14 rounded-[20px] bg-gradient-to-br from-purple-100 to-fuchsia-50 text-purple-600 flex items-center justify-center shadow-sm relative z-10">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                 </div>
-                <span class="font-bold text-slate-700 text-sm">นับ Stock</span>
+                <span class="font-bold text-slate-800 text-[13px] relative z-10 group-hover:text-purple-700 transition-colors">นับ Stock</span>
             </button>
-            <button onclick="showView('view-checklist')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95">
-                <div class="w-14 h-14 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center">
+
+            <button onclick="showView('view-checklist')" class="bg-white p-5 rounded-[28px] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.06)] border border-slate-100 flex flex-col items-center justify-center gap-3 hover:shadow-[0_20px_50px_-10px_rgba(20,184,166,0.15)] hover:border-teal-100 transition-all duration-300 hover:-translate-y-1 active:scale-95 group relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-teal-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div class="w-14 h-14 rounded-[20px] bg-gradient-to-br from-teal-100 to-cyan-50 text-teal-600 flex items-center justify-center shadow-sm relative z-10">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                 </div>
-                <span class="font-bold text-slate-700 text-sm">Checklist เปิด-ปิด</span>
+                <span class="font-bold text-slate-800 text-[13px] relative z-10 group-hover:text-teal-700 transition-colors">Checklist เปิด-ปิด</span>
             </button>
-            <button onclick="showView('view-qa')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95">
-                <div class="w-14 h-14 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center">
+
+            <button onclick="showView('view-qa')" class="bg-white p-5 rounded-[28px] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.06)] border border-slate-100 flex flex-col items-center justify-center gap-3 hover:shadow-[0_20px_50px_-10px_rgba(236,72,153,0.15)] hover:border-pink-100 transition-all duration-300 hover:-translate-y-1 active:scale-95 group relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-pink-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div class="w-14 h-14 rounded-[20px] bg-gradient-to-br from-pink-100 to-rose-50 text-pink-600 flex items-center justify-center shadow-sm relative z-10">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
-                <span class="font-bold text-slate-700 text-sm">Q&A</span>
+                <span class="font-bold text-slate-800 text-[13px] relative z-10 group-hover:text-pink-700 transition-colors">Q&A</span>
             </button>
         </div>
     </div>
@@ -960,7 +969,7 @@
     </div>
 
     <script src="js/customSelect.js"></script>
-    <script src="js/app.js?v=20260623_27"></script>
+    <script src="js/app.js?v=20260623_28"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -973,7 +982,7 @@
       }
     </script>
     <div id="app-version-display" class="fixed bottom-2 right-2 text-[10px] text-slate-400 font-medium z-[9999] pointer-events-none opacity-50">
-        v1.3.16 (23 มิ.ย. 26 05:32)
+        v2.0.0 (23 มิ.ย. 26 05:40)
     </div>
 </body>
 </html>
