@@ -11,6 +11,11 @@ function doGet(e) {
   if (action == "getLeaves") return createJsonResponse({status: "success", data: getLeavesData()});
   if (action == "getInitPayrollData") return createJsonResponse(handleGetInitPayrollData());
   
+  if (action == "testLine") {
+    sendLineNotify("🔥 ทดสอบการเชื่อมต่อ LINE จาก Google Apps Script สำเร็จ!");
+    return HtmlService.createHtmlOutput('<h1 style="color:green; font-family:sans-serif; text-align:center; margin-top:50px;">✅ ส่งข้อความทดสอบเข้า LINE เรียบร้อยแล้ว!<br>กรุณาเช็คในแอป LINE ของคุณครับ</h1>');
+  }
+  
   return HtmlService.createHtmlOutput('API is running (v2 with Merged Sheets).');
 }
 
