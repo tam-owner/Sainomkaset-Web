@@ -573,8 +573,8 @@ function updateDashboardAttendanceStatus() {
         iconIn.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>';
     } else {
         btnInText.innerHTML = `<span class="font-bold tracking-wide text-sm">เข้างาน (IN)</span>`;
-        btnIn.className = 'bg-[#18181b] text-slate-300 p-4 rounded-[20px] shadow-sm border border-white/5 hover:border-blue-500/30 hover:bg-[#27272a] flex flex-col items-center justify-center gap-2 transition-all duration-300 active:scale-95 group';
-        iconIn.className = 'w-8 h-8 text-blue-400 group-hover:text-blue-300 group-hover:scale-110 transition-all duration-300';
+        btnIn.className = 'bg-slate-800 text-slate-200 p-4 rounded-[20px] shadow-lg border border-slate-700 hover:bg-slate-700 flex flex-col items-center justify-center gap-2 transition-all duration-300 active:scale-95 group';
+        iconIn.className = 'w-8 h-8 text-blue-400 group-hover:text-blue-300 transition-colors duration-300';
         iconIn.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>';
     }
     
@@ -585,9 +585,9 @@ function updateDashboardAttendanceStatus() {
         iconOut.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>';
     } else {
         btnOutText.innerHTML = `<span class="font-bold tracking-wide text-sm">ออกงาน (OUT)</span>`;
-        btnOut.className = 'bg-[#18181b] text-slate-300 p-4 rounded-[20px] shadow-sm border border-white/5 hover:border-rose-500/30 hover:bg-[#27272a] flex flex-col items-center justify-center gap-2 transition-all duration-300 active:scale-95 group';
-        iconOut.className = 'w-8 h-8 text-rose-400 group-hover:text-rose-300 group-hover:scale-110 transition-all duration-300';
-        iconOut.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>';
+        btnOut.className = 'bg-slate-800 text-slate-200 p-4 rounded-[20px] shadow-lg border border-slate-700 hover:bg-slate-700 flex flex-col items-center justify-center gap-2 transition-all duration-300 active:scale-95 group';
+        iconOut.className = 'w-8 h-8 text-rose-400 group-hover:text-rose-300 transition-colors duration-300';
+        iconOut.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>';
     }
 }
 
