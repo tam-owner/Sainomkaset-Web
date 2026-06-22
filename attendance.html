@@ -188,7 +188,11 @@
             document.getElementById('wifi-retry-btn').classList.add('hidden');
             
             try {
-                const prRes = await fetch(PAYROLL_WEB_APP_URL + '?action=getInitPayrollData');
+                const prRes = await fetch(PAYROLL_WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: "getInitPayrollData" }),
+                    headers: { "Content-Type": "text/plain;charset=utf-8" }
+                });
                 const prData = await prRes.json();
                 const shopIP = prData.data && prData.data.settings ? prData.data.settings['ShopIP'] : null;
                 
@@ -461,7 +465,7 @@
         }, 1000);
     </script>
     <div id="app-version-display" class="fixed bottom-2 right-2 text-[10px] text-slate-400 font-medium z-[9999] pointer-events-none opacity-50">
-        v1.1.2 (23 มิ.ย. 26 01:35)
+        v1.1.3 (23 มิ.ย. 26 01:40)
     </div>
 </body>
 </html>
