@@ -3165,7 +3165,38 @@ async function openQuickAttendance(type) {
                 Swal.fire({
                     icon: 'error',
                     title: 'เชื่อมต่อ Wi-Fi ผิดพลาด',
-                    text: 'กรุณาเชื่อมต่อ Wi-Fi ของร้านเพื่อใช้งานระบบบันทึกเวลา'
+                    html: 'กรุณาเชื่อมต่อ Wi-Fi ของร้านเพื่อใช้งานระบบบันทึกเวลา<br><br><span class="text-xs text-slate-500">หากเน็ตร้านเสีย หรือ IP เปลี่ยน ผู้ดูแลสามารถอัปเดต IP ได้</span>',
+                    showCancelButton: true,
+                    confirmButtonText: 'ตกลง',
+                    cancelButtonText: 'อัปเดต IP (Admin)',
+                    cancelButtonColor: '#475569'
+                }).then((res) => {
+                    if (res.dismiss === Swal.DismissReason.cancel) {
+                        Swal.fire({
+                            title: 'รหัสผ่านผู้ดูแลระบบ',
+                            input: 'password',
+                            inputAttributes: { autocapitalize: 'off' },
+                            showCancelButton: true,
+                            confirmButtonText: 'อัปเดต IP ปัจจุบัน',
+                            showLoaderOnConfirm: true,
+                            preConfirm: (pass) => {
+                                if(pass === "34531") {
+                                    return fetch(WEB_APP_URL, {
+                                        method: 'POST',
+                                        body: JSON.stringify({ action: "saveSetting", key: "ShopIP", value: ipData.ip })
+                                    }).then(r => r.json()).catch(() => Swal.showValidationMessage('การเชื่อมต่อล้มเหลว'));
+                                } else {
+                                    Swal.showValidationMessage('รหัสผ่านไม่ถูกต้อง');
+                                }
+                            },
+                            allowOutsideClick: () => !Swal.isLoading()
+                        }).then((adminRes) => {
+                            if (adminRes.isConfirmed && adminRes.value && adminRes.value.status === 'success') {
+                                shopAllowedIP = ipData.ip;
+                                Swal.fire('สำเร็จ', 'อัปเดต IP ร้านค้าเรียบร้อยแล้ว กรุณากดเข้างานอีกครั้ง', 'success');
+                            }
+                        });
+                    }
                 });
                 return;
             }

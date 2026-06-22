@@ -55,7 +55,15 @@
             </div>
             <h3 id="wifi-title" class="text-2xl font-black tracking-tight text-slate-950">กำลังตรวจสอบระบบ...</h3>
             <p id="wifi-desc" class="text-sm text-slate-600 font-medium">รอสักครู่ ระบบกำลังตรวจสอบการเชื่อมต่อ Wi-Fi</p>
-            <button id="wifi-retry-btn" onclick="checkWifiRestriction()" class="hidden w-full py-4 bg-slate-800 text-white rounded-2xl font-bold active:scale-95 transition shadow-md mt-2">ลองอีกครั้ง</button>
+            <div id="wifi-admin-area" class="hidden space-y-3 pt-2 pb-2">
+                <input type="password" id="wifi-admin-pass" class="input-modern py-3 text-sm" placeholder="รหัสผู้ดูแลเพื่ออัปเดต IP" maxlength="5">
+                <p id="wifi-admin-error" class="text-[11px] font-bold text-red-500 hidden text-center italic">✘ รหัสผ่านไม่ถูกต้อง</p>
+                <button id="wifi-admin-submit" onclick="submitWifiAdmin()" class="w-full py-3 bg-slate-800 text-white rounded-xl font-bold active:scale-95 transition shadow-sm text-sm">อัปเดต IP</button>
+            </div>
+            <div class="flex flex-col gap-2 mt-2 w-full">
+                <button id="wifi-retry-btn" onclick="checkWifiRestriction()" class="hidden w-full py-4 bg-slate-800 text-white rounded-2xl font-bold active:scale-95 transition shadow-md">ลองอีกครั้ง</button>
+                <button id="wifi-admin-toggle-btn" onclick="toggleWifiAdmin()" class="hidden w-full py-3 bg-slate-100 text-slate-600 rounded-2xl font-bold active:scale-95 transition text-sm">อัปเดต IP (Admin)</button>
+            </div>
         </div>
     </div>
 
@@ -186,6 +194,8 @@
             document.getElementById('wifi-title').innerText = 'กำลังตรวจสอบระบบ...';
             document.getElementById('wifi-desc').innerText = 'รอสักครู่ ระบบกำลังตรวจสอบการเชื่อมต่อ Wi-Fi';
             document.getElementById('wifi-retry-btn').classList.add('hidden');
+            document.getElementById('wifi-admin-toggle-btn').classList.add('hidden');
+            document.getElementById('wifi-admin-area').classList.add('hidden');
             
             try {
                 const prRes = await fetch(PAYROLL_WEB_APP_URL, {
@@ -207,7 +217,9 @@
                         document.getElementById('wifi-title').innerText = 'เชื่อมต่อ Wi-Fi ผิดพลาด';
                         document.getElementById('wifi-desc').innerText = 'กรุณาเชื่อมต่อ Wi-Fi ของร้านเพื่อใช้งานระบบบันทึกเวลา';
                         document.getElementById('wifi-retry-btn').classList.remove('hidden');
+                        document.getElementById('wifi-admin-toggle-btn').classList.remove('hidden');
                         document.getElementById('wifi-block-overlay').style.display = 'flex';
+                        currentFailedIP = ipData.ip;
                         return; // Blocked
                     }
                 }
@@ -225,6 +237,41 @@
             }
         }
         checkWifiRestriction();
+
+        let currentFailedIP = null;
+        async function submitWifiAdmin() {
+            if (document.getElementById('wifi-admin-pass').value !== "34531") {
+                document.getElementById('wifi-admin-error').classList.remove('hidden');
+                return;
+            }
+            if (!currentFailedIP) return;
+            const btn = document.getElementById('wifi-admin-submit');
+            btn.innerText = "กำลังบันทึก...";
+            try {
+                const res = await fetch(PAYROLL_WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: "saveSetting", key: "ShopIP", value: currentFailedIP })
+                });
+                const data = await res.json();
+                if(data.status === 'success') {
+                    alert('อัปเดต IP ของร้านเรียบร้อยแล้ว');
+                    checkWifiRestriction();
+                } else alert('Error updating IP');
+            } catch(e) { alert('Connection error'); }
+            btn.innerText = "อัปเดต IP";
+        }
+        function toggleWifiAdmin() {
+            const area = document.getElementById('wifi-admin-area');
+            if(area.classList.contains('hidden')) {
+                area.classList.remove('hidden');
+                document.getElementById('wifi-admin-toggle-btn').innerText = 'ยกเลิก';
+            } else {
+                area.classList.add('hidden');
+                document.getElementById('wifi-admin-pass').value = '';
+                document.getElementById('wifi-admin-error').classList.add('hidden');
+                document.getElementById('wifi-admin-toggle-btn').innerText = 'อัปเดต IP (Admin)';
+            }
+        }
 
         let mode = '', shift = '', pendingEntry = null, isSuccessState = false; 
         let userList = ["เมย์", "จอย", "มานี"]; let historyData = [];
