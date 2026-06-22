@@ -45,6 +45,17 @@
         </div>
     </div>
 
+    <div id="wifi-block-overlay" class="modal-overlay" style="z-index: 9999; background: rgba(15, 23, 42, 0.95);">
+        <div class="modal-card shadow-2xl space-y-4 text-center">
+            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-2">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <h3 class="text-2xl font-black tracking-tight text-slate-950">เชื่อมต่อ Wi-Fi ผิดพลาด</h3>
+            <p class="text-sm text-slate-600 font-medium">กรุณาเชื่อมต่อ Wi-Fi ของร้านเพื่อใช้งานระบบบันทึกเวลา</p>
+            <button onclick="checkWifiRestriction()" class="w-full py-4 bg-slate-800 text-white rounded-2xl font-bold active:scale-95 transition shadow-md mt-2">ลองอีกครั้ง</button>
+        </div>
+    </div>
+
     <div id="add-user-modal" class="modal-overlay">
         <div class="modal-card shadow-2xl space-y-6 text-center transition-all">
             <h3 class="text-2xl font-black tracking-tight text-slate-950">เพิ่มรายชื่อใหม่</h3>
@@ -164,6 +175,29 @@
     </div>
 
     <script>
+        const PAYROLL_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzFUKSmGgJI0N66zDJMCLeryob1Y0PTl3oVMS-VCR80_P2sZ5R7BJ7HpwW53VmTBJM/exec';
+        async function checkWifiRestriction() {
+            try {
+                const prRes = await fetch(PAYROLL_WEB_APP_URL + '?action=getInitPayrollData');
+                const prData = await prRes.json();
+                const shopIP = prData.data && prData.data.settings ? prData.data.settings['ShopIP'] : null;
+                
+                if (shopIP) {
+                    const ipRes = await fetch('https://api.ipify.org?format=json');
+                    const ipData = await ipRes.json();
+                    
+                    if (ipData.ip !== shopIP) {
+                        document.getElementById('wifi-block-overlay').style.display = 'flex';
+                        return; // Blocked
+                    }
+                }
+                document.getElementById('wifi-block-overlay').style.display = 'none';
+            } catch (e) {
+                console.error("WiFi Check Error", e);
+            }
+        }
+        checkWifiRestriction();
+
         let mode = '', shift = '', pendingEntry = null, isSuccessState = false; 
         let userList = ["เมย์", "จอย", "มานี"]; let historyData = [];
         const validCustomTimes = ["11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30","19:00","19:30","20:00","20:30","21:00","21:30","22:00","22:30","23:00","23:30","24:00"];

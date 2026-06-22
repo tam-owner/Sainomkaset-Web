@@ -14,6 +14,7 @@ let employees = [];
 let deductions = [];
 let leaves = [];
 let timeEditRequests = [];
+let shopAllowedIP = "";
 
 let processedAttendance = [];
 let availablePeriods = [];
@@ -140,6 +141,9 @@ function applyInitData(data, isSilent = false) {
     deductions = data.deductions || [];
     leaves = data.leaves || [];
     timeEditRequests = data.timeEditRequests || [];
+    if (data.settings && data.settings['ShopIP']) {
+        shopAllowedIP = data.settings['ShopIP'];
+    }
 
     // Auto-register missing names
     let attendanceNames = new Set(rawAttendance.map(r => r.name).filter(n => n));
@@ -2990,4 +2994,54 @@ function cleanTimeStr(str) {
         return `${h}:${m}`;
     }
     return s;
+}
+
+async function openWifiSettings() {
+    Swal.fire({
+        title: 'กำลังตรวจสอบ IP...',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    try {
+        const res = await fetch('https://api.ipify.org?format=json');
+        const data = await res.json();
+        const ip = data.ip;
+        
+        Swal.fire({
+            title: 'ตั้งค่า Wi-Fi ร้านค้า',
+            html: `<div class="text-sm text-slate-600 text-left mb-4">
+                IP ปัจจุบันของคุณคือ:<br>
+                <span class="text-xl font-black text-indigo-600">${ip}</span>
+                <br><br>
+                หากคุณกำลังใช้ Wi-Fi ของร้าน กดบันทึกด้านล่าง เพื่อจำกัดให้พนักงานสแกนเวลาผ่าน Wi-Fi ของร้านเท่านั้น<br><br>
+                <span class="text-red-500 font-bold text-xs">*หากตั้งค่าแล้ว พนักงานจะสแกนเข้างานไม่ได้ถ้าไม่ใช้ Wi-Fi ของร้าน</span>
+            </div>`,
+            showCancelButton: true,
+            confirmButtonText: 'ตั้งค่า IP นี้เป็น Wi-Fi ร้าน',
+            cancelButtonText: 'ยกเลิก',
+            confirmButtonColor: '#10b981',
+            showLoaderOnConfirm: true,
+            preConfirm: async () => {
+                const saveRes = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: "saveSetting", key: "ShopIP", value: ip })
+                });
+                const saveJson = await saveRes.json();
+                if(saveJson.status !== "success") throw new Error(saveJson.message);
+                return ip;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                shopAllowedIP = result.value;
+                Swal.fire('สำเร็จ!', 'ตั้งค่า Wi-Fi ของร้านเรียบร้อยแล้ว พนักงานจะต้องใช้เน็ตวงนี้เพื่อบันทึกเวลา', 'success');
+                fetchFreshDataSilently();
+            }
+        });
+
+    } catch (e) {
+        Swal.fire('ข้อผิดพลาด', 'ไม่สามารถอ่าน IP ของคุณได้ กรุณาตรวจสอบอินเทอร์เน็ต', 'error');
+    }
 }

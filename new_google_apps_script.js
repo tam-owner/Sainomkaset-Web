@@ -34,6 +34,7 @@ function doPost(e) {
     if (action == "getInitPayrollData") return createJsonResponse(handleGetInitPayrollData());
     if (action == "requestTimeEdit") return createJsonResponse(handleRequestTimeEdit(p.timeEditRequest));
     if (action == "updateEditRequestStatus") return createJsonResponse(handleUpdateEditRequestStatus(p.id, p.status));
+    if (action == "saveSetting") return createJsonResponse(handleSaveSetting(p.key, p.value));
     return createJsonResponse({status: "error", message: "Unknown action"});
   } catch (error) {
     return createJsonResponse({status: "error", message: error.toString()});
@@ -95,6 +96,8 @@ function getSheetByNameOrCreateNew(name) {
       sheet.appendRow(["ID", "Name", "StartDate", "EndDate", "LeaveType", "Reason", "Status", "Timestamp"]);
     } else if (name === "TimeEditRequests") {
       sheet.appendRow(["ID", "Timestamp", "Name", "Date", "OriginalIn", "OriginalOut", "NewIn", "NewOut", "Reason", "Status"]);
+    } else if (name === "Settings") {
+      sheet.appendRow(["Key", "Value"]);
     }
   }
   return sheet;
@@ -482,9 +485,35 @@ function handleGetInitPayrollData() {
       employees: getEmployeesData(),
       deductions: getDeductionsData(),
       leaves: getLeavesData(),
-      timeEditRequests: getTimeEditRequestsData()
+      timeEditRequests: getTimeEditRequestsData(),
+      settings: getSettingsData()
     }
   };
+}
+
+function getSettingsData() {
+  try {
+    var sheet = getSheetByNameOrCreateNew("Settings");
+    var data = sheet.getDataRange().getValues();
+    var result = {};
+    for (var i = 1; i < data.length; i++) {
+      if (data[i][0]) result[String(data[i][0])] = String(data[i][1]);
+    }
+    return result;
+  } catch (e) { return {}; }
+}
+
+function handleSaveSetting(key, value) {
+  var sheet = getSheetByNameOrCreateNew("Settings");
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === key) {
+      sheet.getRange(i + 1, 2).setValue(value);
+      return {status: "success"};
+    }
+  }
+  sheet.appendRow([key, value]);
+  return {status: "success"};
 }
 
 function handleSaveDeduction(deduction) {
