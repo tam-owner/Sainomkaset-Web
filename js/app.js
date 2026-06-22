@@ -448,8 +448,30 @@ function logout() {
 }
 
 // ----------------------------------------------------
-// Views Routing
+// Loading Helpers & Views Routing
 // ----------------------------------------------------
+function showLoading(text) {
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) {
+        document.getElementById('loading-text').innerText = text;
+        overlay.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-[-20px]');
+        overlay.classList.add('opacity-100', 'translate-y-0');
+    }
+}
+
+function hideLoading() {
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) {
+        overlay.classList.remove('opacity-100', 'translate-y-0');
+        overlay.classList.add('opacity-0', 'pointer-events-none', 'translate-y-[-20px]');
+    }
+    const skeleton = document.getElementById('skeleton-view');
+    if (skeleton && !skeleton.classList.contains('hidden')) {
+        skeleton.classList.add('opacity-0', 'pointer-events-none');
+        setTimeout(() => skeleton.classList.add('hidden'), 500); // Wait for fade out
+    }
+}
+
 function showView(viewId, pushToHistory = true) {
     const views = ['view-login', 'view-dashboard', 'view-employee', 'view-profile', 'view-leave', 'view-stock', 'view-checklist', 'view-qa', 'view-admin-dashboard', 'view-admin-employees', 'view-admin-overview', 'view-admin-leaves'];
     views.forEach(v => {
@@ -458,7 +480,13 @@ function showView(viewId, pushToHistory = true) {
     });
     
     let target = document.getElementById(viewId);
-    if (target) target.classList.remove('hidden');
+    if (target) {
+        target.classList.remove('hidden');
+        // Restart animation
+        target.classList.remove('animate-fade-in-up');
+        void target.offsetWidth; // Trigger reflow
+        target.classList.add('animate-fade-in-up');
+    }
     
     let animatedBg = document.getElementById('animated-bg');
     if (animatedBg) {
@@ -469,7 +497,7 @@ function showView(viewId, pushToHistory = true) {
         }
     }
     
-    document.getElementById('loading-overlay').classList.add('hidden');
+    hideLoading();
     
     if (pushToHistory) {
         history.pushState({ view: viewId }, '', `#${viewId}`);
