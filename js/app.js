@@ -3322,16 +3322,62 @@ function qaValidateFinal() {
     }
     
     const ok = (loggedInEmployee && qaMode !== "" && qaShift !== "" && tOk && dOk && isRemarkValid && isTimeValid);
-    document.getElementById('btn-qa-save').disabled = !ok;
+    // document.getElementById('btn-qa-save').disabled = !ok;
 }
 
 function submitQuickAttendance() {
+    const rem = document.getElementById('qa-remark').value.trim();
+    const customT = document.getElementById('qa-custom-time').value.trim();
+    const tOk = !document.getElementById('qa-time-warning').classList.contains('hidden') ? document.getElementById('qa-time-confirm').checked : true;
+    const dOk = !document.getElementById('qa-duplicate-warning').classList.contains('hidden') ? document.getElementById('qa-duplicate-confirm').checked : true;
+    let isTimeValid = (qaShift === 'อื่นๆ') ? qaValidCustomTimes.indexOf(customT) !== -1 : true;
+    const isDiff = !document.getElementById('qa-time-warning').classList.contains('hidden');
+    const forceRemark = (qaShift === 'อื่นๆ' || isDiff);
+    const isRemarkValid = (!forceRemark || rem.length >= 3);
+
+    // Validation checks on click
+    if (qaShift === "") {
+        document.getElementById('qa-shift-area').classList.add('ring-2', 'ring-red-500', 'rounded-xl', 'animate-pulse');
+        setTimeout(() => document.getElementById('qa-shift-area').classList.remove('ring-2', 'ring-red-500', 'rounded-xl', 'animate-pulse'), 1500);
+        Swal.fire('ข้อมูลไม่ครบ', 'กรุณาเลือกเวลาตามตาราง หรือระบุเวลาเอง', 'warning');
+        return;
+    }
+    if (!isTimeValid) {
+        document.getElementById('qa-custom-time').classList.add('border-red-500', 'animate-pulse');
+        document.getElementById('qa-custom-time-error').classList.remove('hidden');
+        setTimeout(() => document.getElementById('qa-custom-time').classList.remove('border-red-500', 'animate-pulse'), 1500);
+        Swal.fire('ข้อมูลไม่ครบ', 'กรุณาระบุเวลาให้ถูกต้อง (เช่น 11:30)', 'warning');
+        return;
+    }
+    if (!tOk) {
+        const warnBox = document.getElementById('qa-time-warning');
+        warnBox.classList.add('ring-2', 'ring-red-500', 'animate-pulse');
+        setTimeout(() => warnBox.classList.remove('ring-2', 'ring-red-500', 'animate-pulse'), 1500);
+        Swal.fire('ข้อมูลไม่ครบ', 'กรุณายืนยันว่าเวลาห่างเกิน 30 นาทีถูกต้อง', 'warning');
+        return;
+    }
+    if (!dOk) {
+        const dupBox = document.getElementById('qa-duplicate-warning');
+        dupBox.classList.add('ring-2', 'ring-red-500', 'animate-pulse');
+        setTimeout(() => dupBox.classList.remove('ring-2', 'ring-red-500', 'animate-pulse'), 1500);
+        Swal.fire('ข้อมูลไม่ครบ', 'กรุณายืนยันการบันทึกซ้ำ', 'warning');
+        return;
+    }
+    if (!isRemarkValid) {
+        const remarkBox = document.getElementById('qa-remark');
+        remarkBox.classList.add('border-red-500', 'animate-pulse');
+        document.getElementById('qa-remark-error').classList.remove('hidden');
+        setTimeout(() => remarkBox.classList.remove('border-red-500', 'animate-pulse'), 1500);
+        Swal.fire('ข้อมูลไม่ครบ', 'กรุณาระบุเหตุผลอย่างน้อย 3 ตัวอักษร', 'warning');
+        return;
+    }
+
     const btn = document.getElementById('btn-qa-save');
     btn.disabled = true;
     btn.innerHTML = `<svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> กำลังบันทึก...`;
     
-    const selectedTime = (qaShift === 'อื่นๆ') ? document.getElementById('qa-custom-time').value : qaShift;
-    const remark = document.getElementById('qa-remark').value.trim();
+    const selectedTime = (qaShift === 'อื่นๆ') ? customT : qaShift;
+    const remark = rem;
     
     const payload = {
         name: loggedInEmployee.name,
