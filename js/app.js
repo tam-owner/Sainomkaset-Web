@@ -3525,7 +3525,9 @@ function handleSecretIPUpdate() {
                         
                         return fetch(WEB_APP_URL, {
                             method: 'POST',
-                            body: JSON.stringify({ action: "saveSetting", key: "ShopIP", value: ipData.ip })
+                            body: JSON.stringify({ action: "saveSetting", key: "ShopIP", value: ipData.ip }),
+                            headers: { "Content-Type": "text/plain;charset=utf-8" },
+                            cache: "no-store"
                         }).then(r => r.json());
                     } catch (e) {
                         Swal.showValidationMessage('เกิดข้อผิดพลาดในการเชื่อมต่อ');
@@ -3544,6 +3546,7 @@ function handleSecretIPUpdate() {
                     timer: 2000,
                     showConfirmButton: false
                 }).then(() => {
+                    localStorage.removeItem('snk_payroll_data');
                     window.location.reload();
                 });
             }
