@@ -3045,3 +3045,275 @@ async function openWifiSettings() {
         Swal.fire('ข้อผิดพลาด', 'ไม่สามารถอ่าน IP ของคุณได้ กรุณาตรวจสอบอินเทอร์เน็ต', 'error');
     }
 }
+
+// =====================================
+// QUICK ATTENDANCE LOGIC
+// =====================================
+let qaMode = '';
+let qaShift = '';
+const qaValidCustomTimes = ["11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30","19:00","19:30","20:00","20:30","21:00","21:30","22:00","22:30","23:00","23:30","24:00"];
+
+async function openQuickAttendance(type) {
+    if(!currentUser) {
+        Swal.fire('ข้อผิดพลาด', 'กรุณาล็อกอินก่อนใช้งาน', 'error');
+        return;
+    }
+
+    // 1. Wi-Fi Check
+    if (shopAllowedIP) {
+        Swal.fire({
+            title: 'กำลังตรวจสอบระบบ...',
+            text: 'รอสักครู่ ระบบกำลังตรวจสอบการเชื่อมต่อ Wi-Fi',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+        });
+
+        try {
+            const ipRes = await fetch('https://api.ipify.org?format=json');
+            const ipData = await ipRes.json();
+            
+            if (ipData.ip !== shopAllowedIP) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'เชื่อมต่อ Wi-Fi ผิดพลาด',
+                    text: 'กรุณาเชื่อมต่อ Wi-Fi ของร้านเพื่อใช้งานระบบบันทึกเวลา'
+                });
+                return;
+            }
+        } catch (e) {
+            console.error("WiFi Check Error", e);
+            Swal.fire({
+                icon: 'warning',
+                title: 'ตรวจสอบ IP ไม่สำเร็จ',
+                text: 'ไม่สามารถดึงข้อมูล IP ของคุณได้ กรุณาปิดตัวบล็อกโฆษณา หรือรีเฟรชลองใหม่'
+            });
+            return;
+        }
+    }
+    
+    // Close loading if passed
+    Swal.close();
+
+    // 2. Setup Modal State
+    qaMode = type.toLowerCase();
+    qaShift = '';
+    
+    // Reset fields
+    document.getElementById('qa-custom-time').value = '';
+    document.getElementById('qa-custom-time-error').classList.add('hidden');
+    document.getElementById('qa-remark').value = '';
+    document.getElementById('qa-remark-error').classList.add('hidden');
+    document.getElementById('qa-time-confirm').checked = false;
+    document.getElementById('qa-duplicate-confirm').checked = false;
+    document.getElementById('qa-time-warning').classList.add('hidden');
+    document.getElementById('qa-duplicate-warning').classList.add('hidden');
+    
+    // Set UI 
+    document.getElementById('qa-user-name').innerText = currentUser.name;
+    const badge = document.getElementById('qa-status-badge');
+    if (qaMode === 'in') {
+        badge.innerText = 'เข้า (IN)';
+        badge.className = 'px-3 py-1 text-xs font-black rounded-full bg-blue-100 text-blue-700';
+    } else {
+        badge.innerText = 'ออก (OUT)';
+        badge.className = 'px-3 py-1 text-xs font-black rounded-full bg-rose-100 text-rose-700';
+    }
+
+    // Set Shift Options
+    const s = qaMode === 'in' ? ['11:30','13:30','14:30','16:30','18:00','อื่นๆ'] : ['20:20','23:30','อื่นๆ'];
+    let html = '';
+    for(let i=0; i<s.length; i++) {
+        html += `<button onclick="qaSetShift(this, '${s[i]}')" class="qa-shift-chip bg-white border border-slate-200 text-slate-600 font-bold py-3 rounded-xl shadow-sm hover:bg-slate-50 transition-colors active:scale-95">${s[i]}</button>`;
+    }
+    document.getElementById('qa-shift-area').innerHTML = html;
+    
+    qaCheckDuplicateLocal();
+    qaValidateFinal();
+
+    // 3. Show Modal
+    const overlay = document.getElementById('quick-attendance-modal');
+    const box = document.getElementById('quick-attendance-modal-box');
+    overlay.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+    setTimeout(() => box.classList.remove('scale-95'), 10);
+}
+
+function closeQuickAttendance() {
+    const overlay = document.getElementById('quick-attendance-modal');
+    const box = document.getElementById('quick-attendance-modal-box');
+    box.classList.add('scale-95');
+    setTimeout(() => {
+        overlay.classList.add('opacity-0', 'pointer-events-none');
+        setTimeout(() => overlay.classList.add('hidden'), 300);
+    }, 100);
+}
+
+function qaSetShift(btn, s) {
+    qaShift = s; 
+    const chips = document.querySelectorAll('.qa-shift-chip'); 
+    for(let i=0; i<chips.length; i++) { 
+        chips[i].classList.remove('bg-indigo-600', 'text-white', 'border-indigo-600'); 
+        chips[i].classList.add('bg-white', 'text-slate-600', 'border-slate-200');
+    } 
+    btn.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
+    btn.classList.add('bg-indigo-600', 'text-white', 'border-indigo-600');
+    
+    if(s !== 'อื่นๆ') { 
+        document.getElementById('qa-custom-time-area').classList.add('hidden'); 
+    } else { 
+        document.getElementById('qa-custom-time-area').classList.remove('hidden'); 
+    }
+    
+    const title = document.getElementById('qa-remark-title');
+    const reqText = document.getElementById('qa-remark-req-text');
+    const remarkInput = document.getElementById('qa-remark');
+    
+    if(s === 'อื่นๆ') { 
+        title.classList.add('text-red-600'); 
+        reqText.classList.remove('hidden'); 
+        remarkInput.placeholder = "ระบุเหตุผล (บังคับ 3 ตัวอักษรขึ้นไป)"; 
+    } else { 
+        title.classList.remove('text-red-600'); 
+        reqText.classList.add('hidden'); 
+        remarkInput.placeholder = "ระบุหมายเหตุหากมี"; 
+        document.getElementById('qa-remark-error').classList.add('hidden'); 
+        document.getElementById('qa-custom-time').value = ''; 
+        document.getElementById('qa-custom-time-error').classList.add('hidden'); 
+    }
+    
+    if(s !== 'อื่นๆ') { 
+        qaCheckTimeDiff(s); 
+    }
+    qaValidateFinal();
+}
+
+function qaFormatTimeInput(i) { 
+    let v = i.value.replace(/\D/g, ''); 
+    if (v.length >= 3) { v = v.slice(0, 2) + ':' + v.slice(2, 4); } 
+    i.value = v; 
+}
+
+function qaCheckCustomTimeRealtime() {
+    const inputEl = document.getElementById('qa-custom-time');
+    const errEl = document.getElementById('qa-custom-time-error');
+    const val = inputEl.value;
+    
+    if (val === "") { 
+        errEl.classList.add('hidden'); 
+        return; 
+    }
+    const isValidPrefix = qaValidCustomTimes.some(function(t) { return t.indexOf(val) === 0; });
+    if (!isValidPrefix) { 
+        errEl.classList.remove('hidden'); 
+    } else { 
+        errEl.classList.add('hidden'); 
+    }
+    if(val.length === 5 && qaValidCustomTimes.indexOf(val) !== -1) { 
+        qaCheckTimeDiff(val); 
+    }
+}
+
+function qaCheckTimeDiff(s) {
+    const now = new Date(), parts = s.split(':'), target = new Date(); 
+    target.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), 0);
+    const isDiff = (Math.abs(now - target) / 60000) > 30;
+    
+    if(isDiff) { 
+        document.getElementById('qa-time-warning').classList.remove('hidden'); 
+        document.getElementById('qa-time-confirm').checked = false; 
+    } else { 
+        document.getElementById('qa-time-warning').classList.add('hidden'); 
+        document.getElementById('qa-time-confirm').checked = true; 
+    }
+    qaValidateFinal();
+}
+
+function qaCheckDuplicateLocal() {
+    if (!currentUser || !qaMode) return;
+    const name = currentUser.name.trim();
+    const now = new Date(); 
+    let rd = new Date(now.getTime()); 
+    if (rd.getHours() < 5) rd.setDate(rd.getDate() - 1);
+    const today = `${rd.getDate()}/${rd.getMonth() + 1}/${rd.getFullYear().toString().slice(-2)}`;
+    
+    let isDup = false; 
+    for(let i=0; i<historyData.length; i++) { 
+        if(historyData[i].name.trim() === name && historyData[i].mode === qaMode && historyData[i].displayDate === today) { 
+            isDup = true; break; 
+        } 
+    }
+    
+    if(isDup) { 
+        document.getElementById('qa-duplicate-warning').classList.remove('hidden'); 
+        document.getElementById('qa-duplicate-confirm').checked = false; 
+    } else { 
+        document.getElementById('qa-duplicate-warning').classList.add('hidden'); 
+        document.getElementById('qa-duplicate-confirm').checked = true; 
+    }
+    qaValidateFinal();
+}
+
+function qaValidateFinal() {
+    const rem = document.getElementById('qa-remark').value.trim();
+    const customT = document.getElementById('qa-custom-time').value.trim();
+    
+    const tOk = !document.getElementById('qa-time-warning').classList.contains('hidden') ? document.getElementById('qa-time-confirm').checked : true;
+    const dOk = !document.getElementById('qa-duplicate-warning').classList.contains('hidden') ? document.getElementById('qa-duplicate-confirm').checked : true;
+    
+    let isTimeValid = (qaShift === 'อื่นๆ') ? qaValidCustomTimes.indexOf(customT) !== -1 : true;
+    const isRemarkValid = (qaShift !== 'อื่นๆ' || rem.length >= 3);
+    
+    if(qaShift === 'อื่นๆ') { 
+        if(rem.length >= 3 || rem.length === 0) document.getElementById('qa-remark-error').classList.add('hidden'); 
+        else document.getElementById('qa-remark-error').classList.remove('hidden'); 
+    }
+    
+    const ok = (currentUser && qaMode !== "" && qaShift !== "" && tOk && dOk && isRemarkValid && isTimeValid);
+    document.getElementById('btn-qa-save').disabled = !ok;
+}
+
+function submitQuickAttendance() {
+    const btn = document.getElementById('btn-qa-save');
+    btn.disabled = true;
+    btn.innerHTML = `<svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> กำลังบันทึก...`;
+    
+    const selectedTime = (qaShift === 'อื่นๆ') ? document.getElementById('qa-custom-time').value : qaShift;
+    const remark = document.getElementById('qa-remark').value.trim();
+    
+    const payload = {
+        name: currentUser.name,
+        mode: qaMode,
+        shift: selectedTime,
+        remark: remark,
+        clientTime: new Date().toISOString()
+    };
+    
+    fetch(WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "clockin", ...payload }),
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        cache: "no-store"
+    })
+    .then(r => r.json())
+    .then(data => {
+        closeQuickAttendance();
+        if(data.status === "success") {
+            Swal.fire({
+                icon: 'success',
+                title: 'บันทึกสำเร็จ!',
+                text: 'ระบบบันทึกเวลาของคุณเรียบร้อยแล้ว',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            fetchFreshDataSilently();
+            btn.innerHTML = `บันทึกข้อมูล <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>`;
+        } else {
+            Swal.fire('ข้อผิดพลาด', data.message || 'ไม่สามารถบันทึกได้', 'error');
+            btn.innerHTML = `บันทึกข้อมูล <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>`;
+        }
+    })
+    .catch(e => {
+        closeQuickAttendance();
+        Swal.fire('ข้อผิดพลาด', 'เชื่อมต่อระบบล้มเหลว กรุณาลองใหม่', 'error');
+        btn.innerHTML = `บันทึกข้อมูล <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>`;
+    });
+}
