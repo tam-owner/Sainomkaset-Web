@@ -3230,16 +3230,40 @@ function qaCheckTimeDiff(s) {
 function qaCheckDuplicateLocal() {
     if (!loggedInEmployee || !qaMode) return;
     const name = loggedInEmployee.name.trim();
+    
+    const thMode = qaMode === 'in' ? 'เข้า' : 'ออก';
     const now = new Date(); 
     let rd = new Date(now.getTime()); 
     if (rd.getHours() < 5) rd.setDate(rd.getDate() - 1);
-    const today = `${rd.getDate()}/${rd.getMonth() + 1}/${rd.getFullYear().toString().slice(-2)}`;
+    const todayStr = `${rd.getFullYear()}-${String(rd.getMonth() + 1).padStart(2, '0')}-${String(rd.getDate()).padStart(2, '0')}`;
     
     let isDup = false; 
-    for(let i=0; i<historyData.length; i++) { 
-        if(historyData[i].name.trim() === name && historyData[i].mode === qaMode && historyData[i].displayDate === today) { 
-            isDup = true; break; 
-        } 
+    for(let i=0; i<rawAttendance.length; i++) { 
+        const r = rawAttendance[i];
+        if (r.name && r.name.trim() === name && r.type === thMode) {
+            let d;
+            let timestampStr = String(r.timestamp).trim();
+            const dtMatch = timestampStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:\s+(\d{1,2}:\d{2}(?::\d{2})?))?/);
+            if (dtMatch) {
+                let day = dtMatch[1].padStart(2, '0');
+                let month = dtMatch[2].padStart(2, '0');
+                let year = dtMatch[3];
+                let time = dtMatch[4] || '00:00:00';
+                d = new Date(`${year}-${month}-${day}T${time}`);
+            } else {
+                d = new Date(timestampStr);
+            }
+            if (!isNaN(d.getTime())) {
+                let rDate = new Date(d.getTime());
+                if (rDate.getHours() < 5) rDate.setDate(rDate.getDate() - 1);
+                const rDateStr = `${rDate.getFullYear()}-${String(rDate.getMonth() + 1).padStart(2, '0')}-${String(rDate.getDate()).padStart(2, '0')}`;
+                
+                if (rDateStr === todayStr) {
+                    isDup = true;
+                    break;
+                }
+            }
+        }
     }
     
     if(isDup) { 
