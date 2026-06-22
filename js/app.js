@@ -3225,13 +3225,24 @@ function qaCheckTimeDiff(s) {
     const now = new Date(), parts = s.split(':'), target = new Date(); 
     target.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), 0);
     const isDiff = (Math.abs(now - target) / 60000) > 30;
+    const title = document.getElementById('qa-remark-title');
+    const reqText = document.getElementById('qa-remark-req-text');
+    const remarkInput = document.getElementById('qa-remark');
     
     if(isDiff) { 
         document.getElementById('qa-time-warning').classList.remove('hidden'); 
         document.getElementById('qa-time-confirm').checked = false; 
+        title.classList.add('text-red-600'); 
+        reqText.classList.remove('hidden'); 
+        remarkInput.placeholder = "ระบุเหตุผลที่บันทึกเวลาห่างเกิน 30 นาที (บังคับกรอก)"; 
     } else { 
         document.getElementById('qa-time-warning').classList.add('hidden'); 
         document.getElementById('qa-time-confirm').checked = true; 
+        if (qaShift !== 'อื่นๆ') {
+            title.classList.remove('text-red-600'); 
+            reqText.classList.add('hidden'); 
+            remarkInput.placeholder = "ระบุหมายเหตุหากมี"; 
+        }
     }
     qaValidateFinal();
 }
@@ -3293,11 +3304,16 @@ function qaValidateFinal() {
     const dOk = !document.getElementById('qa-duplicate-warning').classList.contains('hidden') ? document.getElementById('qa-duplicate-confirm').checked : true;
     
     let isTimeValid = (qaShift === 'อื่นๆ') ? qaValidCustomTimes.indexOf(customT) !== -1 : true;
-    const isRemarkValid = (qaShift !== 'อื่นๆ' || rem.length >= 3);
     
-    if(qaShift === 'อื่นๆ') { 
+    const isDiff = !document.getElementById('qa-time-warning').classList.contains('hidden');
+    const forceRemark = (qaShift === 'อื่นๆ' || isDiff);
+    const isRemarkValid = (!forceRemark || rem.length >= 3);
+    
+    if(forceRemark) { 
         if(rem.length >= 3 || rem.length === 0) document.getElementById('qa-remark-error').classList.add('hidden'); 
         else document.getElementById('qa-remark-error').classList.remove('hidden'); 
+    } else {
+        document.getElementById('qa-remark-error').classList.add('hidden');
     }
     
     const ok = (loggedInEmployee && qaMode !== "" && qaShift !== "" && tOk && dOk && isRemarkValid && isTimeValid);
