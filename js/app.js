@@ -501,7 +501,19 @@ function showEmployeeDashboard(pushToHistory = true) {
     const photoImg = document.getElementById('dash-user-photo');
     if (loggedInEmployee && loggedInEmployee.photo) {
         if(photoImg) { photoImg.src = loggedInEmployee.photo; photoImg.classList.remove('hidden'); }
-        function updateDashboardAttendanceStatus() {
+        if(initialSpan) initialSpan.classList.add('hidden');
+    } else if (loggedInEmployee) {
+        if(photoImg) { photoImg.src = ""; photoImg.classList.add('hidden'); }
+        if(initialSpan) { initialSpan.classList.remove('hidden'); initialSpan.innerText = loggedInEmployee.name.charAt(0); }
+    }
+    if (document.getElementById('dash-user-name') && loggedInEmployee) {
+        document.getElementById('dash-user-name').innerText = loggedInEmployee.name;
+    }
+    
+    updateDashboardAttendanceStatus();
+}
+
+function updateDashboardAttendanceStatus() {
     if (!loggedInEmployee) return;
     const name = loggedInEmployee.name.trim();
     const now = new Date(); 
