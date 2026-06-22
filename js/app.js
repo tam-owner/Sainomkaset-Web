@@ -572,10 +572,10 @@ function updateDashboardAttendanceStatus() {
         iconIn.className = 'w-8 h-8 text-white drop-shadow-md transition-colors';
         iconIn.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>';
     } else {
-        btnInText.innerHTML = `เข้างาน (IN)`;
-        btnIn.className = 'bg-blue-600/10 text-blue-700 hover:bg-blue-600 hover:text-white p-4 rounded-2xl shadow-sm border border-blue-200 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all active:scale-95 group';
-        iconIn.className = 'w-8 h-8 text-blue-500 group-hover:text-white transition-colors';
-        iconIn.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>';
+        btnInText.innerHTML = `<span class="font-bold tracking-wide">เข้างาน (IN)</span>`;
+        btnIn.className = 'bg-gradient-to-b from-white to-blue-50/50 text-blue-700 p-4 rounded-[22px] shadow-[0_4px_20px_-4px_rgba(59,130,246,0.15)] border border-blue-100/80 hover:border-blue-300 hover:shadow-[0_8px_25px_-5px_rgba(59,130,246,0.25)] hover:to-blue-50 flex flex-col items-center justify-center gap-2 transition-all duration-300 active:scale-95 group';
+        iconIn.className = 'w-9 h-9 text-blue-500 group-hover:text-blue-600 group-hover:scale-110 transition-all duration-300';
+        iconIn.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>';
     }
     
     if (outTime) {
@@ -584,10 +584,10 @@ function updateDashboardAttendanceStatus() {
         iconOut.className = 'w-8 h-8 text-white drop-shadow-md transition-colors';
         iconOut.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>';
     } else {
-        btnOutText.innerHTML = `ออกงาน (OUT)`;
-        btnOut.className = 'bg-rose-600/10 text-rose-700 hover:bg-rose-600 hover:text-white p-4 rounded-2xl shadow-sm border border-rose-200 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all active:scale-95 group';
-        iconOut.className = 'w-8 h-8 text-rose-500 group-hover:text-white transition-colors';
-        iconOut.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>';
+        btnOutText.innerHTML = `<span class="font-bold tracking-wide">ออกงาน (OUT)</span>`;
+        btnOut.className = 'bg-gradient-to-b from-white to-rose-50/50 text-rose-700 p-4 rounded-[22px] shadow-[0_4px_20px_-4px_rgba(244,63,94,0.15)] border border-rose-100/80 hover:border-rose-300 hover:shadow-[0_8px_25px_-5px_rgba(244,63,94,0.25)] hover:to-rose-50 flex flex-col items-center justify-center gap-2 transition-all duration-300 active:scale-95 group';
+        iconOut.className = 'w-9 h-9 text-rose-500 group-hover:text-rose-600 group-hover:scale-110 transition-all duration-300';
+        iconOut.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M17 16l4-4m0 0l4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>';
     }
 }
 
