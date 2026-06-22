@@ -2857,7 +2857,7 @@ function renderEmployeeTimeEditRequests() {
         html += `<div class="flex justify-between items-center p-2 text-left">
             <div>
                 <div class="font-bold text-slate-800 text-xs">${formatDateStr(r.date)}</div>
-                <div class="text-[10px] text-slate-500 mt-0.5">เดิม: ${r.originalIn} - ${r.originalOut} <br> ใหม่: ${r.newIn} - ${r.newOut}</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">เดิม: ${cleanTimeStr(r.originalIn)} - ${cleanTimeStr(r.originalOut)} <br> ใหม่: ${cleanTimeStr(r.newIn)} - ${cleanTimeStr(r.newOut)}</div>
                 <div class="text-[10px] text-indigo-600 mt-0.5">เหตุผล: ${r.reason}</div>
             </div>
             <div>${statusBadge}</div>
@@ -2893,7 +2893,7 @@ function renderAdminTimeEdits() {
             <div>
                 <div class="font-black text-indigo-900">${r.name}</div>
                 <div class="text-[11px] font-bold text-indigo-700 mt-0.5">วันที่: ${formatDateStr(r.date)}</div>
-                <div class="text-[11px] text-slate-600 mt-1">เดิม: ${r.originalIn} - ${r.originalOut} <br> ใหม่: <span class="font-bold text-indigo-600">${r.newIn} - ${r.newOut}</span></div>
+                <div class="text-[11px] text-slate-600 mt-1">เดิม: ${cleanTimeStr(r.originalIn)} - ${cleanTimeStr(r.originalOut)} <br> ใหม่: <span class="font-bold text-indigo-600">${cleanTimeStr(r.newIn)} - ${cleanTimeStr(r.newOut)}</span></div>
                 <div class="text-[10px] text-indigo-500 mt-1 bg-white p-1.5 rounded-lg border border-indigo-100">เหตุผล: ${r.reason}</div>
             </div>
             <div class="flex flex-col gap-1 ml-2">
@@ -2975,4 +2975,19 @@ function formatDateStr(dateStr) {
     const d = new Date(dateStr);
     if (isNaN(d)) return dateStr;
     return d.toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" });
+}
+
+function cleanTimeStr(str) {
+    if (!str || str === '-' || String(str).toLowerCase() === 'undefined') return '-';
+    let s = String(str).trim();
+    if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(s)) {
+        return s.substring(0, 5);
+    }
+    let d = new Date(s);
+    if (!isNaN(d.getTime())) {
+        let h = String(d.getHours()).padStart(2, '0');
+        let m = String(d.getMinutes()).padStart(2, '0');
+        return `${h}:${m}`;
+    }
+    return s;
 }
