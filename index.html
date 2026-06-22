@@ -761,8 +761,8 @@
                 <section class="text-center">
                     <h2 class="text-[10px] font-black text-slate-400 tracking-widest uppercase mb-2">01. พนักงาน / สถานะ</h2>
                     <div class="bg-white px-4 py-3 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                        <p id="qa-user-name" class="font-bold text-slate-800 text-lg"></p>
-                        <p id="qa-status-badge" class="px-3 py-1 text-xs font-black rounded-full"></p>
+                        <p id="qa-user-name" class="font-bold text-slate-800 text-lg flex items-baseline gap-2"></p>
+                        <button id="qa-status-badge" onclick="toggleQaMode()" class="px-4 py-2 text-sm font-black rounded-full shadow-sm active:scale-95 transition-all"></button>
                     </div>
                 </section>
 
@@ -960,7 +960,7 @@
     </div>
 
     <script src="js/customSelect.js"></script>
-    <script src="js/app.js?v=20260623_06"></script>
+    <script src="js/app.js?v=20260623_07"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -973,7 +973,7 @@
       }
     </script>
     <div id="app-version-display" class="fixed bottom-2 right-2 text-[10px] text-slate-400 font-medium z-[9999] pointer-events-none opacity-50">
-        v1.2.5 (23 มิ.ย. 26 02:30)
+        v1.2.6 (23 มิ.ย. 26 02:45)
     </div>
 </body>
 </html>

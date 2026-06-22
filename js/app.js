@@ -3118,14 +3118,14 @@ async function openQuickAttendance(type) {
     document.getElementById('qa-duplicate-warning').classList.add('hidden');
     
     // Set UI 
-    document.getElementById('qa-user-name').innerText = loggedInEmployee.name;
+    document.getElementById('qa-user-name').innerHTML = `${loggedInEmployee.name} <span class="text-sm font-normal text-slate-400 ml-1">${loggedInEmployee.fullName || ''}</span>`;
     const badge = document.getElementById('qa-status-badge');
     if (qaMode === 'in') {
         badge.innerText = 'เข้า (IN)';
-        badge.className = 'px-3 py-1 text-xs font-black rounded-full bg-blue-100 text-blue-700';
+        badge.className = 'px-4 py-2 text-[15px] font-black rounded-full bg-blue-100 text-blue-700 shadow-sm active:scale-95 transition-all';
     } else {
         badge.innerText = 'ออก (OUT)';
-        badge.className = 'px-3 py-1 text-xs font-black rounded-full bg-rose-100 text-rose-700';
+        badge.className = 'px-4 py-2 text-[15px] font-black rounded-full bg-rose-100 text-rose-700 shadow-sm active:scale-95 transition-all';
     }
 
     // Set Shift Options
@@ -3144,6 +3144,11 @@ async function openQuickAttendance(type) {
     const box = document.getElementById('quick-attendance-modal-box');
     overlay.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
     setTimeout(() => box.classList.remove('scale-95'), 10);
+}
+
+function toggleQaMode() {
+    const newMode = (qaMode === 'in') ? 'out' : 'in';
+    openQuickAttendance(newMode);
 }
 
 function closeQuickAttendance() {
