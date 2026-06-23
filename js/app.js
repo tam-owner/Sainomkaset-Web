@@ -622,12 +622,18 @@ function updateDashboardAttendanceStatus() {
             else { normalHrs = diffHrs; }
             
             hrsHtml = `
-            <div class="ml-auto flex flex-col items-end justify-center border-l border-white/10 pl-2">
-                <div class="text-xs text-slate-400 whitespace-nowrap flex items-center gap-1.5">
-                    <div class="text-[9px] leading-[1.1] text-right">เวลา<br>งาน</div>
-                    <span class="font-bold text-white text-sm">${normalHrs.toFixed(1)} <span class="text-[10px] font-normal">ชม.</span></span>
+            <div class="ml-auto flex flex-col items-end justify-center border-l border-white/10 pl-3">
+                <div class="text-xs text-slate-400 whitespace-nowrap flex items-center justify-end">
+                    <span class="text-[10px] mr-1.5">งาน</span>
+                    <span class="font-bold text-white text-[13px] w-7 text-right">${normalHrs.toFixed(1)}</span>
+                    <span class="text-[9px] text-slate-400 ml-1">ชม.</span>
                 </div>
-                ${otHrs > 0 ? `<div class="text-xs text-orange-400 mt-1.5 whitespace-nowrap flex items-center gap-1.5"><div class="text-[10px] font-bold text-right">OT</div> <span class="font-bold text-orange-300 text-sm">${otHrs.toFixed(1)} <span class="text-[10px] font-normal">ชม.</span></span></div>` : ''}
+                ${otHrs > 0 ? `
+                <div class="text-xs text-orange-400 mt-1 whitespace-nowrap flex items-center justify-end">
+                    <span class="text-[10px] font-bold mr-1.5">OT</span>
+                    <span class="font-bold text-orange-300 text-[13px] w-7 text-right">${otHrs.toFixed(1)}</span>
+                    <span class="text-[9px] text-orange-400/80 ml-1">ชม.</span>
+                </div>` : ''}
             </div>
             `;
         }
