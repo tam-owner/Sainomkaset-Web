@@ -595,8 +595,9 @@ function updateDashboardAttendanceStatus() {
     const iconOut = document.getElementById('icon-dash-out');
     
     if (inTime) {
+        btnInText.className = "flex flex-row items-center justify-between w-full";
         btnInText.innerHTML = `<div class="flex flex-col items-start leading-tight"><span class="font-bold text-sm text-emerald-400">เข้างานแล้ว</span><div class="text-[11px] text-slate-400 mt-1">ตาราง: <span class="text-emerald-400 font-bold">${inSched}</span><br>จริง: ${inTime}</div></div>`;
-        btnIn.className = 'bg-slate-800/90 text-white py-2 px-3 rounded-xl border border-emerald-500/20 flex flex-row items-center justify-start transition-all cursor-default shadow-sm';
+        btnIn.className = 'bg-slate-800/90 text-white py-2 px-3 rounded-xl border border-emerald-500/20 block transition-all cursor-default shadow-sm w-full';
         iconIn.className = 'hidden';
         iconIn.innerHTML = '';
     } else {
@@ -638,9 +639,9 @@ function updateDashboardAttendanceStatus() {
             `;
         }
 
-        btnOutText.className = "flex flex-row items-center justify-between w-full min-w-full";
+        btnOutText.className = "flex flex-row items-center justify-between w-full";
         btnOutText.innerHTML = `<div class="flex flex-col items-start leading-tight whitespace-nowrap"><span class="font-bold text-sm text-rose-400">ออกงานแล้ว</span><div class="text-[11px] text-slate-400 mt-1">ตาราง: <span class="text-rose-400 font-bold">${outSched}</span><br>จริง: ${outTime}</div></div>${hrsHtml}`;
-        btnOut.className = 'bg-slate-800/90 text-white py-2 px-3 rounded-xl border border-rose-500/20 flex flex-row items-center justify-start transition-all cursor-default shadow-sm w-full';
+        btnOut.className = 'bg-slate-800/90 text-white py-2 px-3 rounded-xl border border-rose-500/20 block transition-all cursor-default shadow-sm w-full';
         iconOut.className = 'hidden';
         iconOut.innerHTML = '';
     } else {
