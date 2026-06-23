@@ -1682,6 +1682,7 @@ function renderAdminEmployees() {
     const inactiveEmployees = [];
 
     employees.forEach(emp => {
+        if (emp.isGhost) return; // Hide deleted employees from setup list
         if (!emp.name.toLowerCase().includes(search) && !(emp.fullName && emp.fullName.toLowerCase().includes(search))) {
             return;
         }
