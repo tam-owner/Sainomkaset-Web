@@ -152,7 +152,7 @@ function applyInitData(data, isSilent = false) {
 
     if (missingNames.length > 0) {
         missingNames.forEach(name => {
-            employees.push({ name: name, pin: "1234", normalRate: 46.88, otRate: 8.79, deductionType: "3%" });
+            employees.push({ name: name, pin: "1234", normalRate: 46.88, otRate: 8.79, deductionType: "3%", isGhost: true });
         });
         fetch(WEB_APP_URL, {
             method: 'POST',
@@ -316,7 +316,7 @@ function populateLoginNames() {
         }
     });
 
-    const activeEmployees = employees.filter(emp => emp.status !== "Inactive");
+    const activeEmployees = employees.filter(emp => emp.status !== "Inactive" && !emp.isGhost);
 
     const sortedEmp = activeEmployees.sort((a, b) => {
         const lastA = lastAttendanceMap[a.name] ? lastAttendanceMap[a.name].getTime() : Infinity;
