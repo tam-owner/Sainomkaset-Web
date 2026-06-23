@@ -595,7 +595,7 @@ function updateDashboardAttendanceStatus() {
     const iconOut = document.getElementById('icon-dash-out');
     
     if (inTime) {
-        btnInText.innerHTML = `<div class="flex flex-col items-start leading-tight"><span class="font-bold text-sm text-emerald-400">เข้างานแล้ว</span><div class="text-[10px] text-slate-400 mt-0.5">ตาราง: ${inSched} <span class="opacity-50 px-0.5">|</span> จริง: <span class="text-emerald-300">${inTime}</span></div></div>`;
+        btnInText.innerHTML = `<div class="flex flex-col items-start leading-tight"><span class="font-bold text-sm text-emerald-400">เข้างานแล้ว</span><div class="text-[11px] text-slate-400 mt-1">ตาราง: <span class="text-emerald-400 font-bold">${inSched}</span><br>จริง: ${inTime}</div></div>`;
         btnIn.className = 'bg-slate-800/90 text-white py-2 px-3 rounded-xl border border-emerald-500/20 flex flex-row items-center justify-start gap-3 transition-all cursor-default shadow-sm';
         iconIn.className = 'w-6 h-6 text-emerald-400 shrink-0';
         iconIn.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
@@ -607,7 +607,7 @@ function updateDashboardAttendanceStatus() {
     }
     
     if (outTime) {
-        btnOutText.innerHTML = `<div class="flex flex-col items-start leading-tight"><span class="font-bold text-sm text-rose-400">ออกงานแล้ว</span><div class="text-[10px] text-slate-400 mt-0.5">ตาราง: ${outSched} <span class="opacity-50 px-0.5">|</span> จริง: <span class="text-rose-300">${outTime}</span></div></div>`;
+        btnOutText.innerHTML = `<div class="flex flex-col items-start leading-tight"><span class="font-bold text-sm text-rose-400">ออกงานแล้ว</span><div class="text-[11px] text-slate-400 mt-1">ตาราง: <span class="text-rose-400 font-bold">${outSched}</span><br>จริง: ${outTime}</div></div>`;
         btnOut.className = 'bg-slate-800/90 text-white py-2 px-3 rounded-xl border border-rose-500/20 flex flex-row items-center justify-start gap-3 transition-all cursor-default shadow-sm';
         iconOut.className = 'w-6 h-6 text-rose-400 shrink-0';
         iconOut.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
