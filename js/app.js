@@ -596,9 +596,9 @@ function updateDashboardAttendanceStatus() {
     
     if (inTime) {
         btnInText.innerHTML = `<div class="flex flex-col items-start leading-tight"><span class="font-bold text-sm text-emerald-400">เข้างานแล้ว</span><div class="text-[11px] text-slate-400 mt-1">ตาราง: <span class="text-emerald-400 font-bold">${inSched}</span><br>จริง: ${inTime}</div></div>`;
-        btnIn.className = 'bg-slate-800/90 text-white py-2 px-3 rounded-xl border border-emerald-500/20 flex flex-row items-center justify-start gap-3 transition-all cursor-default shadow-sm';
-        iconIn.className = 'w-6 h-6 text-emerald-400 shrink-0';
-        iconIn.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+        btnIn.className = 'bg-slate-800/90 text-white py-2 px-3 rounded-xl border border-emerald-500/20 flex flex-row items-center justify-start transition-all cursor-default shadow-sm';
+        iconIn.className = 'hidden';
+        iconIn.innerHTML = '';
     } else {
         btnInText.innerHTML = `<span class="font-bold tracking-wide text-sm">เข้างาน (IN)</span>`;
         btnIn.className = 'bg-slate-800 text-slate-300 py-3 px-4 flex flex-row items-center justify-center gap-2 transition-all duration-200 active:scale-95 group rounded-xl hover:bg-slate-700 shadow-sm border border-slate-700/50';
@@ -623,17 +623,20 @@ function updateDashboardAttendanceStatus() {
             
             hrsHtml = `
             <div class="ml-auto flex flex-col items-end justify-center border-l border-white/10 pl-2">
-                <div class="text-[9px] text-slate-400 whitespace-nowrap">งาน <span class="font-bold text-white">${normalHrs.toFixed(1)} ชม.</span></div>
-                ${otHrs > 0 ? `<div class="text-[9px] text-orange-400 mt-0.5 whitespace-nowrap">OT <span class="font-bold text-orange-300">${otHrs.toFixed(1)} ชม.</span></div>` : ''}
+                <div class="text-xs text-slate-400 whitespace-nowrap flex items-center gap-1.5">
+                    <div class="text-[9px] leading-[1.1] text-right">เวลา<br>งาน</div>
+                    <span class="font-bold text-white text-sm">${normalHrs.toFixed(1)} <span class="text-[10px] font-normal">ชม.</span></span>
+                </div>
+                ${otHrs > 0 ? `<div class="text-xs text-orange-400 mt-1.5 whitespace-nowrap flex items-center gap-1.5"><div class="text-[10px] font-bold text-right">OT</div> <span class="font-bold text-orange-300 text-sm">${otHrs.toFixed(1)} <span class="text-[10px] font-normal">ชม.</span></span></div>` : ''}
             </div>
             `;
         }
 
         btnOutText.className = "flex-1 flex flex-row items-center w-full";
         btnOutText.innerHTML = `<div class="flex flex-col items-start leading-tight whitespace-nowrap"><span class="font-bold text-sm text-rose-400">ออกงานแล้ว</span><div class="text-[11px] text-slate-400 mt-1">ตาราง: <span class="text-rose-400 font-bold">${outSched}</span><br>จริง: ${outTime}</div></div>${hrsHtml}`;
-        btnOut.className = 'bg-slate-800/90 text-white py-2 px-3 rounded-xl border border-rose-500/20 flex flex-row items-center justify-start gap-2 transition-all cursor-default shadow-sm w-full';
-        iconOut.className = 'w-5 h-5 text-rose-400 shrink-0';
-        iconOut.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+        btnOut.className = 'bg-slate-800/90 text-white py-2 px-3 rounded-xl border border-rose-500/20 flex flex-row items-center justify-start transition-all cursor-default shadow-sm w-full';
+        iconOut.className = 'hidden';
+        iconOut.innerHTML = '';
     } else {
         btnOutText.innerHTML = `<span class="font-bold tracking-wide text-sm">ออกงาน (OUT)</span>`;
         btnOut.className = 'bg-slate-800 text-slate-300 py-3 px-4 flex flex-row items-center justify-center gap-2 transition-all duration-200 active:scale-95 group rounded-xl hover:bg-slate-700 shadow-sm border border-slate-700/50';
