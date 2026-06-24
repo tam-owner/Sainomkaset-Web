@@ -13,30 +13,29 @@
     <title>Sainom Kaset - Payroll & Management</title>
     <!-- Auto Cache Clear Script -->
     <script>
-        const APP_VERSION = "20260624_68";
+        const APP_VERSION = "20260624_70";
         const currentVersion = localStorage.getItem('APP_VERSION');
         if (currentVersion !== APP_VERSION) {
             console.log("New version detected, clearing cache...");
             localStorage.setItem('APP_VERSION', APP_VERSION);
             
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            async function clearAllAndReload() {
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
                     for(let registration of registrations) {
-                        registration.unregister();
+                        await registration.unregister();
                     }
-                });
-            }
-            if (window.caches) {
-                caches.keys().then(function(names) {
-                    for (let name of names) caches.delete(name);
-                });
-            }
-            if (window.location.href.indexOf('cleared=') === -1) {
-                setTimeout(() => {
-                    var newUrl = window.location.href.split('?')[0] + '?cleared=' + Date.now();
+                }
+                const names = await caches.keys();
+                for (let name of names) {
+                    await caches.delete(name);
+                }
+                if (window.location.href.indexOf('cleared=') === -1) {
+                    let newUrl = window.location.href.split('?')[0] + '?cleared=' + Date.now();
                     window.location.replace(newUrl);
-                }, 500);
+                }
             }
+            clearAllAndReload();
         }
     </script>
     <!-- PWA Setup -->
@@ -1067,7 +1066,7 @@
     </div>
 
     <script src="js/customSelect.js"></script>
-    <script src="js/app.js?v=20260624_68"></script>
+    <script src="js/app.js?v=20260624_70"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -1110,7 +1109,7 @@
         ล้างแคช
     </button>
     <div id="app-version-display" class="fixed bottom-2 right-2 text-[10px] text-slate-400 font-medium z-[9999] pointer-events-none opacity-50">
-        v1.3.34 (24 มิ.ย. 26 18:52)
+        v1.3.35 (24 มิ.ย. 26 21:05)
     </div>
 </body>
 </html>
