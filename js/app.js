@@ -624,6 +624,9 @@ function updateDashboardAttendanceStatus() {
                     <span class="text-white text-xs font-bold tracking-wider">${inTime}</span>
                 </div>
             </div>
+            <div class="flex items-center justify-between w-full mt-1.5 px-0.5 border-t border-transparent pt-1.5 opacity-0 pointer-events-none select-none">
+                <span class="text-[9px] tracking-wide">รวมเวลา: <span class="font-medium">0.0 ชม.</span></span>
+            </div>
         </div>
         `;
         btnIn.className = 'bg-slate-800/90 text-white p-2 rounded-xl border border-emerald-500/20 flex flex-col justify-start items-stretch transition-all cursor-default shadow-sm w-full h-full';
