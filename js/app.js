@@ -652,7 +652,11 @@ function updateDashboardAttendanceStatus() {
             else if (diffHrs > 5) { normalHrs = diffHrs - 1; }
             else { normalHrs = diffHrs; }
             
-            hrsHtml = `<div class="text-[9px] text-slate-400 font-medium tracking-wide">${normalHrs.toFixed(1)} ชม.${otHrs > 0 ? ` <span class="text-orange-400/80">OT: ${otHrs.toFixed(1)}</span>` : ''}</div>`;
+            hrsHtml = `
+            <div class="flex items-center justify-between w-full mt-1.5 px-0.5 border-t border-slate-700/50 pt-1.5">
+                <span class="text-[9px] text-slate-400 tracking-wide">รวมเวลา: <span class="text-white font-medium">${normalHrs.toFixed(1)} ชม.</span></span>
+                ${otHrs > 0 ? `<span class="text-[9px] text-orange-400/80 tracking-wide font-medium">OT: ${otHrs.toFixed(1)} ชม.</span>` : ''}
+            </div>`;
         }
 
         btnOutText.className = "w-full block";
@@ -665,7 +669,7 @@ function updateDashboardAttendanceStatus() {
                     </span>
                     <span class="font-bold text-[11px] text-rose-400 tracking-wide">ออกงาน</span>
                 </div>
-                ${hrsHtml}
+                <span class="text-[9px] text-slate-400 font-medium tracking-wide">${dateString}</span>
             </div>
             <div class="bg-slate-900/40 rounded-lg border border-slate-700/50 p-1.5 w-full flex flex-col gap-0.5">
                 <div class="flex items-center justify-between">
@@ -677,6 +681,7 @@ function updateDashboardAttendanceStatus() {
                     <span class="text-white text-xs font-bold tracking-wider">${outTime}</span>
                 </div>
             </div>
+            ${hrsHtml}
         </div>
         `;
         btnOut.className = 'bg-slate-800/90 text-white p-2 rounded-xl border border-rose-500/20 block transition-all cursor-default shadow-sm w-full h-full';
