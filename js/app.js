@@ -601,6 +601,7 @@ function updateDashboardAttendanceStatus() {
     let dateString = `วัน${dayNames[currentD.getDay()]} ${currentD.getDate()} ${monthNames[currentD.getMonth()]}`;
 
     if (inTime) {
+        btnInText.className = 'w-full block';
         btnInText.innerHTML = `
         <div class="flex flex-col w-full text-left">
             <div class="flex items-center justify-between mb-1.5">
@@ -625,14 +626,7 @@ function updateDashboardAttendanceStatus() {
             </div>
         </div>
         `;
-        btnIn.className = 'bg-slate-800/90 text-white p-2 rounded-xl border border-emerald-500/20 flex flex-col items-start justify-start transition-all cursor-default shadow-sm w-full';
-        iconIn.className = 'hidden';
-        iconIn.innerHTML = '';
-    } else {
-        btnInText.innerHTML = `<span class="font-bold tracking-wide text-[12px]">เข้างาน (IN)</span>`;
-        btnIn.className = 'bg-slate-800 text-slate-300 py-2 px-3 flex flex-row items-center justify-center gap-1.5 transition-all duration-200 active:scale-95 group rounded-lg hover:bg-slate-700 shadow-sm border border-slate-700/50 w-full';
-        iconIn.className = 'w-4 h-4 text-blue-400 group-hover:text-blue-300 transition-colors duration-200 shrink-0';
-        iconIn.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>';
+        btnIn.className = 'bg-slate-800/90 text-white p-2 rounded-xl border border-e        iconIn.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>';
     }
     
     if (outTime) {
@@ -653,7 +647,7 @@ function updateDashboardAttendanceStatus() {
             hrsHtml = `<div class="text-[9px] text-slate-400 font-medium tracking-wide">${normalHrs.toFixed(1)} ชม.${otHrs > 0 ? ` <span class="text-orange-400/80">OT: ${otHrs.toFixed(1)}</span>` : ''}</div>`;
         }
 
-        btnOutText.className = "flex-1 flex flex-row items-center w-full";
+        btnOutText.className = "w-full block";
         btnOutText.innerHTML = `
         <div class="flex flex-col w-full text-left">
             <div class="flex items-center justify-between mb-1.5">
@@ -677,12 +671,14 @@ function updateDashboardAttendanceStatus() {
             </div>
         </div>
         `;
-        btnOut.className = 'bg-slate-800/90 text-white p-2 rounded-xl border border-rose-500/20 flex flex-col items-start justify-start transition-all cursor-default shadow-sm w-full';
+        btnOut.className = 'bg-slate-800/90 text-white p-2 rounded-xl border border-rose-500/20 block transition-all cursor-default shadow-sm w-full h-full';
         iconOut.className = 'hidden';
         iconOut.innerHTML = '';
     } else {
+        btnOutText.className = 'flex-1 text-center font-bold tracking-wide text-sm';
         btnOutText.innerHTML = `<span class="font-bold tracking-wide text-[12px]">ออกงาน (OUT)</span>`;
-        btnOut.className = 'bg-slate-800 text-slate-300 py-2 px-3 flex flex-row items-center justify-center gap-1.5 transition-all duration-200 active:scale-95 group rounded-lg hover:bg-slate-700 shadow-sm border border-slate-700/50 w-full';
+        btnOut.className = 'bg-slate-800 text-slate-300 py-2 px-3 flex flex-row items-center justify-center gap-1.5 transition-all duration-200 active:scale-95 group rounded-lg hover:bg-slate-700 shadow-sm border border-slate-700/50 w-full h-full';
+
         iconOut.className = 'w-4 h-4 text-rose-400 group-hover:text-rose-300 transition-colors duration-200 shrink-0';
         iconOut.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>';
     }
