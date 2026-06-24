@@ -2339,16 +2339,16 @@ function calculateMonthlySlips() {
         let thaiYear = s.yyyy + 543;
         
         if (s.period === 1) {
-            payDateText = `(จ่าย 20 ${monthsThai[s.mm - 1]})`;
-            s.periodText = `1-15 ${fullMonthName} ${thaiYear} ${payDateText}`;
+            s.payDateText = `(จ่าย 20 ${monthsThai[s.mm - 1]})`;
+            s.periodText = `1-15 ${fullMonthName} ${thaiYear}`;
         } else if (s.period === 2) {
             let lastDay = new Date(s.yyyy, s.mm, 0).getDate();
-            payDateText = `(จ่าย 5 ${monthsThai[nextMonthIndex]})`;
-            s.periodText = `16-${lastDay} ${fullMonthName} ${thaiYear} ${payDateText}`;
+            s.payDateText = `(จ่าย 5 ${monthsThai[nextMonthIndex]})`;
+            s.periodText = `16-${lastDay} ${fullMonthName} ${thaiYear}`;
         } else {
             let lastDay = new Date(s.yyyy, s.mm, 0).getDate();
-            payDateText = `(จ่าย 5 ${monthsThai[nextMonthIndex]})`;
-            s.periodText = `1-${lastDay} ${fullMonthName} ${thaiYear} ${payDateText}`;
+            s.payDateText = `(จ่าย 5 ${monthsThai[nextMonthIndex]})`;
+            s.periodText = `1-${lastDay} ${fullMonthName} ${thaiYear}`;
         }
     });
 }
@@ -2369,6 +2369,7 @@ function renderSlips() {
             <div>
                 <div class="font-bold text-slate-800 text-sm flex items-baseline gap-2">
                     ${s.periodText}
+                    <span class="text-[11px] text-slate-400 font-medium whitespace-nowrap">${s.payDateText}</span>
                 </div>
                 <div class="text-xs text-slate-500 mt-1">รับสุทธิ: <span class="font-bold text-emerald-600">${formatMoney(s.netPay)}</span> ฿</div>
             </div>
@@ -2394,7 +2395,7 @@ function printSlip(idx) {
     const html = `
     <html>
     <head>
-        <title>สลิปเงินเดือน ${s.periodText}</title>
+        <title>สลิปเงินเดือน ${s.periodText} ${s.payDateText}</title>
         <meta charset="utf-8">
         <style>
             body { font-family: 'Sarabun', 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #333; }
@@ -2423,7 +2424,7 @@ function printSlip(idx) {
         <div class="slip-container">
             <div class="header">
                 <h1>ใบรับรองเงินเดือน (Payslip)</h1>
-                <p>ประจำเดือน ${s.periodText}</p>
+                <p>ประจำเดือน ${s.periodText} ${s.payDateText}</p>
             </div>
             
             <div class="info-grid">
