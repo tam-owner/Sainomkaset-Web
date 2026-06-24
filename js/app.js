@@ -626,7 +626,7 @@ function updateDashboardAttendanceStatus() {
             </div>
         </div>
         `;
-        btnIn.className = 'bg-slate-800/90 text-white p-2 rounded-xl border border-emerald-500/20 block transition-all cursor-default shadow-sm w-full h-full';
+        btnIn.className = 'bg-slate-800/90 text-white p-2 rounded-xl border border-emerald-500/20 flex flex-col justify-start items-stretch transition-all cursor-default shadow-sm w-full h-full';
         iconIn.className = 'hidden';
         iconIn.innerHTML = '';
     } else {
@@ -684,7 +684,7 @@ function updateDashboardAttendanceStatus() {
             ${hrsHtml}
         </div>
         `;
-        btnOut.className = 'bg-slate-800/90 text-white p-2 rounded-xl border border-rose-500/20 block transition-all cursor-default shadow-sm w-full h-full';
+        btnOut.className = 'bg-slate-800/90 text-white p-2 rounded-xl border border-rose-500/20 flex flex-col justify-start items-stretch transition-all cursor-default shadow-sm w-full h-full';
         iconOut.className = 'hidden';
         iconOut.innerHTML = '';
     } else {
