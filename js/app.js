@@ -594,14 +594,41 @@ function updateDashboardAttendanceStatus() {
     const btnOutText = document.getElementById('btn-dash-out-text');
     const iconOut = document.getElementById('icon-dash-out');
     
+    const dayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+    const monthNames = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+    let currentD = new Date();
+    if (currentD.getHours() < 5) currentD.setDate(currentD.getDate() - 1);
+    let dateString = `วัน${dayNames[currentD.getDay()]} ${currentD.getDate()} ${monthNames[currentD.getMonth()]}`;
+
     if (inTime) {
-        btnInText.innerHTML = `<div class="flex flex-col items-start leading-tight"><span class="font-bold text-sm text-emerald-400">เข้างานแล้ว</span><div class="text-[11px] text-slate-400 mt-1">ตาราง: <span class="text-emerald-400 font-bold">${inSched}</span><br>จริง: ${inTime}</div></div>`;
-        btnIn.className = 'bg-slate-800/90 text-white py-2 px-3 rounded-xl border border-emerald-500/20 flex flex-row items-center justify-start transition-all cursor-default shadow-sm';
+        btnInText.innerHTML = `
+        <div class="flex flex-col w-full text-left">
+            <div class="text-[10px] text-slate-400 mb-1.5 font-medium tracking-wide">${dateString}</div>
+            <div class="flex items-center gap-1.5 mb-2">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span class="font-bold text-[13px] text-emerald-400 tracking-wide">เข้างานแล้ว</span>
+            </div>
+            <div class="bg-slate-900/60 rounded border border-slate-700/50 p-1.5 space-y-0.5 w-full">
+                <div class="flex justify-between items-center text-[10px]">
+                    <span class="text-slate-400">ตารางเวลา</span>
+                    <span class="text-slate-300 font-medium">${inSched}</span>
+                </div>
+                <div class="flex justify-between items-center text-[10px]">
+                    <span class="text-emerald-400/80">เวลาจริง</span>
+                    <span class="text-emerald-400 font-bold">${inTime}</span>
+                </div>
+            </div>
+        </div>
+        `;
+        btnIn.className = 'bg-slate-800/90 text-white p-3 rounded-xl border border-emerald-500/20 flex flex-col items-start justify-start transition-all cursor-default shadow-sm h-full w-full';
         iconIn.className = 'hidden';
         iconIn.innerHTML = '';
     } else {
         btnInText.innerHTML = `<span class="font-bold tracking-wide text-sm">เข้างาน (IN)</span>`;
-        btnIn.className = 'bg-slate-800 text-slate-300 py-3 px-4 flex flex-row items-center justify-center gap-2 transition-all duration-200 active:scale-95 group rounded-xl hover:bg-slate-700 shadow-sm border border-slate-700/50';
+        btnIn.className = 'bg-slate-800 text-slate-300 py-3 px-4 flex flex-row items-center justify-center gap-2 transition-all duration-200 active:scale-95 group rounded-xl hover:bg-slate-700 shadow-sm border border-slate-700/50 h-full w-full';
         iconIn.className = 'w-5 h-5 text-blue-400 group-hover:text-blue-300 transition-colors duration-200 shrink-0';
         iconIn.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>';
     }
@@ -622,30 +649,49 @@ function updateDashboardAttendanceStatus() {
             else { normalHrs = diffHrs; }
             
             hrsHtml = `
-            <div class="ml-auto flex flex-col items-end justify-center border-l border-white/10 pl-3">
-                <div class="text-xs text-slate-400 whitespace-nowrap flex items-center justify-end">
-                    <span class="text-[10px] mr-1.5">งาน</span>
-                    <span class="font-bold text-white text-[13px] w-7 text-right">${normalHrs.toFixed(1)}</span>
-                    <span class="text-[9px] text-slate-400 ml-1">ชม.</span>
+            <div class="w-full flex justify-between items-center mt-2 pt-2 border-t border-slate-700/50">
+                <div class="flex items-center gap-1 text-[10px]">
+                    <span class="text-slate-400">เวลางาน</span>
+                    <span class="font-bold text-white text-[11px]">${normalHrs.toFixed(1)}</span>
                 </div>
                 ${otHrs > 0 ? `
-                <div class="text-xs text-orange-400 mt-1 whitespace-nowrap flex items-center justify-end">
-                    <span class="text-[10px] font-bold mr-1.5">OT</span>
-                    <span class="font-bold text-orange-300 text-[13px] w-7 text-right">${otHrs.toFixed(1)}</span>
-                    <span class="text-[9px] text-orange-400/80 ml-1">ชม.</span>
+                <div class="flex items-center gap-1 text-[10px]">
+                    <span class="text-orange-400/80">OT</span>
+                    <span class="font-bold text-orange-400 text-[11px]">${otHrs.toFixed(1)}</span>
                 </div>` : ''}
             </div>
             `;
         }
 
         btnOutText.className = "flex-1 flex flex-row items-center w-full";
-        btnOutText.innerHTML = `<div class="flex flex-col items-start leading-tight whitespace-nowrap"><span class="font-bold text-sm text-rose-400">ออกงานแล้ว</span><div class="text-[11px] text-slate-400 mt-1">ตาราง: <span class="text-rose-400 font-bold">${outSched}</span><br>จริง: ${outTime}</div></div>${hrsHtml}`;
-        btnOut.className = 'bg-slate-800/90 text-white py-2 px-3 rounded-xl border border-rose-500/20 flex flex-row items-center justify-start transition-all cursor-default shadow-sm w-full';
+        btnOutText.innerHTML = `
+        <div class="flex flex-col w-full text-left">
+            <div class="text-[10px] text-transparent mb-1.5 font-medium tracking-wide select-none">.</div>
+            <div class="flex items-center gap-1.5 mb-2">
+                <span class="relative flex h-2 w-2">
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.6)]"></span>
+                </span>
+                <span class="font-bold text-[13px] text-rose-400 tracking-wide">ออกงานแล้ว</span>
+            </div>
+            <div class="bg-slate-900/60 rounded border border-slate-700/50 p-1.5 space-y-0.5 w-full">
+                <div class="flex justify-between items-center text-[10px]">
+                    <span class="text-slate-400">ตารางเวลา</span>
+                    <span class="text-slate-300 font-medium">${outSched}</span>
+                </div>
+                <div class="flex justify-between items-center text-[10px]">
+                    <span class="text-rose-400/80">เวลาจริง</span>
+                    <span class="text-rose-400 font-bold">${outTime}</span>
+                </div>
+            </div>
+            ${hrsHtml}
+        </div>
+        `;
+        btnOut.className = 'bg-slate-800/90 text-white p-3 rounded-xl border border-rose-500/20 flex flex-col items-start justify-start transition-all cursor-default shadow-sm h-full w-full';
         iconOut.className = 'hidden';
         iconOut.innerHTML = '';
     } else {
         btnOutText.innerHTML = `<span class="font-bold tracking-wide text-sm">ออกงาน (OUT)</span>`;
-        btnOut.className = 'bg-slate-800 text-slate-300 py-3 px-4 flex flex-row items-center justify-center gap-2 transition-all duration-200 active:scale-95 group rounded-xl hover:bg-slate-700 shadow-sm border border-slate-700/50';
+        btnOut.className = 'bg-slate-800 text-slate-300 py-3 px-4 flex flex-row items-center justify-center gap-2 transition-all duration-200 active:scale-95 group rounded-xl hover:bg-slate-700 shadow-sm border border-slate-700/50 h-full w-full';
         iconOut.className = 'w-5 h-5 text-rose-400 group-hover:text-rose-300 transition-colors duration-200 shrink-0';
         iconOut.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>';
     }
