@@ -2224,20 +2224,40 @@ function formatMoney(num) {
 function calculateMonthlySlips() {
     if (!loggedInEmployee) return;
     
-    const slipsMap = {}; // Key: "YYYY-MM"
+    const slipsMap = {}; // Key: "YYYY-MM" or "YYYY-MM-1"
     
+    let empDedType = String(loggedInEmployee.deductionType || "").trim();
+    let is5Percent = (empDedType === "5%" || empDedType === "0.05" || empDedType.includes("5%"));
+
     // Process Attendance
     const myAttendance = processedAttendance.filter(a => a.name === loggedInEmployee.name);
     myAttendance.forEach(a => {
         if (!a.dateObj) return;
         let yyyy = a.dateObj.getFullYear();
-        let mm = String(a.dateObj.getMonth() + 1).padStart(2, '0');
-        let key = `${yyyy}-${mm}`;
+        let mm = a.dateObj.getMonth() + 1;
+        let mmStr = String(mm).padStart(2, '0');
+        let day = a.dateObj.getDate();
+        
+        let key = `${yyyy}-${mmStr}`;
+        let period = 0; // 0 = full month, 1 = 1-15, 2 = 16-end
+        
+        if (is5Percent) {
+            if (day <= 15) {
+                key = `${yyyy}-${mmStr}-1`;
+                period = 1;
+            } else {
+                key = `${yyyy}-${mmStr}-2`;
+                period = 2;
+            }
+        }
         
         if (!slipsMap[key]) {
             slipsMap[key] = {
                 monthStr: key,
                 monthName: a.dateObj.toLocaleString('th-TH', { month: 'long', year: 'numeric' }),
+                yyyy: yyyy,
+                mm: mm,
+                period: period,
                 regularHours: 0,
                 otHours: 0,
                 lateDeduction: 0,
@@ -2254,16 +2274,38 @@ function calculateMonthlySlips() {
     if (typeof deductions !== 'undefined') {
         const myDeductions = deductions.filter(d => d.name === loggedInEmployee.name);
         myDeductions.forEach(d => {
-            // d.period looks like "2026-06-1" or "2026-06-2"
+            // d.period looks like "2026-06-1" or "2026-06-2" or "2026-06"
             let parts = d.period.split('-');
             if (parts.length >= 2) {
-                let key = `${parts[0]}-${parts[1].padStart(2, '0')}`;
+                let yyyy = parseInt(parts[0]);
+                let mm = parseInt(parts[1]);
+                let mmStr = parts[1].padStart(2, '0');
+                let periodPart = parts.length >= 3 ? parseInt(parts[2]) : 0;
+                
+                let key = `${yyyy}-${mmStr}`;
+                let period = 0;
+                
+                if (is5Percent) {
+                    if (periodPart === 1) {
+                        key = `${yyyy}-${mmStr}-1`;
+                        period = 1;
+                    } else if (periodPart === 2) {
+                        key = `${yyyy}-${mmStr}-2`;
+                        period = 2;
+                    } else {
+                        key = `${yyyy}-${mmStr}-2`;
+                        period = 2;
+                    }
+                }
+                
                 if (!slipsMap[key]) {
-                    // Create empty if no attendance exists
-                    let dObj = new Date(parseInt(parts[0]), parseInt(parts[1])-1, 1);
+                    let dObj = new Date(yyyy, mm-1, 1);
                     slipsMap[key] = {
                         monthStr: key,
                         monthName: dObj.toLocaleString('th-TH', { month: 'long', year: 'numeric' }),
+                        yyyy: yyyy,
+                        mm: mm,
+                        period: period,
                         regularHours: 0,
                         otHours: 0,
                         lateDeduction: 0,
@@ -2277,9 +2319,10 @@ function calculateMonthlySlips() {
 
     monthlySlips = Object.values(slipsMap).sort((a, b) => b.monthStr.localeCompare(a.monthStr));
     
-    // Calculate final pay
+    // Calculate final pay and period text
     const rate = loggedInEmployee.normalRate || 0;
     const otRate = loggedInEmployee.otRate || 0;
+    const monthsThai = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
     
     monthlySlips.forEach(s => {
         s.grossPay = (s.regularHours * rate) + (s.otHours * otRate);
@@ -2287,6 +2330,23 @@ function calculateMonthlySlips() {
         s.netPay = s.grossPay - s.totalDeductions;
         s.rate = rate;
         s.otRate = otRate;
+        
+        // Generate period text
+        let payDateText = "";
+        let nextMonthIndex = s.mm % 12; // 0 for Jan ... 11 for Dec
+        
+        if (s.period === 1) {
+            payDateText = `(จ่าย 20 ${monthsThai[s.mm - 1]})`;
+            s.periodText = `วันที่ 1-15 ${payDateText}`;
+        } else if (s.period === 2) {
+            let lastDay = new Date(s.yyyy, s.mm, 0).getDate();
+            payDateText = `(จ่าย 5 ${monthsThai[nextMonthIndex]})`;
+            s.periodText = `วันที่ 16-${lastDay} ${payDateText}`;
+        } else {
+            let lastDay = new Date(s.yyyy, s.mm, 0).getDate();
+            payDateText = `(จ่าย 5 ${monthsThai[nextMonthIndex]})`;
+            s.periodText = `วันที่ 1-${lastDay} ${payDateText}`;
+        }
     });
 }
 
@@ -2300,13 +2360,17 @@ function renderSlips() {
     }
     
     let html = '';
+    
     monthlySlips.forEach((s, idx) => {
         html += `<div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex items-center justify-between shadow-sm">
             <div>
-                <div class="font-bold text-slate-800 text-sm">${s.monthName}</div>
+                <div class="font-bold text-slate-800 text-sm flex items-baseline gap-2">
+                    ${s.monthName}
+                    <span class="text-[11px] text-slate-400 font-medium whitespace-nowrap">${s.periodText}</span>
+                </div>
                 <div class="text-xs text-slate-500 mt-1">รับสุทธิ: <span class="font-bold text-emerald-600">${formatMoney(s.netPay)}</span> ฿</div>
             </div>
-            <button onclick="printSlip(${idx})" class="p-2.5 bg-indigo-100 text-indigo-700 rounded-xl hover:bg-indigo-200 active:scale-95 transition-transform">
+            <button onclick="printSlip(${idx})" class="p-2.5 bg-indigo-100 text-indigo-700 rounded-xl hover:bg-indigo-200 active:scale-95 transition-transform shrink-0">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
             </button>
         </div>`;
@@ -2328,7 +2392,7 @@ function printSlip(idx) {
     const html = `
     <html>
     <head>
-        <title>สลิปเงินเดือน ${s.monthName}</title>
+        <title>สลิปเงินเดือน ${s.monthName} ${s.periodText}</title>
         <meta charset="utf-8">
         <style>
             body { font-family: 'Sarabun', 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #333; }
@@ -2357,7 +2421,7 @@ function printSlip(idx) {
         <div class="slip-container">
             <div class="header">
                 <h1>ใบรับรองเงินเดือน (Payslip)</h1>
-                <p>ประจำเดือน ${s.monthName}</p>
+                <p>ประจำเดือน ${s.monthName} ${s.periodText}</p>
             </div>
             
             <div class="info-grid">
