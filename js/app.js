@@ -2129,8 +2129,23 @@ function openProfile(pushToHistory = true) {
         document.getElementById('profile-user-fullname').innerText = loggedInEmployee.name;
     }
     document.getElementById('profile-user-type').innerText = loggedInEmployee.employeeType || 'พนักงาน';
-    document.getElementById('profile-user-bank').innerText = loggedInEmployee.bankAccount || 'ยังไม่ระบุเลขบัญชี';
+    
+    // Add deduction badge
+    const deductEl = document.getElementById('profile-user-deduction');
+    if (deductEl) {
+        let empDedType = String(loggedInEmployee.deductionType || "").trim();
+        if (empDedType === "5%" || empDedType === "0.05" || empDedType.includes("5%")) {
+            deductEl.className = "text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-700";
+            deductEl.innerText = "ประกันสังคม 5%";
+        } else if (empDedType === "3%" || empDedType === "0.03" || empDedType.includes("3%") || empDedType === "" || empDedType === "None") {
+            deductEl.className = "text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700";
+            deductEl.innerText = "หักภาษี 3%";
+        } else {
+            deductEl.className = "hidden";
+        }
+    }
 
+    document.getElementById('profile-user-bank').innerText = loggedInEmployee.bankAccount || 'ยังไม่ระบุเลขบัญชี';
     calculateMonthlySlips();
     renderSlips();
 
