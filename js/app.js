@@ -2323,6 +2323,7 @@ function calculateMonthlySlips() {
     const rate = loggedInEmployee.normalRate || 0;
     const otRate = loggedInEmployee.otRate || 0;
     const monthsThai = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+    const monthsThaiFull = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
     
     monthlySlips.forEach(s => {
         s.grossPay = (s.regularHours * rate) + (s.otHours * otRate);
@@ -2334,18 +2335,19 @@ function calculateMonthlySlips() {
         // Generate period text
         let payDateText = "";
         let nextMonthIndex = s.mm % 12; // 0 for Jan ... 11 for Dec
+        let fullMonthName = monthsThaiFull[s.mm - 1];
         
         if (s.period === 1) {
             payDateText = `(จ่าย 20 ${monthsThai[s.mm - 1]})`;
-            s.periodText = `วันที่ 1-15 ${payDateText}`;
+            s.periodText = `1-15 ${fullMonthName} ${payDateText}`;
         } else if (s.period === 2) {
             let lastDay = new Date(s.yyyy, s.mm, 0).getDate();
             payDateText = `(จ่าย 5 ${monthsThai[nextMonthIndex]})`;
-            s.periodText = `วันที่ 16-${lastDay} ${payDateText}`;
+            s.periodText = `16-${lastDay} ${fullMonthName} ${payDateText}`;
         } else {
             let lastDay = new Date(s.yyyy, s.mm, 0).getDate();
             payDateText = `(จ่าย 5 ${monthsThai[nextMonthIndex]})`;
-            s.periodText = `วันที่ 1-${lastDay} ${payDateText}`;
+            s.periodText = `1-${lastDay} ${fullMonthName} ${payDateText}`;
         }
     });
 }
