@@ -13,7 +13,7 @@
     <title>Sainom Kaset - Payroll & Management</title>
     <!-- Auto Cache Clear Script -->
     <script>
-        const APP_VERSION = "20260624_86";
+        const APP_VERSION = "20260624_87";
         const currentVersion = localStorage.getItem('APP_VERSION');
         if (currentVersion !== APP_VERSION) {
             console.log("New version detected, clearing cache...");
@@ -271,14 +271,14 @@
             </div>
         </div>
         <div class="grid grid-cols-2 gap-4 mb-4">
-            <button id="btn-dash-in" onclick="openQuickAttendance('IN')" class="bg-blue-600/10 text-blue-700 hover:bg-blue-600 hover:text-white p-4 rounded-2xl shadow-sm border border-blue-200 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all active:scale-95 group">
+            <div id="btn-dash-in" role="button" tabindex="0" onclick="openQuickAttendance('IN')" class="cursor-pointer select-none outline-none bg-blue-600/10 text-blue-700 hover:bg-blue-600 hover:text-white p-4 rounded-2xl shadow-sm border border-blue-200 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all active:scale-95 group">
                 <svg id="icon-dash-in" class="w-8 h-8 text-blue-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
-                <span id="btn-dash-in-text" class="font-black text-base tracking-wide">เข้างาน (IN)</span>
-            </button>
-            <button id="btn-dash-out" onclick="openQuickAttendance('OUT')" class="bg-rose-600/10 text-rose-700 hover:bg-rose-600 hover:text-white p-4 rounded-2xl shadow-sm border border-rose-200 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all active:scale-95 group">
-                <span id="btn-dash-out-text" class="font-black text-base tracking-wide">ออกงาน (OUT)</span>
+                <div id="btn-dash-in-text" class="font-black text-base tracking-wide">เข้างาน (IN)</div>
+            </div>
+            <div id="btn-dash-out" role="button" tabindex="0" onclick="openQuickAttendance('OUT')" class="cursor-pointer select-none outline-none bg-rose-600/10 text-rose-700 hover:bg-rose-600 hover:text-white p-4 rounded-2xl shadow-sm border border-rose-200 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all active:scale-95 group">
+                <div id="btn-dash-out-text" class="font-black text-base tracking-wide">ออกงาน (OUT)</div>
                 <svg id="icon-dash-out" class="w-8 h-8 text-rose-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-            </button>
+            </div>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
@@ -1057,7 +1057,7 @@
     </div>
 
     <script src="js/customSelect.js"></script>
-    <script src="js/app.js?v=20260624_86"></script>
+    <script src="js/app.js?v=20260624_87"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -1100,7 +1100,7 @@
         ล้างแคช
     </button>
     <div id="app-version-display" class="fixed bottom-2 right-2 text-[10px] text-slate-400 font-medium z-[9999] pointer-events-none opacity-50">
-        v1.3.50 (24 มิ.ย. 26 22:21)
+        v1.3.51 (24 มิ.ย. 26 22:25)
     </div>
 </body>
 </html>
