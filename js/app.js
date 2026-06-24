@@ -601,7 +601,7 @@ function updateDashboardAttendanceStatus() {
     let dateString = `วัน${dayNames[currentD.getDay()]} ${currentD.getDate()} ${monthNames[currentD.getMonth()]}`;
 
     if (inTime) {
-        btnInText.className = 'w-full block';
+        btnInText.className = 'w-full h-full flex flex-col justify-start';
         btnInText.innerHTML = `
         <div class="flex flex-col w-full text-left">
             <div class="flex items-center justify-between mb-1.5">
@@ -659,7 +659,7 @@ function updateDashboardAttendanceStatus() {
             </div>`;
         }
 
-        btnOutText.className = "w-full block";
+        btnOutText.className = "w-full h-full flex flex-col justify-start";
         btnOutText.innerHTML = `
         <div class="flex flex-col w-full text-left">
             <div class="flex items-center justify-between mb-1.5">
