@@ -603,29 +603,29 @@ function updateDashboardAttendanceStatus() {
     if (inTime) {
         btnInText.innerHTML = `
         <div class="flex flex-col w-full text-left">
-            <div class="flex items-center justify-between mb-0.5">
-                <div class="flex items-center gap-1">
-                    <span class="relative flex h-1.5 w-1.5">
+            <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-1.5">
+                    <span class="relative flex h-2 w-2">
                       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                     </span>
-                    <span class="font-bold text-[11px] text-emerald-400 tracking-wide">เข้างานแล้ว</span>
+                    <span class="font-bold text-[11px] text-emerald-400 tracking-wide">เข้างาน</span>
                 </div>
-                <span class="text-[8px] text-slate-400 tracking-wide">${dateString}</span>
+                <span class="text-[9px] text-slate-400 font-medium tracking-wide">${dateString}</span>
             </div>
-            <div class="flex justify-between items-center w-full text-[10px]">
-                <div class="flex items-baseline gap-1">
-                   <span class="text-slate-500 text-[8px]">ตาราง</span>
-                   <span class="text-emerald-400 font-bold tracking-wider">${inSched}</span>
+            <div class="bg-slate-900/40 rounded-lg border border-slate-700/50 p-1.5 w-full flex flex-col gap-0.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-500 text-[9px]">เวลาตาราง</span>
+                    <span class="text-emerald-400 text-xs font-bold tracking-wider">${inSched}</span>
                 </div>
-                <div class="flex items-baseline gap-1">
-                   <span class="text-slate-500 text-[8px]">จริง</span>
-                   <span class="text-slate-200 font-medium tracking-wider">${inTime}</span>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-500 text-[9px]">เวลาจริง</span>
+                    <span class="text-white text-xs font-bold tracking-wider">${inTime}</span>
                 </div>
             </div>
         </div>
         `;
-        btnIn.className = 'bg-slate-800/90 text-white px-2 py-1.5 rounded-lg border border-emerald-500/20 flex flex-col items-center justify-center transition-all cursor-default shadow-sm w-full';
+        btnIn.className = 'bg-slate-800/90 text-white p-2 rounded-xl border border-emerald-500/20 flex flex-col items-start justify-start transition-all cursor-default shadow-sm w-full';
         iconIn.className = 'hidden';
         iconIn.innerHTML = '';
     } else {
@@ -650,34 +650,34 @@ function updateDashboardAttendanceStatus() {
             else if (diffHrs > 5) { normalHrs = diffHrs - 1; }
             else { normalHrs = diffHrs; }
             
-            hrsHtml = `<div class="text-[8px] text-slate-400 tracking-wide">${normalHrs.toFixed(1)} ชม.${otHrs > 0 ? ` <span class="text-orange-400/80">OT: ${otHrs.toFixed(1)}</span>` : ''}</div>`;
+            hrsHtml = `<div class="text-[9px] text-slate-400 font-medium tracking-wide">${normalHrs.toFixed(1)} ชม.${otHrs > 0 ? ` <span class="text-orange-400/80">OT: ${otHrs.toFixed(1)}</span>` : ''}</div>`;
         }
 
         btnOutText.className = "flex-1 flex flex-row items-center w-full";
         btnOutText.innerHTML = `
         <div class="flex flex-col w-full text-left">
-            <div class="flex items-center justify-between mb-0.5">
-                <div class="flex items-center gap-1">
-                    <span class="relative flex h-1.5 w-1.5">
-                      <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500 shadow-[0_0_4px_rgba(244,63,94,0.6)]"></span>
+            <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-1.5">
+                    <span class="relative flex h-2 w-2">
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.6)]"></span>
                     </span>
-                    <span class="font-bold text-[11px] text-rose-400 tracking-wide">ออกงานแล้ว</span>
+                    <span class="font-bold text-[11px] text-rose-400 tracking-wide">ออกงาน</span>
                 </div>
                 ${hrsHtml}
             </div>
-            <div class="flex justify-between items-center w-full text-[10px]">
-                <div class="flex items-baseline gap-1">
-                   <span class="text-slate-500 text-[8px]">ตาราง</span>
-                   <span class="text-rose-400 font-bold tracking-wider">${outSched}</span>
+            <div class="bg-slate-900/40 rounded-lg border border-slate-700/50 p-1.5 w-full flex flex-col gap-0.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-500 text-[9px]">เวลาตาราง</span>
+                    <span class="text-rose-400 text-xs font-bold tracking-wider">${outSched}</span>
                 </div>
-                <div class="flex items-baseline gap-1">
-                   <span class="text-slate-500 text-[8px]">จริง</span>
-                   <span class="text-slate-200 font-medium tracking-wider">${outTime}</span>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-500 text-[9px]">เวลาจริง</span>
+                    <span class="text-white text-xs font-bold tracking-wider">${outTime}</span>
                 </div>
             </div>
         </div>
         `;
-        btnOut.className = 'bg-slate-800/90 text-white px-2 py-1.5 rounded-lg border border-rose-500/20 flex flex-col items-center justify-center transition-all cursor-default shadow-sm w-full';
+        btnOut.className = 'bg-slate-800/90 text-white p-2 rounded-xl border border-rose-500/20 flex flex-col items-start justify-start transition-all cursor-default shadow-sm w-full';
         iconOut.className = 'hidden';
         iconOut.innerHTML = '';
     } else {
