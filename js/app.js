@@ -2164,56 +2164,6 @@ function openProfile(pushToHistory = true) {
     document.getElementById('profile-total-hours').innerText = formatMoney(totalHours);
     document.getElementById('profile-total-income').innerText = formatMoney(totalIncome);
 
-    // Calculate tenure
-    const startDateStr = loggedInEmployee.startDate || '';
-    const startDateEl = document.getElementById('profile-start-date');
-    const tenureEl = document.getElementById('profile-tenure');
-    
-    if (startDateStr) {
-        // Try parsing assuming ISO format or Google Sheets standard date string
-        const startDateObj = new Date(startDateStr);
-        if (!isNaN(startDateObj.getTime())) {
-            startDateEl.innerText = startDateObj.toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: 'numeric' });
-            
-            const now = new Date();
-            
-            if (startDateObj > now) {
-                tenureEl.innerText = '-';
-            } else {
-                let years = now.getFullYear() - startDateObj.getFullYear();
-                let months = now.getMonth() - startDateObj.getMonth();
-                let days = now.getDate() - startDateObj.getDate();
-
-                if (days < 0) {
-                    months--;
-                    const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-                    days += prevMonth.getDate();
-                }
-                
-                if (months < 0) {
-                    years--;
-                    months += 12;
-                }
-
-                let totalMonths = (years * 12) + months;
-                
-                if (totalMonths === 0 && days === 0) {
-                    tenureEl.innerText = 'เริ่มงานวันนี้';
-                } else {
-                    let parts = [];
-                    if (totalMonths > 0) parts.push(`${totalMonths} เดือน`);
-                    parts.push(`${days} วัน`);
-                    tenureEl.innerText = parts.join(' ');
-                }
-            }
-        } else {
-            startDateEl.innerText = startDateStr;
-            tenureEl.innerText = '-';
-        }
-    } else {
-        startDateEl.innerText = 'ยังไม่ระบุ';
-        tenureEl.innerText = 'ยังไม่ระบุ';
-    }
 }
 
 function formatMoney(num) {
