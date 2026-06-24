@@ -2132,16 +2132,20 @@ function openProfile(pushToHistory = true) {
     
     // Add deduction badge
     const deductEl = document.getElementById('profile-user-deduction');
+    const payScheduleEl = document.getElementById('profile-pay-schedule');
     if (deductEl) {
         let empDedType = String(loggedInEmployee.deductionType || "").trim();
         if (empDedType === "5%" || empDedType === "0.05" || empDedType.includes("5%")) {
             deductEl.className = "text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-700";
             deductEl.innerText = "ประกันสังคม 5%";
+            if (payScheduleEl) payScheduleEl.innerText = "* จ่ายทุกวันที่ 5 และ 20 ของเดือน";
         } else if (empDedType === "3%" || empDedType === "0.03" || empDedType.includes("3%") || empDedType === "" || empDedType === "None") {
             deductEl.className = "text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700";
             deductEl.innerText = "หักภาษี 3%";
+            if (payScheduleEl) payScheduleEl.innerText = "* จ่ายทุกวันที่ 5 ของเดือน";
         } else {
             deductEl.className = "hidden";
+            if (payScheduleEl) payScheduleEl.innerText = "";
         }
     }
 
