@@ -2004,11 +2004,12 @@ function closeEmployeeModal() {
 }
 
 async function saveEmployee() {
-    const oldNickname = document.getElementById('old-nickname').value;
-    const oldFullName = document.getElementById('old-fullname').value;
+    try {
+        const oldNickname = document.getElementById('old-nickname').value;
+        const oldFullName = document.getElementById('old-fullname').value;
 
-    const nickname = document.getElementById('emp-nickname').value.trim();
-    if (!nickname) return Swal.fire("กรุณากรอกชื่อเล่น");
+        const nickname = document.getElementById('emp-nickname').value.trim();
+        if (!nickname) return Swal.fire("กรุณากรอกชื่อเล่น");
 
     const empObj = {
         name: nickname, // 'name' corresponds to nickname in data structure
@@ -2072,6 +2073,10 @@ async function saveEmployee() {
         Swal.fire("Failed to connect to server. Details: " + e.message);
     } finally {
         hideLoading();
+    }
+    } catch (err) {
+        console.error("CRITICAL ERROR IN saveEmployee:", err);
+        alert("เกิดข้อผิดพลาดรุนแรง: " + err.message);
     }
 }
 
