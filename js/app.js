@@ -38,93 +38,81 @@ document.addEventListener('DOMContentLoaded', () => {
     initData();
 });
 
-async function initData() {
+let isInitialLoad = true;
+
+function initData() {
     const overlay = document.getElementById('loading-overlay');
     const loadingText = document.getElementById('loading-text');
-    
-    // Check local storage for cached data
-    const cachedStr = localStorage.getItem('snk_payroll_data');
-    if (cachedStr) {
-        try {
-            const cachedJson = JSON.parse(cachedStr);
-            if (cachedJson.status === "success") {
-                applyInitData(cachedJson.data);
-                // Hide overlay immediately since we have cached data
+    overlay.classList.remove('hidden');
+    loadingText.innerText = "กำลังเชื่อมต่อฐานข้อมูล Real-time...";
+
+    // Listen to Firebase Realtime Database
+    database.ref('data').on('value', snapshot => {
+        const data = snapshot.val();
+        if (data) {
+            // Save to cache just in case they go offline later
+            localStorage.setItem('snk_payroll_data', JSON.stringify({status: "success", data: data}));
+            
+            // Apply the data
+            applyInitData(data, !isInitialLoad);
+            
+            if (isInitialLoad) {
+                isInitialLoad = false;
                 if (!isAdmin && !loggedInEmployee) {
                     overlay.classList.add('hidden');
                 }
-                // Fetch fresh data in the background silently
-                fetchFreshDataSilently();
-                return;
-            }
-        } catch(e) {
-            console.error("Cache parsing error", e);
-        }
-    }
-    
-    // No cache or cache error, do a normal fetch with loading screen
-    overlay.classList.remove('hidden');
-    loadingText.innerText = "กำลังเชื่อมต่อระบบ...";
-    try {
-        const res = await fetch(`${WEB_APP_URL}?action=getInitPayrollData`);
-        const json = await res.json();
-        if (json.status === "success") {
-            localStorage.setItem('snk_payroll_data', JSON.stringify(json));
-            applyInitData(json.data);
-        } else {
-            overlay.classList.add('hidden');
-        }
-    } catch (e) {
-        console.error(e);
-        Swal.fire("เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาลองใหม่อีกครั้ง");
-        overlay.classList.add('hidden');
-    }
-}
-
-async function fetchFreshDataSilently() {
-    try {
-        const res = await fetch(`${WEB_APP_URL}?action=getInitPayrollData`);
-        const json = await res.json();
-        if (json.status === "success") {
-            localStorage.setItem('snk_payroll_data', JSON.stringify(json));
-            applyInitData(json.data, true); // Update with fresh data, isSilent=true
-            
-            // Re-render UI if already logged in
-            if (loggedInEmployee) {
-                setupPeriods();
-                if (isAdmin) {
-                    if (currentPeriodVal) renderAdminSummary();
-                    if (!document.getElementById('view-admin-employees').classList.contains('hidden')) {
-                        const countEl = document.getElementById('emp-setup-count');
-                        if (countEl) countEl.innerText = employees.length;
-                        renderAdminEmployees();
-                    }
-                } else {
-                    const freshEmp = employees.find(e => e.name === loggedInEmployee.name);
-                    if (freshEmp) {
-                        loggedInEmployee = freshEmp;
-                        sessionStorage.setItem('snk_payroll_user', JSON.stringify(freshEmp));
-                        document.getElementById('emp-user-name').innerText = loggedInEmployee.name;
-                        const photoImg = document.getElementById('emp-user-photo');
-                        const initialSpan = document.getElementById('emp-user-initial');
-                        if (loggedInEmployee.photo) {
-                            photoImg.src = loggedInEmployee.photo;
-                            photoImg.classList.remove('hidden');
-                            initialSpan.classList.add('hidden');
-                        } else {
-                            photoImg.src = "";
-                            photoImg.classList.add('hidden');
-                            initialSpan.classList.remove('hidden');
-                            initialSpan.innerText = loggedInEmployee.name.charAt(0);
+            } else {
+                // This acts like fetchFreshDataSilently: UI updates if already logged in
+                if (loggedInEmployee) {
+                    setupPeriods();
+                    if (isAdmin) {
+                        if (currentPeriodVal) renderAdminSummary();
+                        if (!document.getElementById('view-admin-employees').classList.contains('hidden')) {
+                            const countEl = document.getElementById('emp-setup-count');
+                            if (countEl) countEl.innerText = employees.length;
+                            renderAdminEmployees();
                         }
+                    } else {
+                        const freshEmp = employees.find(e => e.name === loggedInEmployee.name);
+                        if (freshEmp) {
+                            loggedInEmployee = freshEmp;
+                            sessionStorage.setItem('snk_payroll_user', JSON.stringify(freshEmp));
+                            document.getElementById('emp-user-name').innerText = loggedInEmployee.name;
+                            const photoImg = document.getElementById('emp-user-photo');
+                            const initialSpan = document.getElementById('emp-user-initial');
+                            if (loggedInEmployee.photo) {
+                                photoImg.src = loggedInEmployee.photo;
+                                photoImg.classList.remove('hidden');
+                                initialSpan.classList.add('hidden');
+                            } else {
+                                photoImg.src = "";
+                                photoImg.classList.add('hidden');
+                                initialSpan.classList.remove('hidden');
+                                initialSpan.innerText = loggedInEmployee.name.charAt(0);
+                            }
+                        }
+                        if (currentPeriodVal) renderEmployeeDashboard();
                     }
-                    if (currentPeriodVal) renderEmployeeDashboard();
                 }
             }
+        } else {
+            console.warn("No data in Firebase yet.");
+            if (isInitialLoad) overlay.classList.add('hidden');
         }
-    } catch (e) {
-        console.error("Silent fetch error", e);
-    }
+    }, error => {
+        console.error("Firebase fetch error", error);
+        // Fallback to cache
+        const cachedStr = localStorage.getItem('snk_payroll_data');
+        if (cachedStr && isInitialLoad) {
+            try {
+                const cachedJson = JSON.parse(cachedStr);
+                if (cachedJson.status === "success") {
+                    applyInitData(cachedJson.data);
+                }
+            } catch(e){}
+        }
+        if (isInitialLoad) overlay.classList.add('hidden');
+    });
 }
 
 function applyInitData(data, isSilent = false) {

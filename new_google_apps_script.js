@@ -1,6 +1,42 @@
 var OLD_SHEET_ID = "1rS2XH04BgcY_bRRHIFiyb4M1utvDnNsfzsSd11dUbbk";
 var LINE_CHANNEL_ACCESS_TOKEN = "NyKxRhVKq1RjT2NQ7ZiG1JYtmoX7q5H+IkkHJNZb4Gfm5LrZA1A1oIKF2CS/+pf6dohA3OjCqwRjdmC80BZjJ7uvFWbWou43NknbBVauzU1VPR+7AxfZmpmCRkcIUSC29OCSsYQfSJ7/98Mq0pN7nQdB04t89/1O/w1cDnyilFU=";
 var LINE_ADMIN_USER_ID = "U207c7336fdbe39c28cb725f298f4d212";
+var FIREBASE_URL = "https://snk-work-default-rtdb.asia-southeast1.firebasedatabase.app/data.json";
+
+function onOpen() {
+  var ui = SpreadsheetApp.getUi();
+  ui.createMenu('Sainom Kaset')
+      .addItem('🔄 ซิงค์ข้อมูลไปที่เว็บไซต์ (Firebase)', 'syncToFirebaseManually')
+      .addToUi();
+}
+
+function syncToFirebaseManually() {
+  try {
+    syncToFirebase();
+    SpreadsheetApp.getUi().alert('✅ ซิงค์ข้อมูลไปยังเว็บไซต์สำเร็จเรียบร้อยแล้ว!');
+  } catch(e) {
+    SpreadsheetApp.getUi().alert('❌ เกิดข้อผิดพลาดในการซิงค์: ' + e.toString());
+  }
+}
+
+function syncToFirebase() {
+  var payload = {
+    attendance: getMergedAttendanceData(),
+    employees: getEmployeesData(),
+    deductions: getDeductionsData(),
+    leaves: getLeavesData(),
+    timeEditRequests: getTimeEditRequestsData(),
+    settings: getSettingsData()
+  };
+  
+  var options = {
+    method: 'put',
+    contentType: 'application/json',
+    payload: JSON.stringify(payload)
+  };
+  
+  UrlFetchApp.fetch(FIREBASE_URL, options);
+}
 
 function doGet(e) {
   var action = e.parameter.action;
@@ -27,26 +63,32 @@ function doPost(e) {
     var p = JSON.parse(e.postData.contents);
     var action = p.action;
 
+    var res;
     if (action === "clockin" || action === "clockout") {
       p.actualTime = p.shift;
-      return createJsonResponse(handleProcessData(p));
-    }
-    if (action === "saveEmployee") return createJsonResponse(handleSaveEmployee(p));
-    if (action === "deleteEmployee") return createJsonResponse(handleDeleteEmployee(p.oldNickname, p.oldFullName));
-    if (action === "saveDeduction") return createJsonResponse(handleSaveDeduction(p.deduction));
-    if (action === "deleteDeduction") return createJsonResponse(handleDeleteDeduction(p.id));
-    if (action === "getEmployeeLogs") return createJsonResponse(handleGetEmployeeLogs(p.nickname, p.month, p.year));
-    if (action === "updateEmployeeLog") return createJsonResponse(handleUpdateEmployeeLog(p));
-    if (action == "requestLeave") return createJsonResponse(handleRequestLeave(p.leave));
-    if (action == "updateLeaveStatus") return createJsonResponse(handleUpdateLeaveStatus(p.id, p.status));
+      res = handleProcessData(p);
+    } else if (action === "saveEmployee") { res = handleSaveEmployee(p); }
+    else if (action === "deleteEmployee") { res = handleDeleteEmployee(p.oldNickname, p.oldFullName); }
+    else if (action === "saveDeduction") { res = handleSaveDeduction(p.deduction); }
+    else if (action === "deleteDeduction") { res = handleDeleteDeduction(p.id); }
+    else if (action === "getEmployeeLogs") { res = handleGetEmployeeLogs(p.nickname, p.month, p.year); }
+    else if (action === "updateEmployeeLog") { res = handleUpdateEmployeeLog(p); }
+    else if (action === "requestLeave") { res = handleRequestLeave(p.leave); }
+    else if (action === "updateLeaveStatus") { res = handleUpdateLeaveStatus(p.id, p.status); }
+    else if (action === "processData") { res = handleProcessData(p.payload); }
+    else if (action === "getInitPayrollData") { res = handleGetInitPayrollData(); }
+    else if (action === "requestTimeEdit") { res = handleRequestTimeEdit(p.timeEditRequest); }
+    else if (action === "updateEditRequestStatus") { res = handleUpdateEditRequestStatus(p.id, p.status); }
+    else if (action === "saveSetting") { res = handleSaveSetting(p.key, p.value); }
+    else { res = {status: "error", message: "Unknown action"}; }
     
-    // From new attendance system
-    if (action == "processData") return createJsonResponse(handleProcessData(p.payload));
-    if (action == "getInitPayrollData") return createJsonResponse(handleGetInitPayrollData());
-    if (action == "requestTimeEdit") return createJsonResponse(handleRequestTimeEdit(p.timeEditRequest));
-    if (action == "updateEditRequestStatus") return createJsonResponse(handleUpdateEditRequestStatus(p.id, p.status));
-    if (action == "saveSetting") return createJsonResponse(handleSaveSetting(p.key, p.value));
-    return createJsonResponse({status: "error", message: "Unknown action"});
+    // Auto-sync to Firebase if the action modifies data
+    var isMutation = ["getInitPayrollData", "getEmployeeLogs"].indexOf(action) === -1;
+    if (res && res.status === "success" && isMutation) {
+      try { syncToFirebase(); } catch(e) {} // Don't let sync error break the response
+    }
+    
+    return createJsonResponse(res);
   } catch (error) {
     return createJsonResponse({status: "error", message: error.toString()});
   }
