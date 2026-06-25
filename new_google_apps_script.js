@@ -176,7 +176,7 @@ function getSheetByNameOrCreateNew(name) {
     if (name === "Attendance") {
       sheet.appendRow(["Timestamp", "Name", "Type", "ScheduledTime", "Note"]);
     } else if (name === "Employees") {
-      sheet.appendRow(["ชื่อเล่น", "ชื่อจริง-นามสกุล", "PIN", "เรตรายวัน", "เรตรายชม.", "เรต OT", "ประเภทการหักเงิน", "เลขบัญชีธนาคาร", "ประเภทพนักงาน", "รูปภาพ", "วันที่เริ่มงาน", "สถานะ", "เงินเดือน", "เงินล่วงหน้า"]);
+      sheet.appendRow(["ชื่อเล่น", "ชื่อจริง-นามสกุล", "รายเดือน", "เรตรายวัน", "เรตรายชม", "เรต OT", "ประเภทการหักเงิน", "ประเภทพนักงาน", "วันที่เริ่มงาน", "PIN", "เลขบัญชีธนาคาร", "รูปภาพ", "สถานะ", "เงินล่วงหน้า"]);
     } else if (name === "Deductions") {
       sheet.appendRow(["ID", "Period", "Name", "Amount", "Reason", "Timestamp", "Type"]);
     } else if (name === "Leaves") {
@@ -349,12 +349,12 @@ function autoDeactivateAndSortEmployees() {
           row[12] = "Inactive";
           changed = true;
         } else if (!lastAtt) {
-          var startDStr = String(row[10]).trim();
+          var startDStr = String(row[8]).trim();
           var startD = startDStr ? new Date(startDStr) : null;
           if (startD && !isNaN(startD.getTime())) {
              if (startD < oneMonthAgo) {
                 currentStatus = "Inactive";
-                row[11] = "Inactive";
+                row[12] = "Inactive";
                 changed = true;
              }
           }
@@ -364,9 +364,9 @@ function autoDeactivateAndSortEmployees() {
     }
     
     function getSortRank(r) {
-      var st = String(r[11] || "Active").trim();
+      var st = String(r[12] || "Active").trim();
       if (st === "Inactive") return 999;
-      var t = String(r[8] || "").trim().toLowerCase();
+      var t = String(r[7] || "").trim().toLowerCase();
       if (t === "active") return 1;
       if (t === "full time") return 2;
       if (t === "full time ประกันสังคม") return 3;
@@ -389,9 +389,9 @@ function autoDeactivateAndSortEmployees() {
         return dedB.localeCompare(dedA);
       }
       
-      // If same type and deduction, sort by dailyRate (row[3]) or monthlyRate (row[12]) descending
-      var rateA = Math.max(Number(a[3]) || 0, Number(a[12]) || 0);
-      var rateB = Math.max(Number(b[3]) || 0, Number(b[12]) || 0);
+      // If same type and deduction, sort by dailyRate (row[3]) or monthlyRate (row[2]) descending
+      var rateA = Math.max(Number(a[3]) || 0, Number(a[2]) || 0);
+      var rateB = Math.max(Number(b[3]) || 0, Number(b[2]) || 0);
       return rateB - rateA;
     });
     var newOrder = rows.map(function(r) { return r[0]; }).join(",");
@@ -408,7 +408,7 @@ function autoDeactivateAndSortEmployees() {
     var backgrounds = [];
     for (var i = 0; i < rows.length; i++) {
        var rowBg = [];
-       var st = String(rows[i][11] || "Active").trim();
+       var st = String(rows[i][12] || "Active").trim();
        var dailyRateStr = String(rows[i][3] || "").trim();
        var isInactive = (st === "Inactive");
        
@@ -454,17 +454,17 @@ function getEmployeesData() {
       result.push({
         name: String(row[0]).trim(),
         fullName: String(row[1] || "").trim(),
-        pin: String(row[2] || "").trim(),
+        monthlyRate: Number(row[2]) || 0,
         dailyRate: Number(row[3]) || 0,
         normalRate: Number(row[4]) || 0,
         otRate: Number(row[5]) || 0,
         deductionType: String(row[6] || "3%").trim(),
-        bankAccount: String(row[7] || "").trim(),
-        employeeType: String(row[8] || "").trim(),
-        photo: convertDriveUrlToImg(row[9]),
-        startDate: String(row[10] || "").trim(),
-        status: String(row[11] || "Active").trim(),
-        monthlyRate: Number(row[12]) || 0,
+        employeeType: String(row[7] || "").trim(),
+        startDate: String(row[8] || "").trim(),
+        pin: String(row[9] || "").trim(),
+        bankAccount: String(row[10] || "").trim(),
+        photo: convertDriveUrlToImg(row[11]),
+        status: String(row[12] || "Active").trim(),
         advancePayment: Number(row[13]) || 0
       });
     }
@@ -569,17 +569,17 @@ function handleSaveEmployee(p) {
   var rowData = [
     p.nickname,
     p.fullName,
-    p.pin,
-    p.dailyRate,
-    p.hourlyRate,
-    p.otRate,
-    p.deductionType,
-    p.bankAccount,
-    p.employeeType,
-    p.photo || "",
-    p.startDate || Utilities.formatDate(new Date(), "Asia/Bangkok", "yyyy-MM-dd"),
-    p.status || "Active",
     p.monthlyRate || 0,
+    p.dailyRate || 0,
+    p.hourlyRate || 0,
+    p.otRate || 0,
+    p.deductionType || "NoDeduct",
+    p.employeeType || "Full Time",
+    p.startDate || Utilities.formatDate(new Date(), "Asia/Bangkok", "yyyy-MM-dd"),
+    p.pin || "",
+    p.bankAccount || "",
+    p.photo || "",
+    p.status || "Active",
     p.advancePayment || 0
   ];
 
