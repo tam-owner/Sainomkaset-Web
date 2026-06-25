@@ -571,7 +571,7 @@ function handleSaveEmployee(p) {
     p.fullName,
     p.monthlyRate || 0,
     p.dailyRate || 0,
-    p.hourlyRate || 0,
+    p.normalRate || 0,
     p.otRate || 0,
     p.deductionType || "NoDeduct",
     p.employeeType || "Full Time",
