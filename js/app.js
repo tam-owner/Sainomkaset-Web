@@ -2027,9 +2027,7 @@ async function saveEmployee() {
         photo: currentEmployeePhotoBase64
     };
 
-    const overlay = document.getElementById('loading-overlay');
-    document.getElementById('loading-text').innerText = "กำลังบันทึกข้อมูล...";
-    overlay.classList.remove('hidden');
+    showLoading("กำลังบันทึกข้อมูล...");
 
     try {
         let res = await fetch(WEB_APP_URL, {
@@ -2073,7 +2071,7 @@ async function saveEmployee() {
         console.error(e);
         Swal.fire("Failed to connect to server. Details: " + e.message);
     } finally {
-        overlay.classList.add('hidden');
+        hideLoading();
     }
 }
 
