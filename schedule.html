@@ -13,7 +13,7 @@
             const errBox = document.getElementById('debug-error-box');
             if(errBox) { errBox.style.display = 'block'; errBox.innerHTML += '<br>PROMISE ERR: ' + (e.reason ? e.reason.message || e.reason : 'Unknown'); }
         });
-        const APP_VERSION = "20260627_12";
+        const APP_VERSION = "20260627_13";
         const currentVersion = localStorage.getItem('APP_VERSION');
         if (currentVersion !== APP_VERSION) {
             console.log("New version detected, clearing cache...");
