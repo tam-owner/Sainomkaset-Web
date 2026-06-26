@@ -555,11 +555,13 @@ function renderWorkloadWarnings(dates) {
     let html = '<h3 class="section-title mt-4"><i data-lucide="users" class="text-primary"></i> ชั่วโมงงาน</h3><div style="display:flex; flex-direction:column; gap:0.25rem;">';
                
     // Generate array to sort
-    const employeeData = state.employees.map(emp => ({
-        emp,
-        load: weeklyWorkload[emp.name],
-        totalHrs: weeklyHours[emp.name]
-    }));
+    const employeeData = state.employees
+        .filter(e => !e.status || (!e.status.toLowerCase().includes('inactive') && !e.status.includes('ลาออก') && !e.status.includes('เก่า')))
+        .map(emp => ({
+            emp,
+            load: weeklyWorkload[emp.name],
+            totalHrs: weeklyHours[emp.name]
+        }));
     
     // Sort by total hours descending
     employeeData.sort((a, b) => b.totalHrs - a.totalHrs);
