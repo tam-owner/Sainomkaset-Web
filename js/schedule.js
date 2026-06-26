@@ -851,12 +851,14 @@ function renderCustomDropdown(cell, date, shift, station, onSelect) {
     
     let html = '';
     let exceededHtml = '';
+    let unavailableHtml = '';
     
     state.employees.forEach(emp => {
         if (emp.status && (emp.status.toLowerCase().includes('inactive') || emp.status.includes('ลาออก') || emp.status.includes('เก่า'))) return;
         if (currentNames.includes(emp.name)) return;
 
         let isAvailable = true;
+        let unavailableReason = "";
 
         if (emp.isAvailableAll === false) {
             const dObj = new Date(date);
@@ -865,13 +867,20 @@ function renderCustomDropdown(cell, date, shift, station, onSelect) {
             
             if (!emp.availability || !emp.availability[dayIdx] || !emp.availability[dayIdx].includes(shiftInfo.id)) {
                 isAvailable = false;
+                unavailableReason = "ไม่ได้ตั้งให้ว่างเวลานี้";
             }
         }
 
         const isOnLeave = state.leaves.some(l => l.name === emp.name && date >= l.startDate && date <= l.endDate);
-        if (isOnLeave) isAvailable = false;
+        if (isOnLeave) {
+            isAvailable = false;
+            unavailableReason = "ติดลา";
+        }
 
-        if (emp.type === 'Full-time' && !shiftInfo.is8Hour) isAvailable = false;
+        if (emp.type === 'Full-time' && !shiftInfo.is8Hour) {
+            isAvailable = false;
+            unavailableReason = "ประจำลงได้แค่กะ 8 ชม.";
+        }
 
         const hasShiftToday = state.schedules.some(s => 
             s.date === date && 
@@ -879,9 +888,15 @@ function renderCustomDropdown(cell, date, shift, station, onSelect) {
             state.STATIONS.includes(s.station) &&
             state.SHIFTS.some(shift => shift.id === s.shift)
         );
-        if (hasShiftToday) isAvailable = false;
+        if (hasShiftToday) {
+            isAvailable = false;
+            unavailableReason = "ลงกะไปแล้ววันนี้";
+        }
 
-        if (emp.stations && emp.stations.length > 0 && !emp.stations.includes(station)) isAvailable = false;
+        if (emp.stations && emp.stations.length > 0 && !emp.stations.includes(station)) {
+            isAvailable = false;
+            unavailableReason = "ไม่ได้เลือกทำตำแหน่งนี้";
+        }
 
         if (isAvailable) {
             const c = getEmployeeColor(emp.name);
@@ -894,10 +909,12 @@ function renderCustomDropdown(cell, date, shift, station, onSelect) {
             } else {
                 html += `<div class="custom-dropdown-item" data-name="${emp.name}" style="color: ${c.text}; border-left: 4px solid ${c.bg}; font-weight: 600;">${textHtml}</div>`;
             }
+        } else {
+            unavailableHtml += `<div class="custom-dropdown-item" style="color: #94a3b8; cursor: not-allowed; border-left: 4px solid #cbd5e1; font-size: 0.8rem; pointer-events: none;">${emp.name} <span style="font-size:0.7rem;">(${unavailableReason})</span></div>`;
         }
     });
     
-    html = html + exceededHtml;
+    html = html + exceededHtml + unavailableHtml;
     
     if (html === '') {
         html = `<div class="custom-dropdown-item" style="color:var(--danger); cursor:not-allowed;">ไม่มีผู้ว่างงาน</div>`;
