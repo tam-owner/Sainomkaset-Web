@@ -480,15 +480,26 @@ function getDeductionsData() {
     var sheet = getSheetByNameOrCreateNew("Deductions");
     var data = sheet.getDataRange().getValues();
     var result = [];
+    var hasEmptyId = false;
     for (var i = 1; i < data.length; i++) {
       var row = data[i];
-      if (!row[0] || row[0] == "") continue;
+      if (!row[0] || String(row[0]).trim() === "") {
+        if (row[1] && row[2]) {
+          row[0] = Utilities.getUuid();
+          hasEmptyId = true;
+        } else {
+          continue;
+        }
+      }
       if (!isDateValid(row[1])) continue;
       result.push({
         id: String(row[0]), period: String(row[1]), name: String(row[2]),
         amount: Number(row[3]) || 0, reason: String(row[4] || ""), timestamp: row[5],
         type: String(row[6] || "Deduction") // "Deduction" or "Bonus"
       });
+    }
+    if (hasEmptyId) {
+      sheet.getRange(1, 1, data.length, data[0].length).setValues(data);
     }
     return result;
   } catch (e) { return []; }
@@ -499,15 +510,26 @@ function getLeavesData() {
     var sheet = getSheetByNameOrCreateNew("Leaves");
     var data = sheet.getDataRange().getValues();
     var result = [];
+    var hasEmptyId = false;
     for (var i = 1; i < data.length; i++) {
       var row = data[i];
-      if (!row[0] || row[0] == "") continue;
+      if (!row[0] || String(row[0]).trim() === "") {
+        if (row[1] && row[2]) {
+          row[0] = Utilities.getUuid();
+          hasEmptyId = true;
+        } else {
+          continue;
+        }
+      }
       if (!isDateValid(row[2])) continue;
       result.push({
         id: String(row[0]), name: String(row[1]), startDate: String(row[2]),
         endDate: String(row[3]), leaveType: String(row[4]), reason: String(row[5] || ""),
         status: String(row[6]), timestamp: row[7]
       });
+    }
+    if (hasEmptyId) {
+      sheet.getRange(1, 1, data.length, data[0].length).setValues(data);
     }
     return result;
   } catch (e) { return []; }
@@ -541,15 +563,26 @@ function getTimeEditRequestsData() {
     var sheet = getSheetByNameOrCreateNew("TimeEditRequests");
     var data = sheet.getDataRange().getValues();
     var result = [];
+    var hasEmptyId = false;
     for (var i = 1; i < data.length; i++) {
       var row = data[i];
-      if (!row[0] || row[0] == "") continue;
+      if (!row[0] || String(row[0]).trim() === "") {
+        if (row[2] && row[3]) {
+          row[0] = Utilities.getUuid();
+          hasEmptyId = true;
+        } else {
+          continue;
+        }
+      }
       if (!isDateValid(row[3])) continue;
       result.push({
         id: String(row[0]), timestamp: String(row[1]), name: String(row[2]), date: String(row[3]),
         originalIn: String(row[4] || ""), originalOut: String(row[5] || ""), newIn: String(row[6] || ""),
         newOut: String(row[7] || ""), reason: String(row[8] || ""), status: String(row[9] || "Pending")
       });
+    }
+    if (hasEmptyId) {
+      sheet.getRange(1, 1, data.length, data[0].length).setValues(data);
     }
     return result;
   } catch (e) { return []; }
