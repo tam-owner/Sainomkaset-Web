@@ -922,11 +922,17 @@ function renderCustomDropdown(cell, date, shift, station, onSelect) {
 // Initialization
 // ==========================================
 
-document.addEventListener('DOMContentLoaded', async () => {
+async function initScheduleApp() {
     if (window.lucide) window.lucide.createIcons();
     setupEventListeners();
     await loadData();
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initScheduleApp);
+} else {
+    initScheduleApp();
+}
 
 async function loadData() {
     const cachedAPILeaves = localStorage.getItem('cachedAPILeaves');
