@@ -1,0 +1,697 @@
+[
+  {
+    "name": "มิว",
+    "status": "Active",
+    "type": "Full-time",
+    "targetDays": 6,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [
+      "Hotmeal",
+      "Drink",
+      "Bread",
+      "Lava",
+      "Service"
+    ],
+    "note": ""
+  },
+  {
+    "name": "อาย",
+    "status": "Active",
+    "type": "Full-time",
+    "targetDays": 6,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [
+      "Drink",
+      "Bread",
+      "Lava",
+      "Service"
+    ],
+    "note": ""
+  },
+  {
+    "name": "ไอซ์",
+    "status": "Active",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": false,
+    "availability": {
+      "0": [
+        "18:00"
+      ],
+      "1": [
+        "18:00"
+      ],
+      "2": [
+        "18:00"
+      ],
+      "3": [
+        "18:00"
+      ]
+    },
+    "stations": [
+      "Drink",
+      "Bread",
+      "Lava"
+    ],
+    "note": ""
+  },
+  {
+    "name": "คาร่า",
+    "status": "Active",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": false,
+    "availability": {
+      "2": [
+        "18:00"
+      ],
+      "3": [
+        "14:30",
+        "16:30",
+        "18:00"
+      ],
+      "4": [
+        "18:00"
+      ],
+      "5": [
+        "11:30",
+        "14:30",
+        "16:30",
+        "18:00"
+      ],
+      "6": [
+        "11:30",
+        "14:30",
+        "16:30",
+        "18:00"
+      ]
+    },
+    "stations": [
+      "Drink",
+      "Bread",
+      "Lava"
+    ],
+    "note": ""
+  },
+  {
+    "name": "นิว",
+    "status": "Active",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [
+      "Drink",
+      "Bread",
+      "Lava",
+      "Service"
+    ],
+    "note": ""
+  },
+  {
+    "name": "เบียบ",
+    "status": "Active",
+    "type": "Full-time",
+    "targetDays": 6,
+    "isAvailableAll": false,
+    "availability": {},
+    "stations": [
+      "NONE"
+    ],
+    "note": ""
+  },
+  {
+    "name": "ไอไอ",
+    "status": "Active",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": false,
+    "availability": {
+      "0": [
+        "11:30",
+        "14:30",
+        "16:30",
+        "18:00"
+      ],
+      "1": [
+        "11:30",
+        "14:30",
+        "16:30",
+        "18:00"
+      ],
+      "4": [
+        "11:30",
+        "14:30",
+        "16:30",
+        "18:00"
+      ],
+      "5": [
+        "11:30",
+        "14:30",
+        "16:30",
+        "18:00"
+      ],
+      "6": [
+        "11:30",
+        "14:30",
+        "16:30",
+        "18:00"
+      ]
+    },
+    "stations": [
+      "Drink",
+      "Bread",
+      "Lava",
+      "Service"
+    ],
+    "note": ""
+  },
+  {
+    "name": "โดนัท",
+    "status": "Active",
+    "type": "Part-time",
+    "targetDays": 2,
+    "isAvailableAll": false,
+    "availability": {
+      "5": [
+        "11:30",
+        "14:30",
+        "16:30",
+        "18:00"
+      ],
+      "6": [
+        "11:30",
+        "14:30",
+        "16:30",
+        "18:00"
+      ]
+    },
+    "stations": [
+      "Drink",
+      "Bread",
+      "Lava",
+      "Service"
+    ],
+    "note": ""
+  },
+  {
+    "name": "บิว",
+    "status": "Active",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": false,
+    "availability": {
+      "1": [
+        "14:30",
+        "16:30",
+        "18:00"
+      ],
+      "2": [
+        "11:30",
+        "14:30",
+        "16:30",
+        "18:00"
+      ],
+      "4": [
+        "16:30",
+        "18:00"
+      ],
+      "5": [
+        "11:30",
+        "14:30",
+        "16:30",
+        "18:00"
+      ],
+      "6": [
+        "11:30",
+        "14:30",
+        "16:30",
+        "18:00"
+      ]
+    },
+    "stations": [
+      "Drink",
+      "Bread",
+      "Lava",
+      "Service"
+    ],
+    "note": ""
+  },
+  {
+    "name": "ขิง",
+    "status": "Active",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": false,
+    "availability": {
+      "0": [
+        "18:00"
+      ],
+      "1": [
+        "18:00"
+      ],
+      "2": [
+        "14:30",
+        "16:30",
+        "18:00"
+      ],
+      "5": [
+        "11:30",
+        "14:30",
+        "16:30",
+        "18:00"
+      ],
+      "6": [
+        "11:30",
+        "14:30",
+        "16:30",
+        "18:00"
+      ]
+    },
+    "stations": [
+      "Drink",
+      "Bread",
+      "Lava",
+      "Service"
+    ],
+    "note": ""
+  },
+  {
+    "name": "บอล",
+    "status": "Active",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": false,
+    "availability": {
+      "2": [
+        "14:30",
+        "16:30",
+        "18:00"
+      ],
+      "4": [
+        "18:00"
+      ],
+      "5": [
+        "11:30",
+        "14:30",
+        "16:30",
+        "18:00"
+      ],
+      "6": [
+        "11:30",
+        "14:30",
+        "16:30",
+        "18:00"
+      ]
+    },
+    "stations": [
+      "Hotmeal",
+      "Service"
+    ],
+    "note": ""
+  },
+  {
+    "name": "เฮง",
+    "status": "Active",
+    "type": "Part-time",
+    "targetDays": 5,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [
+      "Hotmeal",
+      "Service"
+    ],
+    "note": ""
+  },
+  {
+    "name": "นีน่า",
+    "status": "Active",
+    "type": "Part-time",
+    "targetDays": 5,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [
+      "Drink",
+      "Bread",
+      "Lava",
+      "Service"
+    ],
+    "note": ""
+  },
+  {
+    "name": "เอมมี่",
+    "status": "Active",
+    "type": "Part-time",
+    "targetDays": 5,
+    "isAvailableAll": false,
+    "availability": {
+      "0": [
+        "16:30",
+        "18:00"
+      ],
+      "1": [
+        "14:30",
+        "16:30",
+        "18:00"
+      ],
+      "2": [
+        "18:00"
+      ],
+      "3": [
+        "11:30",
+        "14:30",
+        "16:30",
+        "18:00"
+      ],
+      "4": [
+        "11:30",
+        "14:30",
+        "16:30",
+        "18:00"
+      ],
+      "5": [
+        "11:30",
+        "14:30",
+        "16:30",
+        "18:00"
+      ],
+      "6": [
+        "11:30",
+        "14:30",
+        "16:30",
+        "18:00"
+      ]
+    },
+    "stations": [
+      "Drink",
+      "Bread",
+      "Lava",
+      "Service"
+    ],
+    "note": ""
+  },
+  {
+    "name": "เดียร์",
+    "status": "Active",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": false,
+    "availability": {
+      "0": [
+        "18:00"
+      ],
+      "1": [
+        "18:00"
+      ],
+      "2": [
+        "18:00"
+      ],
+      "3": [
+        "18:00"
+      ],
+      "5": [
+        "11:30",
+        "14:30",
+        "16:30",
+        "18:00"
+      ],
+      "6": [
+        "11:30",
+        "14:30",
+        "16:30",
+        "18:00"
+      ]
+    },
+    "stations": [
+      "Drink",
+      "Bread",
+      "Lava",
+      "Service"
+    ],
+    "note": ""
+  },
+  {
+    "name": "สปาย",
+    "status": "Active",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [],
+    "note": ""
+  },
+  {
+    "name": "แม่",
+    "status": "Active",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [
+      "Hotmeal"
+    ],
+    "note": ""
+  },
+  {
+    "name": "ต้นกล้า",
+    "status": "Inactive",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [],
+    "note": ""
+  },
+  {
+    "name": "น้อยหน่า",
+    "status": "Inactive",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [],
+    "note": ""
+  },
+  {
+    "name": "Test",
+    "status": "Inactive",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [],
+    "note": ""
+  },
+  {
+    "name": "สปาย",
+    "status": "Inactive",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [],
+    "note": ""
+  },
+  {
+    "name": "แนน",
+    "status": "Inactive",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [],
+    "note": ""
+  },
+  {
+    "name": "ต้นเตย",
+    "status": "Inactive",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [],
+    "note": ""
+  },
+  {
+    "name": "บิวตี้",
+    "status": "Inactive",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [],
+    "note": ""
+  },
+  {
+    "name": "ปาร์ตี้",
+    "status": "Inactive",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [],
+    "note": ""
+  },
+  {
+    "name": "แทนใจ",
+    "status": "Inactive",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [],
+    "note": ""
+  },
+  {
+    "name": "ใบเตย",
+    "status": "Inactive",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [],
+    "note": ""
+  },
+  {
+    "name": "วิว",
+    "status": "Inactive",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [],
+    "note": ""
+  },
+  {
+    "name": "พั้นซ์",
+    "status": "Inactive",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [],
+    "note": ""
+  },
+  {
+    "name": "ลูกส้ม",
+    "status": "Inactive",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [],
+    "note": ""
+  },
+  {
+    "name": "มัฟ",
+    "status": "Inactive",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [],
+    "note": ""
+  },
+  {
+    "name": "ยิว",
+    "status": "Inactive",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [],
+    "note": ""
+  },
+  {
+    "name": "แบืยบ",
+    "status": "Inactive",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [],
+    "note": ""
+  },
+  {
+    "name": "เบืยบ",
+    "status": "Inactive",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [],
+    "note": ""
+  },
+  {
+    "name": "เบืยย",
+    "status": "Inactive",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [],
+    "note": ""
+  },
+  {
+    "name": "bb",
+    "status": "Inactive",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [],
+    "note": ""
+  },
+  {
+    "name": "dd",
+    "status": "Inactive",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [],
+    "note": ""
+  },
+  {
+    "name": "น้อบหน่า",
+    "status": "Inactive",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [],
+    "note": ""
+  },
+  {
+    "name": "น้อยหนา",
+    "status": "Inactive",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [],
+    "note": ""
+  },
+  {
+    "name": "น้อยห",
+    "status": "Inactive",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [],
+    "note": ""
+  },
+  {
+    "name": "Test",
+    "status": "Inactive",
+    "type": "Part-time",
+    "targetDays": 4,
+    "isAvailableAll": true,
+    "availability": {},
+    "stations": [],
+    "note": ""
+  }
+]

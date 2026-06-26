@@ -1651,6 +1651,22 @@ function renderAvailabilitySummary() {
     tableHtml += `</tr></tbody></table>`;
 
     container.innerHTML = tableHtml;
+    
+    // DEBUG: Dump the first few characters of the table HTML to prove if JS is generating 13:12
+    const debugDiv = document.createElement('div');
+    debugDiv.style.fontSize = '10px';
+    debugDiv.style.color = '#fff';
+    debugDiv.style.background = '#000';
+    debugDiv.style.position = 'fixed';
+    debugDiv.style.bottom = '40px';
+    debugDiv.style.left = '10px';
+    debugDiv.style.zIndex = '9999';
+    debugDiv.style.maxWidth = '300px';
+    debugDiv.style.maxHeight = '200px';
+    debugDiv.style.overflow = 'auto';
+    debugDiv.textContent = "RAW: " + tableHtml.substring(0, 500) + "... Mew Wed=" + (state.employees.find(e => e.name === 'มิว')?.availability[2] || "empty");
+    document.body.appendChild(debugDiv);
+
     if (window.lucide) window.lucide.createIcons({ root: container });
 }
 
