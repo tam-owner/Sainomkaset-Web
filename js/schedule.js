@@ -612,7 +612,7 @@ function renderEmployeeSummarySchedule(dates) {
     
     // Sort employees exactly like workload warnings
     const weeklyHours = {};
-    const activeEmployees = state.employees.filter(e => !e.status || (e.status.toLowerCase() !== 'inactive' && e.status !== 'พนักงานเก่า (Inactive)' && e.status !== 'ลาออก'));
+    const activeEmployees = state.employees.filter(e => !e.status || (!e.status.toLowerCase().includes('inactive') && !e.status.includes('ลาออก') && !e.status.includes('เก่า')));
     activeEmployees.forEach(e => {
         weeklyHours[e.name] = 0;
     });
@@ -694,9 +694,9 @@ function renderEmployeeList(onEdit) {
 
     let filteredEmployees = state.employees;
     if (state.currentEmpTab === 'Inactive') {
-        filteredEmployees = state.employees.filter(e => e.status && (e.status.toLowerCase() === 'inactive' || e.status === 'พนักงานเก่า (Inactive)' || e.status === 'ลาออก'));
+        filteredEmployees = state.employees.filter(e => e.status && (e.status.toLowerCase().includes('inactive') || e.status.includes('ลาออก') || e.status.includes('เก่า')));
     } else {
-        filteredEmployees = state.employees.filter(e => !e.status || (e.status.toLowerCase() !== 'inactive' && e.status !== 'พนักงานเก่า (Inactive)' && e.status !== 'ลาออก'));
+        filteredEmployees = state.employees.filter(e => !e.status || (!e.status.toLowerCase().includes('inactive') && !e.status.includes('ลาออก') && !e.status.includes('เก่า')));
     }
 
     if (filteredEmployees.length === 0) {
@@ -865,7 +865,7 @@ function renderCustomDropdown(cell, date, shift, station, onSelect) {
     let exceededHtml = '';
     
     state.employees.forEach(emp => {
-        if (emp.status && (emp.status.toLowerCase() === 'inactive' || emp.status === 'พนักงานเก่า (Inactive)' || emp.status === 'ลาออก')) return;
+        if (emp.status && (emp.status.toLowerCase().includes('inactive') || emp.status.includes('ลาออก') || emp.status.includes('เก่า'))) return;
         if (currentNames.includes(emp.name)) return;
 
         let isAvailable = true;
