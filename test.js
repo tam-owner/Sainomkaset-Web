@@ -1,12 +1,14 @@
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw4QuPW52ewb-04vE2E97FUKCijO959hL9cN5X7kLcyhRerPx5nVztyKQxiqSF1ZFQ/exec';
+const url = "https://script.google.com/macros/s/AKfycbxFH8YavPxZMJBeSX-zmTqQQu2dVGPpHrDeNoXD-rvjV1VV4ZVi4w6pFz1uM3TyNt0/exec?action=getScheduleData";
 
-async function test() {
-    const res = await fetch(`${WEB_APP_URL}?action=getInitPayrollData`);
-    const json = await res.json();
-    console.log(Object.keys(json.data));
-    console.log('Attendance:', json.data.attendance ? json.data.attendance.length : 'undefined');
-    console.log('Employees:', json.data.employees ? json.data.employees.length : 'undefined');
-    console.log('Deductions:', json.data.deductions ? json.data.deductions.length : 'undefined');
-    console.log('Leaves:', json.data.leaves ? json.data.leaves.length : 'undefined');
-}
-test();
+fetch(url)
+  .then(res => {
+    console.log("Status:", res.status);
+    return res.text();
+  })
+  .then(text => {
+    console.log("Response length:", text.length);
+    console.log("Response text:", text.substring(0, 500));
+  })
+  .catch(err => {
+    console.error("Error:", err);
+  });
