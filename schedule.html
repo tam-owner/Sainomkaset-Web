@@ -119,11 +119,11 @@
                         </div>
 
                         <div id="action-buttons-group" class="action-buttons-group">
-                            <button id="save-schedule-btn" class="btn btn-primary">
-                                <i data-lucide="save"></i> บันทึกข้อมูล
-                            </button>
+                            <div id="auto-save-status" style="display: flex; align-items: center; font-size: 0.85rem; font-weight: 600; padding: 0 0.5rem; color: var(--text-muted);">
+                                <i data-lucide="check-circle" style="width: 16px; height: 16px; margin-right: 4px;"></i> ซิงค์ข้อมูลล่าสุดแล้ว
+                            </div>
                             <button id="lock-week-btn" class="btn btn-success">
-                                <i data-lucide="lock"></i> บันทึกและล็อค
+                                <i data-lucide="lock"></i> ล็อคสัปดาห์นี้
                             </button>
                             <button id="unlock-week-btn" class="btn btn-warning" style="display: none;">
                                 <i data-lucide="unlock"></i> ปลดล็อคแก้ไข
@@ -201,7 +201,9 @@
                         <!-- JS will populate -->
                     </div>
                     <div class="panel-actions">
-                         <button id="save-employees-btn" class="btn btn-primary btn-large shadow-glow"><i data-lucide="save"></i> บันทึกข้อมูลพนักงานลง Google Sheets</button>
+                         <div id="emp-auto-save-status" style="display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 600; color: var(--text-muted);">
+                              <i data-lucide="check-circle" style="width: 18px; height: 18px; margin-right: 6px;"></i> ข้อมูลพนักงานซิงค์อัตโนมัติแล้ว
+                         </div>
                     </div>
                 </div>
             </section>
@@ -281,7 +283,7 @@
                 <div class="modal-footer">
                     <button class="btn btn-danger mr-auto" id="delete-emp-btn"><i data-lucide="trash"></i> ลบพนักงาน</button>
                     <button class="btn btn-secondary" id="cancel-emp-btn">ยกเลิก</button>
-                    <button class="btn btn-primary" id="confirm-emp-btn">บันทึก</button>
+                    <button class="btn btn-primary" id="confirm-emp-btn">ตกลง</button>
                 </div>
             </div>
         </div>

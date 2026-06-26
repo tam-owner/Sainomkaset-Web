@@ -758,30 +758,7 @@ function renderEmployeeList(onEdit) {
             window.saveLocalState('employees');
             
             // Auto-save silently to API
-            try {
-                const saveBtn = document.getElementById('save-employees-btn');
-                if (saveBtn) {
-                    const originalText = saveBtn.innerHTML;
-                    saveBtn.innerHTML = '<i data-lucide="loader-2" class="spin"></i> กำลังบันทึกอัตโนมัติ...';
-                    if (window.lucide) window.lucide.createIcons({ root: saveBtn.parentElement });
-                    
-                    await saveEmployeesToSheet(state.employees);
-                    window.clearLocalState('employees');
-                    
-                    saveBtn.innerHTML = '<i data-lucide="check"></i> บันทึกสำเร็จ';
-                    if (window.lucide) window.lucide.createIcons({ root: saveBtn.parentElement });
-                    
-                    setTimeout(() => {
-                        saveBtn.innerHTML = originalText;
-                        if (window.lucide) window.lucide.createIcons({ root: saveBtn.parentElement });
-                    }, 2000);
-                } else {
-                    await saveEmployeesToSheet(state.employees);
-                    window.clearLocalState('employees');
-                }
-            } catch (err) {
-                showToast("ไม่สามารถบันทึกอัตโนมัติได้ กรุณากดปุ่มบันทึกด้านล่าง", true);
-            }
+            triggerAutoSaveEmployee();
         });
     });
 
@@ -1088,7 +1065,7 @@ function setupEventListeners() {
             window.saveLocalState('schedules');
             renderWeeklySchedule(handleCellClick, handleCellDoubleClick);
             populateSavedWeeksDropdown();
-            await handleSaveSchedules();
+            triggerAutoSaveSchedule();
         });
     }
 
@@ -1100,7 +1077,7 @@ function setupEventListeners() {
             window.saveLocalState('schedules');
             renderWeeklySchedule(handleCellClick, handleCellDoubleClick);
             populateSavedWeeksDropdown();
-            await handleSaveSchedules();
+            triggerAutoSaveSchedule();
         });
     }
 
@@ -1189,8 +1166,8 @@ function setupEventListeners() {
     document.getElementById('delete-emp-btn').addEventListener('click', deleteEmployeeConfig);
     
     // Save to Google Sheets
-    document.getElementById('save-employees-btn').addEventListener('click', handleSaveEmployees);
-    document.getElementById('save-schedule-btn').addEventListener('click', handleSaveSchedules);
+    // document.getElementById('save-employees-btn').addEventListener('click', handleSaveEmployees);
+    // document.getElementById('save-schedule-btn').addEventListener('click', handleSaveSchedules);
 
     // Leave Admin Navigation
     const prevWeekBtn = document.getElementById('prev-week-btn');
@@ -1334,7 +1311,10 @@ function saveEmployeeConfig() {
     document.getElementById('edit-employee-modal').style.display = 'none';
     renderEmployeeList(openEditEmployeeModal);
     renderWeeklySchedule(handleCellClick, handleCellDoubleClick);
-    showToast('อัปเดตพนักงานในระบบแล้ว (อย่าลืมกดบันทึกลง Google Sheets)');
+    
+    // Hook Auto-Save
+    triggerAutoSaveEmployee();
+    triggerAutoSaveSchedule();
 }
 
 function deleteEmployeeConfig() {
@@ -1349,7 +1329,10 @@ function deleteEmployeeConfig() {
         document.getElementById('edit-employee-modal').style.display = 'none';
         renderEmployeeList(openEditEmployeeModal);
         renderWeeklySchedule(handleCellClick, handleCellDoubleClick);
-        showToast('ลบพนักงานออกจากระบบแล้ว');
+        
+        // Hook Auto-Save
+        triggerAutoSaveEmployee();
+        triggerAutoSaveSchedule();
     }
 }
 
@@ -1374,6 +1357,7 @@ function handleCellClick(e) {
         state.schedules.push({ date, shift, station, employeeName: selectedName });
         window.saveLocalState('schedules');
         renderWeeklySchedule(handleCellClick, handleCellDoubleClick);
+        triggerAutoSaveSchedule();
     });
 }
 
@@ -1401,6 +1385,7 @@ function handleCellDoubleClick(e) {
         window.saveLocalState('schedules');
         renderWeeklySchedule(handleCellClick, handleCellDoubleClick);
         showToast(`นำ ${toRemove.employeeName} ออกจากกะแล้ว`);
+        triggerAutoSaveSchedule();
     }
 }
 
@@ -1947,26 +1932,58 @@ function renderTimeTrackingDetails(periodId, empName) {
 // Saving to API
 // ==========================================
 
-async function handleSaveEmployees() {
-    showLoading(true);
-    try {
-        await saveEmployeesToSheet(state.employees);
-        window.clearLocalState('employees');
-        showToast("บันทึกข้อมูลพนักงานสำเร็จ");
-    } catch (e) {
-        showToast("เกิดข้อผิดพลาดในการบันทึก", true);
+let scheduleSaveTimer = null;
+let employeeSaveTimer = null;
+
+function setAutoSaveStatus(type, status) {
+    const elId = type === 'schedule' ? 'auto-save-status' : 'emp-auto-save-status';
+    const el = document.getElementById(elId);
+    if (!el) return;
+    
+    if (status === 'saving') {
+        el.style.color = '#eab308'; // yellow
+        el.innerHTML = `<svg class="animate-spin" style="width: 16px; height: 16px; margin-right: 4px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> กำลังบันทึก...`;
+    } else if (status === 'saved') {
+        el.style.color = 'var(--text-muted)';
+        const text = type === 'schedule' ? 'ซิงค์ข้อมูลล่าสุดแล้ว' : 'ข้อมูลพนักงานซิงค์อัตโนมัติแล้ว';
+        el.innerHTML = `<i data-lucide="check-circle" style="width: 16px; height: 16px; margin-right: 4px;"></i> ${text}`;
+        if (window.lucide) window.lucide.createIcons({ root: el });
+    } else if (status === 'error') {
+        el.style.color = '#ef4444'; // red
+        el.innerHTML = `<i data-lucide="alert-circle" style="width: 16px; height: 16px; margin-right: 4px;"></i> บันทึกไม่สำเร็จ`;
+        if (window.lucide) window.lucide.createIcons({ root: el });
     }
-    showLoading(false);
 }
 
-async function handleSaveSchedules() {
-    showLoading(true);
-    try {
-        await saveSchedulesToSheet(state.schedules);
-        window.clearLocalState('schedules');
-        showToast("บันทึกตารางงานสำเร็จ");
-    } catch (e) {
-        showToast("เกิดข้อผิดพลาดในการบันทึกตารางงาน", true);
-    }
-    showLoading(false);
+function triggerAutoSaveSchedule() {
+    // Show saving text but don't block UI
+    setAutoSaveStatus('schedule', 'saving');
+    
+    if (scheduleSaveTimer) clearTimeout(scheduleSaveTimer);
+    scheduleSaveTimer = setTimeout(async () => {
+        try {
+            await saveSchedulesToSheet(state.schedules);
+            window.clearLocalState('schedules');
+            setAutoSaveStatus('schedule', 'saved');
+        } catch (e) {
+            setAutoSaveStatus('schedule', 'error');
+            showToast("เกิดข้อผิดพลาดในการบันทึกตารางงาน", true);
+        }
+    }, 2500); // 2.5 seconds debounce
+}
+
+function triggerAutoSaveEmployee() {
+    setAutoSaveStatus('employee', 'saving');
+    
+    if (employeeSaveTimer) clearTimeout(employeeSaveTimer);
+    employeeSaveTimer = setTimeout(async () => {
+        try {
+            await saveEmployeesToSheet(state.employees);
+            window.clearLocalState('employees');
+            setAutoSaveStatus('employee', 'saved');
+        } catch (e) {
+            setAutoSaveStatus('employee', 'error');
+            showToast("เกิดข้อผิดพลาดในการบันทึกข้อมูลพนักงาน", true);
+        }
+    }, 2500);
 }
