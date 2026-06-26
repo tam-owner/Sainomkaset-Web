@@ -1654,17 +1654,22 @@ function renderAvailabilitySummary() {
     
     // DEBUG: Dump the first few characters of the table HTML to prove if JS is generating 13:12
     const debugDiv = document.createElement('div');
-    debugDiv.style.fontSize = '10px';
-    debugDiv.style.color = '#fff';
+    debugDiv.style.fontSize = '12px';
+    debugDiv.style.color = '#0f0';
     debugDiv.style.background = '#000';
     debugDiv.style.position = 'fixed';
-    debugDiv.style.bottom = '40px';
-    debugDiv.style.left = '10px';
-    debugDiv.style.zIndex = '9999';
-    debugDiv.style.maxWidth = '300px';
-    debugDiv.style.maxHeight = '200px';
-    debugDiv.style.overflow = 'auto';
-    debugDiv.textContent = "RAW: " + tableHtml.substring(0, 500) + "... Mew Wed=" + (state.employees.find(e => e.name === 'มิว')?.availability[2] || "empty");
+    debugDiv.style.bottom = '10px';
+    debugDiv.style.right = '10px';
+    debugDiv.style.zIndex = '99999';
+    debugDiv.style.padding = '10px';
+    
+    // Extract what JS generated for Mew
+    const mew = state.employees.find(e => e.name === 'มิว');
+    let mewDebug = "Mew JS output: ";
+    if (mew) {
+        mewDebug += "availAll=" + mew.isAvailableAll + " | WedAvail=" + (mew.availability?.[2] || 'none') + " | targetShift0=" + state.SHIFTS[0].id;
+    }
+    debugDiv.innerHTML = "<b>JS is rendering:</b><br>" + mewDebug;
     document.body.appendChild(debugDiv);
 
     if (window.lucide) window.lucide.createIcons({ root: container });
