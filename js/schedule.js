@@ -923,7 +923,6 @@ function renderCustomDropdown(cell, date, shift, station, onSelect) {
                 const textHtml = `${emp.name} <span style="font-size:0.75rem; opacity:0.8;">(${load}/${emp.targetDays} วัน)</span>`;
                 html += `<div class="custom-dropdown-item" data-name="${emp.name}" style="color: ${c.text}; border-left: 4px solid ${c.bg}; font-weight: 600;">${textHtml}</div>`;
             }
-        }
     });
     
     html = html + exceededHtml;
