@@ -409,7 +409,11 @@ function renderWeeklySchedule(onCellClick, onCellDblClick) {
     dates.forEach((dateStr) => {
         const peopleOnDay = new Set();
         state.schedules.forEach(s => {
-            if (s.date === dateStr) peopleOnDay.add(s.employeeName);
+            const isValidStation = state.STATIONS.includes(s.station);
+            const isValidShift = state.SHIFTS.some(shift => shift.id === s.shift);
+            if (s.date === dateStr && isValidStation && isValidShift) {
+                peopleOnDay.add(s.employeeName);
+            }
         });
         const count = peopleOnDay.size;
         
@@ -432,7 +436,7 @@ function renderWeeklySchedule(onCellClick, onCellDblClick) {
         const daySchedules = state.schedules.filter(s => s.date === dateStr && targetStations.includes(s.station));
         
         const start1130 = daySchedules.filter(s => s.shift === '11:30').length;
-        const end2330 = daySchedules.filter(s => s.shift !== '11:30').length;
+        const end2330 = daySchedules.filter(s => state.SHIFTS.some(shift => shift.id === s.shift) && s.shift !== '11:30').length;
         
         let warningHtml = '';
         if (start1130 !== 2) {
@@ -538,7 +542,10 @@ function renderWorkloadWarnings(dates) {
     });
 
     state.schedules.forEach(s => {
-        if (dates.includes(s.date) && weeklyWorkload[s.employeeName] !== undefined) {
+        const isValidStation = state.STATIONS.includes(s.station);
+        const isValidShift = state.SHIFTS.some(shift => shift.id === s.shift);
+
+        if (dates.includes(s.date) && weeklyWorkload[s.employeeName] !== undefined && isValidStation && isValidShift) {
             weeklyWorkload[s.employeeName]++;
             
             let hours = 0;
