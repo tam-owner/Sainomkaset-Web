@@ -774,7 +774,7 @@ function onEmployeeFormSubmit(e) {
 function handleGetScheduleData() {
   // Get base employees
   var employeesData = getEmployeesData(); 
-  var baseEmployees = employeesData.map(function(e) { return {name: e.name}; });
+  var baseEmployees = employeesData.map(function(e) { return {name: e.name, status: e.status}; });
   
   // Get settings
   var settingsSheet = getSheetByNameOrCreateNew("ScheduleSettings");
@@ -798,6 +798,7 @@ function handleGetScheduleData() {
     var set = settingsMap[emp.name] || {};
     return {
       name: emp.name,
+      status: emp.status || "Active",
       type: set.type || "Part-time",
       targetDays: set.targetDays || 4,
       isAvailableAll: set.isAvailableAll === false ? false : true,

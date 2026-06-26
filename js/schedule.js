@@ -122,7 +122,8 @@ const state = {
     currentMonthDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
     
     // Active UI states
-    activeDropdownCell: null
+    activeDropdownCell: null,
+    currentEmpTab: 'Active'
 };
 
 let isHideEmptyShifts = false;
@@ -179,6 +180,7 @@ function setEmployees(rawEmployees) {
         targetDays: parseInt(e.targetDays) || 0,
         availability: e.availability || {},
         note: e.note || "",
+        status: e.status || "Active",
         isAvailableAll: e.isAvailableAll === false ? false : true,
         stations: e.stations || []
     }));
@@ -610,7 +612,8 @@ function renderEmployeeSummarySchedule(dates) {
     
     // Sort employees exactly like workload warnings
     const weeklyHours = {};
-    state.employees.forEach(e => {
+    const activeEmployees = state.employees.filter(e => e.status !== 'Inactive');
+    activeEmployees.forEach(e => {
         weeklyHours[e.name] = 0;
     });
 
@@ -624,7 +627,7 @@ function renderEmployeeSummarySchedule(dates) {
         }
     });
 
-    const employeeData = state.employees.map(emp => ({
+    const employeeData = activeEmployees.map(emp => ({
         emp,
         totalHrs: weeklyHours[emp.name]
     })).sort((a, b) => b.totalHrs - a.totalHrs);
@@ -689,13 +692,20 @@ function renderEmployeeList(onEdit) {
     const container = document.getElementById('employee-setup-list');
     if (!container) return;
 
-    if (state.employees.length === 0) {
-        container.innerHTML = '<div style="grid-column: 1/-1; text-align:center; color:var(--text-muted); padding:3rem; background:var(--secondary); border-radius:var(--radius-lg); border: 2px dashed var(--border);">ยังไม่มีข้อมูลพนักงาน กดปุ่มด้านบนเพื่อเพิ่มพนักงานใหม่</div>';
+    let filteredEmployees = state.employees;
+    if (state.currentEmpTab === 'Inactive') {
+        filteredEmployees = state.employees.filter(e => e.status === 'Inactive');
+    } else {
+        filteredEmployees = state.employees.filter(e => e.status !== 'Inactive');
+    }
+
+    if (filteredEmployees.length === 0) {
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align:center; color:var(--text-muted); padding:3rem; background:var(--secondary); border-radius:var(--radius-lg); border: 2px dashed var(--border);">ไม่พบพนักงานในสถานะนี้</div>';
         return;
     }
 
     let html = '';
-    state.employees.forEach(emp => {
+    filteredEmployees.forEach(emp => {
         const c = getEmployeeColor(emp.name);
         html += `
             <div class="emp-list-item" style="border-left: 4px solid ${c.border};">
@@ -855,6 +865,7 @@ function renderCustomDropdown(cell, date, shift, station, onSelect) {
     let exceededHtml = '';
     
     state.employees.forEach(emp => {
+        if (emp.status === 'Inactive') return;
         if (currentNames.includes(emp.name)) return;
 
         let isAvailable = true;
@@ -1127,6 +1138,19 @@ function setupEventListeners() {
     }
 
     // Employee Setup
+    document.querySelectorAll('.emp-tab-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.emp-tab-btn').forEach(b => {
+                b.classList.remove('btn-primary');
+                b.classList.add('btn-outline');
+            });
+            e.target.classList.remove('btn-outline');
+            e.target.classList.add('btn-primary');
+            state.currentEmpTab = e.target.getAttribute('data-status');
+            renderEmployeeList(openEditEmployeeModal);
+        });
+    });
+
     document.getElementById('add-employee-btn').addEventListener('click', () => {
         openEditEmployeeModal();
     });
@@ -1215,6 +1239,7 @@ function openEditEmployeeModal(empName = null) {
     document.getElementById('emp-original-name').value = isEdit ? emp.name : '';
     document.getElementById('emp-name').value = isEdit ? emp.name : '';
     document.getElementById('emp-type').value = isEdit ? emp.type : 'Part-time';
+    document.getElementById('emp-status').value = isEdit ? (emp.status || 'Active') : 'Active';
     document.getElementById('emp-target-days').value = isEdit ? emp.targetDays : 4;
     document.getElementById('emp-note').value = isEdit ? emp.note : '';
     
@@ -1243,6 +1268,7 @@ function saveEmployeeConfig() {
     const originalName = document.getElementById('emp-original-name').value;
     const newName = document.getElementById('emp-name').value.trim();
     const type = document.getElementById('emp-type').value;
+    const status = document.getElementById('emp-status').value;
     const targetDays = parseInt(document.getElementById('emp-target-days').value) || 4;
     const note = document.getElementById('emp-note').value.trim();
     const isAvailableAll = document.getElementById('emp-avail-all').checked;
@@ -1272,7 +1298,7 @@ function saveEmployeeConfig() {
         checkedStations.push(cb.value);
     });
 
-    const newData = { name: newName, type, targetDays, availability, note, isAvailableAll, stations: checkedStations };
+    const newData = { name: newName, type, status, targetDays, availability, note, isAvailableAll, stations: checkedStations };
     
     const existingIdx = state.employees.findIndex(e => e.name === originalName);
     if (existingIdx !== -1) {
