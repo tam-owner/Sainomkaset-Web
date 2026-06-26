@@ -4,9 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SainomKaset | Schedule Management</title>
-    <!-- Auto Cache Clear Script -->
     <script>
-        const APP_VERSION = "20260627_1";
+        window.addEventListener('error', function(e) {
+            const errBox = document.getElementById('debug-error-box');
+            if(errBox) { errBox.style.display = 'block'; errBox.innerHTML += '<br>ERR: ' + e.message + ' at ' + e.filename + ':' + e.lineno; }
+        });
+        window.addEventListener('unhandledrejection', function(e) {
+            const errBox = document.getElementById('debug-error-box');
+            if(errBox) { errBox.style.display = 'block'; errBox.innerHTML += '<br>PROMISE ERR: ' + (e.reason ? e.reason.message || e.reason : 'Unknown'); }
+        });
+        const APP_VERSION = "20260627_3";
         const currentVersion = localStorage.getItem('APP_VERSION');
         if (currentVersion !== APP_VERSION) {
             console.log("New version detected, clearing cache...");
@@ -26,8 +33,8 @@
     <link rel="stylesheet" href="css/schedule.css">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-</head>
 <body>
+    <div id="debug-error-box" style="display:none; position:fixed; top:0; left:0; width:100%; background:red; color:white; z-index:999999; padding:10px; font-size:12px; word-wrap:break-word;"></div>
     <div id="app">
         <!-- Mobile Header -->
         <header class="mobile-header">
