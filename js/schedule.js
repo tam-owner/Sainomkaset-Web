@@ -123,6 +123,7 @@ const state = {
     
     // Active UI states
     activeDropdownCell: null,
+    showGuideNames: true,
     currentEmpTab: 'Active'
 };
 
@@ -1144,7 +1145,8 @@ function setupEventListeners() {
     const toggleGuideBtn = document.getElementById('toggle-guide-names-btn');
     if (toggleGuideBtn) {
         toggleGuideBtn.addEventListener('click', () => {
-            state.showGuideNames = state.showGuideNames === false ? true : false;
+            console.log("Guide toggle clicked, old state:", state.showGuideNames);
+            state.showGuideNames = !state.showGuideNames;
             if (state.showGuideNames) {
                 toggleGuideBtn.innerHTML = '<i data-lucide="eye-off"></i> ปิดชื่อไกด์';
                 toggleGuideBtn.classList.remove('btn-primary');
