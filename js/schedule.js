@@ -400,7 +400,7 @@ function renderWeeklySchedule(onCellClick, onCellDblClick) {
                     cellContent += `<div class="sched-emp-badge name-text" title="${a.employeeName}" data-emp="${a.employeeName}" style="color: #000; font-weight: 500; font-size: 0.85rem;"><span>${a.employeeName}</span></div>`;
                 });
                 
-                if (isEmpty) {
+                if (isEmpty && state.showGuideNames !== false) {
                     const availableEmps = getAvailableEmployeesForSlot(dateStr, shift.id, station);
                     if (availableEmps.length > 0) {
                         const randomEmp = availableEmps[Math.floor(Math.random() * availableEmps.length)];
@@ -1135,6 +1135,24 @@ function setupEventListeners() {
                 toggleEmptyBtn.innerHTML = '<i data-lucide="minimize-2"></i> ซ่อนกะที่ว่าง';
                 toggleEmptyBtn.classList.remove('btn-primary');
                 toggleEmptyBtn.classList.add('btn-secondary');
+            }
+            if (window.lucide) window.lucide.createIcons();
+            renderWeeklySchedule(handleCellClick, handleCellDoubleClick);
+        });
+    }
+
+    const toggleGuideBtn = document.getElementById('toggle-guide-names-btn');
+    if (toggleGuideBtn) {
+        toggleGuideBtn.addEventListener('click', () => {
+            state.showGuideNames = state.showGuideNames === false ? true : false;
+            if (state.showGuideNames) {
+                toggleGuideBtn.innerHTML = '<i data-lucide="eye-off"></i> ปิดชื่อไกด์';
+                toggleGuideBtn.classList.remove('btn-primary');
+                toggleGuideBtn.classList.add('btn-secondary');
+            } else {
+                toggleGuideBtn.innerHTML = '<i data-lucide="eye"></i> เปิดชื่อไกด์';
+                toggleGuideBtn.classList.remove('btn-secondary');
+                toggleGuideBtn.classList.add('btn-primary');
             }
             if (window.lucide) window.lucide.createIcons();
             renderWeeklySchedule(handleCellClick, handleCellDoubleClick);
