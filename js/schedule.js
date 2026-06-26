@@ -399,6 +399,14 @@ function renderWeeklySchedule(onCellClick, onCellDblClick) {
                 assignments.forEach(a => {
                     cellContent += `<div class="sched-emp-badge name-text" title="${a.employeeName}" data-emp="${a.employeeName}" style="color: #000; font-weight: 500; font-size: 0.85rem;"><span>${a.employeeName}</span></div>`;
                 });
+                
+                if (isEmpty) {
+                    const availableEmps = getAvailableEmployeesForSlot(dateStr, shift.id, station);
+                    if (availableEmps.length > 0) {
+                        const randomEmp = availableEmps[Math.floor(Math.random() * availableEmps.length)];
+                        cellContent = `<div style="color: rgba(0,0,0,0.4); font-size: 0.85rem; font-weight: 500; font-style: italic; user-select: none; pointer-events: none;">${randomEmp.name}</div>`;
+                    }
+                }
 
                 html += `<td class="shift-data-cell" style="background-color: ${cellBg}; text-align: center; border: 1px dotted #000; vertical-align: middle; min-width: 50px;" 
                     data-date="${dateStr}" data-shift="${shift.id}" data-station="${station}">
@@ -841,12 +849,49 @@ function populateAvailabilityGrid(emp) {
     grid.style.display = 'block';
 }
 
+function getAvailableEmployeesForSlot(date, shiftId, station, excludeNames = []) {
+    const shiftInfo = state.SHIFTS.find(s => s.id === shiftId);
+    if (!shiftInfo) return [];
+
+    return state.employees.filter(emp => {
+        if (emp.status && (emp.status.toLowerCase().includes('inactive') || emp.status.includes('ลาออก') || emp.status.includes('เก่า'))) return false;
+        
+        if (excludeNames.includes(emp.name)) return false;
+        
+        if (emp.isAvailableAll === false) {
+            const dObj = new Date(date);
+            let dayIdx = dObj.getDay() - 1; 
+            if (dayIdx === -1) dayIdx = 6;
+            
+            if (!emp.availability || !emp.availability[dayIdx] || !emp.availability[dayIdx].includes(shiftId)) {
+                return false;
+            }
+        }
+
+        const isOnLeave = state.leaves.some(l => l.name === emp.name && date >= l.startDate && date <= l.endDate);
+        if (isOnLeave) return false;
+
+        if (emp.type === 'Full-time' && !shiftInfo.is8Hour) return false;
+
+        const hasShiftToday = state.schedules.some(s => 
+            s.date === date && 
+            s.employeeName === emp.name &&
+            state.STATIONS.includes(s.station) &&
+            state.SHIFTS.some(shift => shift.id === s.shift)
+        );
+        if (hasShiftToday) return false;
+
+        if (emp.stations && emp.stations.length > 0 && !emp.stations.includes(station)) return false;
+
+        return true;
+    });
+}
+
 function renderCustomDropdown(cell, date, shift, station, onSelect) {
     const currentAssignments = state.schedules.filter(s => s.date === date && s.shift === shift && s.station === station);
     if (currentAssignments.length >= 2) return;
 
     const currentNames = currentAssignments.map(s => s.employeeName);
-    const shiftInfo = state.SHIFTS.find(s => s.id === shift);
     
     // Calculate current week workload
     const dates = [];
@@ -864,50 +909,12 @@ function renderCustomDropdown(cell, date, shift, station, onSelect) {
     let html = '';
     let exceededHtml = '';
     
-    state.employees.forEach(emp => {
-        if (emp.status && (emp.status.toLowerCase().includes('inactive') || emp.status.includes('ลาออก') || emp.status.includes('เก่า'))) return;
-        
-        if (currentNames.includes(emp.name)) return;
-        
-        let isAvailable = true;
-
-        if (emp.isAvailableAll === false) {
-            const dObj = new Date(date);
-            let dayIdx = dObj.getDay() - 1; 
-            if (dayIdx === -1) dayIdx = 6;
-            
-            if (!emp.availability || !emp.availability[dayIdx] || !emp.availability[dayIdx].includes(shiftInfo.id)) {
-                isAvailable = false;
-            }
-        }
-
-        const isOnLeave = state.leaves.some(l => l.name === emp.name && date >= l.startDate && date <= l.endDate);
-        if (isOnLeave) {
-            isAvailable = false;
-        }
-
-        if (emp.type === 'Full-time' && !shiftInfo.is8Hour) {
-            isAvailable = false;
-        }
-
-        const hasShiftToday = state.schedules.some(s => 
-            s.date === date && 
-            s.employeeName === emp.name &&
-            state.STATIONS.includes(s.station) &&
-            state.SHIFTS.some(shift => shift.id === s.shift)
-        );
-        if (hasShiftToday) {
-            isAvailable = false;
-        }
-
-        if (emp.stations && emp.stations.length > 0 && !emp.stations.includes(station)) {
-            isAvailable = false;
-        }
-
-        if (isAvailable) {
-            const c = getEmployeeColor(emp.name);
-            const load = weeklyWorkload[emp.name];
-            const isExceeded = load >= emp.targetDays;
+    const availableEmps = getAvailableEmployeesForSlot(date, shift, station, currentNames);
+    
+    availableEmps.forEach(emp => {
+        const c = getEmployeeColor(emp.name);
+        const load = weeklyWorkload[emp.name];
+        const isExceeded = load >= emp.targetDays;
             
             if (isExceeded) {
                 const textHtml = `${emp.name} <span style="font-size:0.75rem; opacity:0.8;">(ครบ ${emp.targetDays} วันแล้ว)</span>`;
