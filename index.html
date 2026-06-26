@@ -13,7 +13,7 @@
     <title>Sainom Kaset - Payroll & Management</title>
     <!-- Auto Cache Clear Script -->
     <script>
-        const APP_VERSION = "20260626_2";
+        const APP_VERSION = "20260626_3";
         const currentVersion = localStorage.getItem('APP_VERSION');
         if (currentVersion !== APP_VERSION) {
             console.log("New version detected, clearing cache...");
@@ -619,32 +619,6 @@
             </div>
         </div>
 
-        <!-- Today's Status Widget -->
-        <div class="mb-6 bg-white p-5 rounded-[24px] shadow-sm border border-slate-100">
-            <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                สถานะพนักงานวันนี้ <span id="admin-today-date" class="text-[11px] text-slate-400 font-normal ml-auto"></span>
-            </h3>
-            
-            <div class="grid grid-cols-3 gap-3 mb-4">
-                <div class="bg-emerald-50 rounded-xl p-3 flex flex-col items-center justify-center">
-                    <span id="admin-stat-in" class="text-2xl font-black text-emerald-600 leading-none">0</span>
-                    <span class="text-[10px] font-bold text-emerald-700/70 mt-1.5">เข้างานแล้ว</span>
-                </div>
-                <div class="bg-slate-50 rounded-xl p-3 flex flex-col items-center justify-center border border-slate-100">
-                    <span id="admin-stat-out" class="text-2xl font-black text-slate-600 leading-none">0</span>
-                    <span class="text-[10px] font-bold text-slate-500 mt-1.5">ยังไม่เข้า</span>
-                </div>
-                <div class="bg-orange-50 rounded-xl p-3 flex flex-col items-center justify-center">
-                    <span id="admin-stat-leave" class="text-2xl font-black text-orange-600 leading-none">0</span>
-                    <span class="text-[10px] font-bold text-orange-700/70 mt-1.5">ลา/หยุด</span>
-                </div>
-            </div>
-            
-            <div id="admin-today-list" class="space-y-2 max-h-[220px] overflow-y-auto pr-1">
-                <div class="text-center text-xs text-slate-400 py-4">กำลังโหลดข้อมูล...</div>
-            </div>
-        </div>
 
         <div class="grid grid-cols-2 gap-4">
             <button onclick="showView('view-admin-overview')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95">
@@ -685,6 +659,12 @@
                 </div>
                 <span class="font-bold text-slate-700 text-sm">ตั้งค่า Wi-Fi ร้าน</span>
             </button>
+            <button onclick="showView('view-admin-today-status')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95">
+                <div class="w-14 h-14 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                </div>
+                <span class="font-bold text-slate-700 text-sm">สถานะพนักงาน</span>
+            </button>
             <button onclick="window.location.href='schedule.html'" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95">
                 <div class="w-14 h-14 rounded-full bg-cyan-100 text-cyan-600 flex items-center justify-center">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -701,6 +681,44 @@
             </h2>
             <div id="admin-dashboard-notifications" class="space-y-3">
                 <div class="text-center py-4 text-slate-400 text-xs font-bold">ไม่มีรายการใหม่</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- VIEW: ADMIN TODAY STATUS              -->
+    <!-- ===================================== -->
+    <div id="view-admin-today-status" class="hidden px-4">
+        <div class="mb-4 flex items-center gap-3">
+            <button onclick="showView('view-admin-dashboard')" class="p-2 bg-white rounded-full shadow-sm border border-slate-200 text-slate-600 active:scale-95 shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+            <h1 class="text-xl font-black text-slate-800">สถานะพนักงานวันนี้</h1>
+        </div>
+
+        <div class="bg-white p-5 rounded-[24px] shadow-sm border border-slate-100">
+            <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                สถานะเข้าออก <span id="admin-today-date" class="text-[11px] text-slate-400 font-normal ml-auto"></span>
+            </h3>
+            
+            <div class="grid grid-cols-3 gap-3 mb-4">
+                <div class="bg-emerald-50 rounded-xl p-3 flex flex-col items-center justify-center">
+                    <span id="admin-stat-in" class="text-2xl font-black text-emerald-600 leading-none">0</span>
+                    <span class="text-[10px] font-bold text-emerald-700/70 mt-1.5">เข้างานแล้ว</span>
+                </div>
+                <div class="bg-slate-50 rounded-xl p-3 flex flex-col items-center justify-center border border-slate-100">
+                    <span id="admin-stat-out" class="text-2xl font-black text-slate-600 leading-none">0</span>
+                    <span class="text-[10px] font-bold text-slate-500 mt-1.5">ยังไม่เข้า</span>
+                </div>
+                <div class="bg-orange-50 rounded-xl p-3 flex flex-col items-center justify-center">
+                    <span id="admin-stat-leave" class="text-2xl font-black text-orange-600 leading-none">0</span>
+                    <span class="text-[10px] font-bold text-orange-700/70 mt-1.5">ลา/หยุด</span>
+                </div>
+            </div>
+            
+            <div id="admin-today-list" class="space-y-2 overflow-y-auto pr-1" style="max-height: 60vh;">
+                <div class="text-center text-xs text-slate-400 py-4">กำลังโหลดข้อมูล...</div>
             </div>
         </div>
     </div>
