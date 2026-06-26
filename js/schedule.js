@@ -1549,6 +1549,7 @@ function renderAvailabilitySummary() {
     tableHtml += `</tr></thead><tbody>`;
 
     state.employees.forEach(emp => {
+        if (emp.status && (emp.status.toLowerCase().includes('inactive') || emp.status.includes('ลาออก') || emp.status.includes('เก่า'))) return;
         tableHtml += `<tr><td style="font-weight: 700; background: var(--surface); color: var(--text-main); text-align: left; padding: 0.5rem 1rem;">${emp.name}</td>`;
         
         for (let dayIdx = 0; dayIdx < 7; dayIdx++) {
