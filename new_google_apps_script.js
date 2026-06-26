@@ -774,7 +774,7 @@ function onEmployeeFormSubmit(e) {
 function handleGetScheduleData() {
   // Get base employees
   var employeesData = getEmployeesData(); 
-  var baseEmployees = employeesData.map(function(e) { return {name: e.nickname}; });
+  var baseEmployees = employeesData.map(function(e) { return {name: e.name}; });
   
   // Get settings
   var settingsSheet = getSheetByNameOrCreateNew("ScheduleSettings");
