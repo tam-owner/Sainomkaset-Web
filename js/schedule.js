@@ -842,7 +842,9 @@ function renderCustomDropdown(cell, date, shift, station, onSelect) {
     const weeklyWorkload = {};
     state.employees.forEach(e => weeklyWorkload[e.name] = 0);
     state.schedules.forEach(s => {
-        if (dates.includes(s.date) && weeklyWorkload[s.employeeName] !== undefined) {
+        const isValidStation = state.STATIONS.includes(s.station);
+        const isValidShift = state.SHIFTS.some(shift => shift.id === s.shift);
+        if (dates.includes(s.date) && weeklyWorkload[s.employeeName] !== undefined && isValidStation && isValidShift) {
             weeklyWorkload[s.employeeName]++;
         }
     });
@@ -871,7 +873,12 @@ function renderCustomDropdown(cell, date, shift, station, onSelect) {
 
         if (emp.type === 'Full-time' && !shiftInfo.is8Hour) isAvailable = false;
 
-        const hasShiftToday = state.schedules.some(s => s.date === date && s.employeeName === emp.name);
+        const hasShiftToday = state.schedules.some(s => 
+            s.date === date && 
+            s.employeeName === emp.name &&
+            state.STATIONS.includes(s.station) &&
+            state.SHIFTS.some(shift => shift.id === s.shift)
+        );
         if (hasShiftToday) isAvailable = false;
 
         if (emp.stations && emp.stations.length > 0 && !emp.stations.includes(station)) isAvailable = false;
