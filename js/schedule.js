@@ -1151,30 +1151,48 @@ function setupEventListeners() {
     document.getElementById('save-schedule-btn').addEventListener('click', handleSaveSchedules);
 
     // Leave Admin Navigation
-    document.getElementById('prev-week-btn').addEventListener('click', () => {
-        state.adminWeekOffset = (state.adminWeekOffset || 0) - 1;
-        renderAdminCalendar();
-    });
-    document.getElementById('next-week-btn').addEventListener('click', () => {
-        state.adminWeekOffset = (state.adminWeekOffset || 0) + 1;
-        renderAdminCalendar();
-    });
-    document.getElementById('today-week-btn').addEventListener('click', () => {
-        state.adminWeekOffset = 1;
-        renderAdminCalendar();
-    });
+    const prevWeekBtn = document.getElementById('prev-week-btn');
+    if (prevWeekBtn) {
+        prevWeekBtn.addEventListener('click', () => {
+            state.adminWeekOffset = (state.adminWeekOffset || 0) - 1;
+            renderAdminCalendar();
+        });
+    }
+    
+    const nextWeekBtn = document.getElementById('next-week-btn');
+    if (nextWeekBtn) {
+        nextWeekBtn.addEventListener('click', () => {
+            state.adminWeekOffset = (state.adminWeekOffset || 0) + 1;
+            renderAdminCalendar();
+        });
+    }
+    
+    const todayWeekBtn = document.getElementById('today-week-btn');
+    if (todayWeekBtn) {
+        todayWeekBtn.addEventListener('click', () => {
+            state.adminWeekOffset = 1;
+            renderAdminCalendar();
+        });
+    }
 
     // Leave Calendar Navigation
-    document.getElementById('prev-month-btn').addEventListener('click', () => {
-        if (!state.currentMonthDate) state.currentMonthDate = new Date();
-        state.currentMonthDate.setMonth(state.currentMonthDate.getMonth() - 1);
-        renderMonthlyCalendar();
-    });
-    document.getElementById('next-month-btn').addEventListener('click', () => {
-        if (!state.currentMonthDate) state.currentMonthDate = new Date();
-        state.currentMonthDate.setMonth(state.currentMonthDate.getMonth() + 1);
-        renderMonthlyCalendar();
-    });
+    const prevMonthBtn = document.getElementById('prev-month-btn');
+    if (prevMonthBtn) {
+        prevMonthBtn.addEventListener('click', () => {
+            if (!state.currentMonthDate) state.currentMonthDate = new Date();
+            state.currentMonthDate.setMonth(state.currentMonthDate.getMonth() - 1);
+            renderMonthlyCalendar();
+        });
+    }
+    
+    const nextMonthBtn = document.getElementById('next-month-btn');
+    if (nextMonthBtn) {
+        nextMonthBtn.addEventListener('click', () => {
+            if (!state.currentMonthDate) state.currentMonthDate = new Date();
+            state.currentMonthDate.setMonth(state.currentMonthDate.getMonth() + 1);
+            renderMonthlyCalendar();
+        });
+    }
 
     // Global Click for dropdown
     document.addEventListener('click', (e) => {
