@@ -404,7 +404,7 @@ function renderWeeklySchedule(onCellClick, onCellDblClick) {
                     const availableEmps = getAvailableEmployeesForSlot(dateStr, shift.id, station);
                     if (availableEmps.length > 0) {
                         const randomEmp = availableEmps[Math.floor(Math.random() * availableEmps.length)];
-                        cellContent = `<div style="color: rgba(0,0,0,0.4); font-size: 0.85rem; font-weight: 500; font-style: italic; user-select: none; pointer-events: none;">${randomEmp.name}</div>`;
+                        cellContent = `<div style="color: #000; font-size: 0.85rem; font-weight: 600; user-select: none; pointer-events: none;">${randomEmp.name}</div>`;
                     }
                 }
 
