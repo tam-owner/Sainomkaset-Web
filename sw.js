@@ -1,10 +1,13 @@
-const CACHE_NAME = 'snk-cache-v113';
+const CACHE_NAME = 'snk-cache-v115';
 const urlsToCache = [
   '/',
   '/index.html',
   '/css/styles.css',
   '/js/app.js',
-  '/logo.jpg'
+  '/logo.jpg',
+  '/schedule.html',
+  '/css/schedule.css',
+  '/js/schedule.js'
 ];
 
 self.addEventListener('install', event => {

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SainomKaset | Schedule Management</title>
+    <!-- Auto Cache Clear Script -->
+    <script>
+        const APP_VERSION = "20260626_2";
+        const currentVersion = localStorage.getItem('APP_VERSION');
+        if (currentVersion !== APP_VERSION) {
+            console.log("New version detected, clearing cache...");
+            caches.keys().then(names => {
+                for (let name of names) caches.delete(name);
+            });
+            localStorage.setItem('APP_VERSION', APP_VERSION);
+            if (currentVersion) window.location.reload(true);
+        }
+    </script>
+    <meta name="description" content="ระบบจัดการตารางงานและการลางาน">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Use modern fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=Prompt:wght@300;400;500;600&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/lucide@latest/font/lucide.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/schedule.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Mobile Header -->
+        <header class="mobile-header">
+            <div class="header-left">
+                <button class="mobile-menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('active')">
+                    <i data-lucide="menu"></i>
+                </button>
+            </div>
+            <a href="index.html" class="btn btn-outline" style="border:none; padding: 0.5rem; text-decoration: none;">
+                <i data-lucide="home"></i> กลับหน้าหลัก
+            </a>
+        </header>
+
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div style="padding: 1rem; text-align: center; margin-bottom: 1rem;">
+                <h3 style="color: white; margin: 0; font-family: 'Outfit', sans-serif;">SainomKaset</h3>
+                <div style="font-size: 0.8rem; color: #94a3b8;">Admin Schedule</div>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">ระบบตารางงาน</div>
+                <ul class="nav-links">
+                    <li>
+                        <button class="nav-btn active" data-view="schedule">
+                            <i data-lucide="calendar-days"></i> ตารางงาน
+                        </button>
+                    </li>
+                    <li>
+                        <button class="nav-btn" data-view="employees">
+                            <i data-lucide="users"></i> ตั้งค่าพนักงาน
+                        </button>
+                    </li>
+                    <li>
+                        <button class="nav-btn" data-view="availability-summary">
+                            <i data-lucide="bar-chart-2"></i> สรุปเวลาพนักงาน
+                        </button>
+                    </li>
+                    <li>
+                        <button class="nav-btn" data-view="time-tracking">
+                            <i data-lucide="clock"></i> สรุปเวลาเข้าออกงาน
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="nav-section" style="margin-top: auto;">
+                <ul class="nav-links">
+                    <li>
+                        <a href="index.html" class="nav-btn" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.75rem;">
+                            <i data-lucide="home"></i> กลับหน้าแอดมินหลัก
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <!-- ===================== SCHEDULE VIEW ===================== -->
+            <section id="schedule-view" class="view-section active animate-fade-in">
+                <header class="view-header" style="flex-wrap: wrap; gap: 1rem;">
+                    <div class="view-header-top-row" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; width: 100%; justify-content: space-between;">
+                        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                            <h2 class="view-title" style="margin-right: 1rem;">ตารางงาน</h2>
+                            <select id="saved-weeks-dropdown" class="form-control" style="min-width: 150px; padding: 0.4rem; height: auto;">
+                                <option value="">ตารางที่เซฟไว้...</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-outline mobile-actions-toggle" onclick="document.getElementById('action-buttons-group').classList.toggle('show')">
+                            <i data-lucide="settings"></i> จัดการตาราง
+                        </button>
+                    </div>
+                    
+                    <div id="global-schedule-actions" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                        <div id="header-week-nav" class="week-nav">
+                            <button id="sched-today-week-btn" class="badge outline">สัปดาห์ปัจจุบัน</button>
+                            <button id="sched-prev-week-btn" class="icon-btn"><i data-lucide="chevron-left"></i></button>
+                            <span class="badge outline" id="sched-week-range-badge">...</span>
+                            <button id="sched-next-week-btn" class="icon-btn"><i data-lucide="chevron-right"></i></button>
+                        </div>
+
+                        <div id="action-buttons-group" class="action-buttons-group">
+                            <button id="save-schedule-btn" class="btn btn-primary">
+                                <i data-lucide="save"></i> บันทึกข้อมูล
+                            </button>
+                            <button id="lock-week-btn" class="btn btn-success">
+                                <i data-lucide="lock"></i> บันทึกและล็อค
+                            </button>
+                            <button id="unlock-week-btn" class="btn btn-warning" style="display: none;">
+                                <i data-lucide="unlock"></i> ปลดล็อคแก้ไข
+                            </button>
+                            <button id="toggle-empty-shifts-btn" class="btn btn-secondary">
+                                <i data-lucide="minimize-2"></i> ซ่อนกะที่ว่าง
+                            </button>
+                            <button id="export-schedule-btn" class="btn btn-secondary">
+                                <i data-lucide="image"></i> Export
+                            </button>
+                        </div>
+                    </div>
+                </header>
+
+                <div class="glass-panel main-panel" id="export-container">
+                    
+                    <!-- Table on the left -->
+                    <div class="schedule-grid-wrapper">
+                        <div id="weekly-schedule-grid">
+                            <!-- JS will populate the matrix -->
+                        </div>
+                        <div id="employee-summary-grid" style="margin-top: 2rem; overflow-x: auto;">
+                            <!-- JS will populate employee summary matrix -->
+                        </div>
+                    </div>
+
+                    <!-- Sidebar for Warnings on the right -->
+                    <div class="warnings-sidebar">
+                        <!-- Schedule Header Info -->
+                        <div class="warning-section" style="display: none;">
+                            <h3 class="section-title">
+                                <i data-lucide="clipboard-list" class="text-primary"></i> วันลาในสัปดาห์นี้
+                            </h3>
+                            <div id="schedule-leave-warnings" class="leave-warning-container">
+                                <!-- JS will populate leaves -->
+                            </div>
+                        </div>
+
+                        <!-- Workload Warnings -->
+                        <div id="schedule-workload-warnings" class="workload-warning-container" style="display: none;">
+                            <!-- JS will populate workload issues -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===================== AVAILABILITY SUMMARY VIEW ===================== -->
+            <section id="availability-summary-view" class="view-section animate-fade-in" style="display: none;">
+                <header class="view-header">
+                    <h2 class="view-title">สรุปเวลาพนักงาน</h2>
+                </header>
+                
+                <div class="glass-panel" style="padding: 1.5rem; overflow: auto;">
+                    <div id="availability-summary-container">
+                        <!-- JS will populate matrix table and summary -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===================== EMPLOYEES SETUP VIEW ===================== -->
+            <section id="employees-view" class="view-section animate-fade-in" style="display: none;">
+                <header class="view-header" style="justify-content: flex-start; gap: 1rem;">
+                    <h2 class="view-title">ตั้งค่าพนักงาน</h2>
+                    <button id="add-employee-btn" class="btn btn-primary"><i data-lucide="user-plus"></i> เพิ่มพนักงานใหม่</button>
+                </header>
+                
+                <div class="glass-panel list-panel-wrapper" style="width: 60%; min-width: 600px; margin: 0 auto; background: #1e293b; border-color: #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                    <div class="employee-list" id="employee-setup-list">
+                        <!-- JS will populate -->
+                    </div>
+                    <div class="panel-actions">
+                         <button id="save-employees-btn" class="btn btn-primary btn-large shadow-glow"><i data-lucide="save"></i> บันทึกข้อมูลพนักงานลง Google Sheets</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===================== TIME TRACKING VIEW ===================== -->
+            <section id="time-tracking-view" class="view-section animate-fade-in" style="display: none;">
+                <header class="view-header" style="flex-wrap: wrap; gap: 1rem;">
+                    <h2 class="view-title">สรุปเวลาเข้าออกงาน</h2>
+                    <select id="time-tracking-period-dropdown" class="form-control" style="min-width: 200px; padding: 0.4rem; height: auto;">
+                        <option value="">กำลังโหลดรอบ...</option>
+                    </select>
+                </header>
+
+                <div class="glass-panel" style="padding: 1.5rem; overflow: auto; min-height: 400px;">
+                    <div id="time-tracking-summary-container">
+                        <!-- JS will populate this with summary table -->
+                    </div>
+                    <div id="time-tracking-details-container" style="margin-top: 2rem; display: none;">
+                        <!-- JS will populate this with detail table -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Edit Employee Modal -->
+    <div id="edit-employee-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content animate-pop-in">
+            <header class="modal-header">
+                <h3 id="emp-modal-title">ตั้งค่าพนักงาน</h3>
+                <button class="close-modal-btn" id="close-emp-modal"><i data-lucide="x"></i></button>
+            </header>
+            <div class="modal-body">
+                <input type="hidden" id="emp-original-name">
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label>ชื่อพนักงาน</label>
+                        <input type="text" id="emp-name" class="form-control" placeholder="ระบุชื่อพนักงาน">
+                    </div>
+                    <div class="form-group w-32">
+                        <label>ประเภท</label>
+                        <select id="emp-type" class="form-control">
+                            <option value="Part-time">Part-time</option>
+                            <option value="Full-time">Full-time</option>
+                        </select>
+                    </div>
+                    <div class="form-group w-36">
+                        <label>เป้าหมาย (วัน/สัปดาห์)</label>
+                        <input type="number" id="emp-target-days" class="form-control" min="1" max="7" value="4">
+                    </div>
+                </div>
+                
+                <div class="form-group mb-4">
+                    <label>หมายเหตุ</label>
+                    <input type="text" id="emp-note" class="form-control">
+                </div>
+                
+                <div class="form-group mb-4">
+                    <label>จุดที่สามารถทำได้ (Stations)</label>
+                    <div class="station-checkboxes" id="emp-stations-container">
+                        <!-- JS will populate -->
+                    </div>
+                </div>
+                
+                <div class="form-group mb-2">
+                    <label>ความพร้อม (วันและเวลาที่ว่าง)</label>
+                    <label class="checkbox-label mt-1">
+                        <input type="checkbox" id="emp-avail-all" checked>
+                        ว่างทุกวันและทุกกะ (All)
+                    </label>
+                    <div id="emp-availability-grid" class="availability-grid" style="display: none;">
+                        <!-- JS will populate rows -->
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn btn-danger mr-auto" id="delete-emp-btn"><i data-lucide="trash"></i> ลบพนักงาน</button>
+                    <button class="btn btn-secondary" id="cancel-emp-btn">ยกเลิก</button>
+                    <button class="btn btn-primary" id="confirm-emp-btn">บันทึก</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Dropdown -->
+    <div id="custom-dropdown" class="custom-dropdown animate-fade-in" style="display: none;"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay animate-fade-in" style="display: flex;">
+        <div class="loading-content">
+            <i data-lucide="loader-2" class="spin icon-xl"></i>
+            <h3>กำลังโหลดข้อมูล...</h3>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="js/schedule.js"></script>
+</body>
+</html>

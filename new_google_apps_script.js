@@ -45,6 +45,7 @@ function doGet(e) {
   if (action == "getEmployees") return createJsonResponse({status: "success", data: getEmployeesData()});
   if (action == "getDeductions") return createJsonResponse({status: "success", data: getDeductionsData()});
   if (action == "getLeaves") return createJsonResponse({status: "success", data: getLeavesData()});
+  if (action == "getScheduleData") return createJsonResponse({status: "success", data: handleGetScheduleData()});
   if (action == "getInitPayrollData") return createJsonResponse(handleGetInitPayrollData());
   
   if (action == "testLine") {
@@ -80,6 +81,8 @@ function doPost(e) {
     else if (action === "requestTimeEdit") { res = handleRequestTimeEdit(p.timeEditRequest); }
     else if (action === "updateEditRequestStatus") { res = handleUpdateEditRequestStatus(p.id, p.status); }
     else if (action === "saveSetting") { res = handleSaveSetting(p.key, p.value); }
+    else if (action === "saveSchedules") { res = handleSaveSchedules(p.data); }
+    else if (action === "saveScheduleSettings") { res = handleSaveScheduleSettings(p.data); }
     else { res = {status: "error", message: "Unknown action"}; }
     
     // Auto-sync to Firebase if the action modifies data
@@ -762,6 +765,133 @@ function onEmployeeFormSubmit(e) {
       }
     }
   }
+}
+
+// ==========================================
+// SCHEDULE MANAGEMENT FUNCTIONS
+// ==========================================
+
+function handleGetScheduleData() {
+  // Get base employees
+  var employeesData = getEmployeesData(); 
+  var baseEmployees = employeesData.map(function(e) { return {name: e.nickname}; });
+  
+  // Get settings
+  var settingsSheet = getSheetByNameOrCreateNew("ScheduleSettings");
+  var settingsData = settingsSheet.getDataRange().getValues();
+  var settingsMap = {};
+  if (settingsData.length > 1) {
+    for (var i = 1; i < settingsData.length; i++) {
+      var row = settingsData[i];
+      settingsMap[row[0]] = {
+        type: row[1],
+        targetDays: row[2],
+        isAvailableAll: row[3],
+        availability: row[4] ? JSON.parse(row[4]) : {},
+        stations: row[5] ? JSON.parse(row[5]) : [],
+        note: row[6]
+      };
+    }
+  }
+  
+  var finalEmployees = baseEmployees.map(function(emp) {
+    var set = settingsMap[emp.name] || {};
+    return {
+      name: emp.name,
+      type: set.type || "Part-time",
+      targetDays: set.targetDays || 4,
+      isAvailableAll: set.isAvailableAll === false ? false : true,
+      availability: set.availability || {},
+      stations: set.stations || [],
+      note: set.note || ""
+    };
+  });
+  
+  // Get schedules
+  var schedSheet = getSheetByNameOrCreateNew("Schedules");
+  var schedData = schedSheet.getDataRange().getValues();
+  var finalSchedules = [];
+  if (schedData.length > 1) {
+    for (var i = 1; i < schedData.length; i++) {
+      var r = schedData[i];
+      finalSchedules.push({
+        date: r[0],
+        shift: r[1],
+        station: r[2],
+        employeeName: r[3]
+      });
+    }
+  }
+  
+  // Get leaves
+  var leaves = getLeavesData(); 
+  var finalLeaves = leaves.filter(function(l) { return l.status === "Approved"; }).map(function(l) {
+    return {
+      name: l.name,
+      startDate: l.startDate,
+      endDate: l.endDate
+    };
+  });
+  
+  // Get attendance
+  var attendanceSheet = getSheetByNameOrCreateNew("Attendance");
+  var attData = attendanceSheet.getDataRange().getValues();
+  var finalAttendance = [];
+  if (attData.length > 1) {
+    for (var i = 1; i < attData.length; i++) {
+      finalAttendance.push({
+        timestamp: attData[i][0],
+        name: attData[i][1],
+        type: attData[i][2],
+        scheduledTime: attData[i][3],
+        note: attData[i][4]
+      });
+    }
+  }
+  
+  return {
+    employees: finalEmployees,
+    schedules: finalSchedules,
+    leaves: finalLeaves,
+    attendance: finalAttendance
+  };
+}
+
+function handleSaveSchedules(data) {
+  var sheet = getSheetByNameOrCreateNew("Schedules");
+  sheet.clear();
+  sheet.appendRow(["Date", "Shift", "Station", "EmployeeName"]);
+  var rows = [];
+  for (var i = 0; i < data.length; i++) {
+    rows.push([data[i].date, data[i].shift, data[i].station, data[i].employeeName]);
+  }
+  if (rows.length > 0) {
+    sheet.getRange(2, 1, rows.length, 4).setValues(rows);
+  }
+  return {status: "success"};
+}
+
+function handleSaveScheduleSettings(data) {
+  var sheet = getSheetByNameOrCreateNew("ScheduleSettings");
+  sheet.clear();
+  sheet.appendRow(["Name", "Type", "TargetDays", "IsAvailableAll", "AvailabilityJSON", "StationsJSON", "Note"]);
+  var rows = [];
+  for (var i = 0; i < data.length; i++) {
+    var e = data[i];
+    rows.push([
+      e.name, 
+      e.type, 
+      e.targetDays, 
+      e.isAvailableAll, 
+      JSON.stringify(e.availability || {}), 
+      JSON.stringify(e.stations || []), 
+      e.note || ""
+    ]);
+  }
+  if (rows.length > 0) {
+    sheet.getRange(2, 1, rows.length, 7).setValues(rows);
+  }
+  return {status: "success"};
 }
 
 function handleGetInitPayrollData() {
