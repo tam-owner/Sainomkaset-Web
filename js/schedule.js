@@ -612,7 +612,7 @@ function renderEmployeeSummarySchedule(dates) {
     
     // Sort employees exactly like workload warnings
     const weeklyHours = {};
-    const activeEmployees = state.employees.filter(e => e.status !== 'Inactive');
+    const activeEmployees = state.employees.filter(e => !e.status || (e.status.toLowerCase() !== 'inactive' && e.status !== 'พนักงานเก่า (Inactive)' && e.status !== 'ลาออก'));
     activeEmployees.forEach(e => {
         weeklyHours[e.name] = 0;
     });
@@ -694,9 +694,9 @@ function renderEmployeeList(onEdit) {
 
     let filteredEmployees = state.employees;
     if (state.currentEmpTab === 'Inactive') {
-        filteredEmployees = state.employees.filter(e => e.status === 'Inactive');
+        filteredEmployees = state.employees.filter(e => e.status && (e.status.toLowerCase() === 'inactive' || e.status === 'พนักงานเก่า (Inactive)' || e.status === 'ลาออก'));
     } else {
-        filteredEmployees = state.employees.filter(e => e.status !== 'Inactive');
+        filteredEmployees = state.employees.filter(e => !e.status || (e.status.toLowerCase() !== 'inactive' && e.status !== 'พนักงานเก่า (Inactive)' && e.status !== 'ลาออก'));
     }
 
     if (filteredEmployees.length === 0) {
@@ -865,7 +865,7 @@ function renderCustomDropdown(cell, date, shift, station, onSelect) {
     let exceededHtml = '';
     
     state.employees.forEach(emp => {
-        if (emp.status === 'Inactive') return;
+        if (emp.status && (emp.status.toLowerCase() === 'inactive' || emp.status === 'พนักงานเก่า (Inactive)' || emp.status === 'ลาออก')) return;
         if (currentNames.includes(emp.name)) return;
 
         let isAvailable = true;
@@ -984,7 +984,23 @@ async function loadData() {
         const localEmployees = localStorage.getItem('localEmployees');
         const localSchedules = localStorage.getItem('localSchedules');
         
-        setEmployees(localEmployees ? JSON.parse(localEmployees) : data.employees || []);
+        let finalEmps = data.employees || [];
+        if (localEmployees) {
+            const parsedLocal = JSON.parse(localEmployees);
+            finalEmps = parsedLocal.map(le => {
+                const apiEmp = (data.employees || []).find(e => e.name === le.name);
+                if (apiEmp) {
+                    le.status = apiEmp.status;
+                }
+                return le;
+            });
+            (data.employees || []).forEach(apiEmp => {
+                if (!finalEmps.find(e => e.name === apiEmp.name)) {
+                    finalEmps.push(apiEmp);
+                }
+            });
+        }
+        setEmployees(finalEmps);
         setSchedules(localSchedules ? JSON.parse(localSchedules) : data.schedules || []);
         
         if (!hasCache && (localEmployees || localSchedules)) {
