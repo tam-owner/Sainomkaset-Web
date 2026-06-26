@@ -173,43 +173,55 @@ function setLeaves(rawLeaves) {
     }));
 }
 
+function normalizeShiftId(shiftStr) {
+    if (!shiftStr || typeof shiftStr !== 'string') return shiftStr;
+    if (shiftStr.includes('T')) {
+        const timePart = shiftStr.split('T')[1];
+        if (timePart) {
+            let h = parseInt(timePart.substring(0, 2), 10);
+            const m = timePart.substring(3, 5);
+            h = (h + 7) % 24;
+            return h + ':' + m;
+        }
+    }
+    // Auto-correct corrupted cache from the 1899 bug or timezone shifting
+    const corrections = {
+        '11:12': '11:30', '12:55': '11:30',
+        '14:12': '14:30', '15:55': '14:30',
+        '16:12': '16:30', '17:55': '16:30',
+        '17:42': '18:00', '19:25': '18:00'
+    };
+    if (corrections[shiftStr]) return corrections[shiftStr];
+    return shiftStr;
+}
+
 function setEmployees(rawEmployees) {
-    state.employees = rawEmployees.map(e => ({
-        ...e,
-        type: e.type || "Part-time",
-        targetDays: parseInt(e.targetDays) || 0,
-        availability: e.availability || {},
-        note: e.note || "",
-        status: e.status || "Active",
-        isAvailableAll: e.isAvailableAll === false ? false : true,
-        stations: e.stations || []
-    }));
+    state.employees = rawEmployees.map(e => {
+        let avail = e.availability || {};
+        const normalizedAvail = {};
+        Object.keys(avail).forEach(day => {
+            normalizedAvail[day] = avail[day].map(normalizeShiftId);
+        });
+        
+        return {
+            ...e,
+            type: e.type || "Part-time",
+            targetDays: parseInt(e.targetDays) || 0,
+            availability: normalizedAvail,
+            note: e.note || "",
+            status: e.status || "Active",
+            isAvailableAll: e.isAvailableAll === false ? false : true,
+            stations: e.stations || []
+        };
+    });
 }
 
 function setSchedules(rawSchedules) {
     state.schedules = rawSchedules.map(s => {
-        let shiftStr = s.shift;
-        if (shiftStr && typeof shiftStr === 'string') {
-            if (shiftStr.includes('T')) {
-                const timePart = shiftStr.split('T')[1];
-                if (timePart) {
-                    let h = parseInt(timePart.substring(0, 2), 10);
-                    const m = timePart.substring(3, 5);
-                    h = (h + 7) % 24;
-                    shiftStr = h + ':' + m;
-                }
-            } else {
-                // Auto-correct corrupted cache from the 1899 bug
-                if (shiftStr === '11:12') shiftStr = '11:30';
-                else if (shiftStr === '14:12') shiftStr = '14:30';
-                else if (shiftStr === '16:12') shiftStr = '16:30';
-                else if (shiftStr === '17:42') shiftStr = '18:00';
-            }
-        }
         return {
             ...s,
             date: formatAsISODate(s.date),
-            shift: shiftStr
+            shift: normalizeShiftId(s.shift)
         };
     });
 }
@@ -1586,9 +1598,12 @@ function renderAvailabilitySummary() {
                 isAvail = true;
                 targetShiftId = state.SHIFTS[0].id; // Default to first shift if available all
             } else if (emp.availability && emp.availability[dayIdx] && emp.availability[dayIdx].length > 0) {
-                isAvail = true;
-                // Pick the first available shift to display
-                targetShiftId = emp.availability[dayIdx][0]; 
+                const validShifts = emp.availability[dayIdx].filter(sId => state.SHIFTS.some(shift => shift.id === sId));
+                if (validShifts.length > 0) {
+                    isAvail = true;
+                    // Pick the first available shift to display
+                    targetShiftId = validShifts[0]; 
+                }
             }
 
             if (isAvail && targetShiftId) {
