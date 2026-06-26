@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+// Mock DOM
+document.addEventListener("DOMContentLoaded", () => {
+    document.body.innerHTML = `
+        <div id="loading-overlay" style="display:flex;"></div>
+        <div id="toast-container"></div>
+        <div id="weekly-schedule-grid"></div>
+        <div id="employee-summary-grid"></div>
+        <div id="schedule-leave-warnings"></div>
+        <div id="schedule-workload-warnings"></div>
+        <div id="employee-setup-list"></div>
+        <div id="saved-weeks-dropdown"></div>
+    `;
+});
+// Mock lucide
+window.lucide = { createIcons: () => {} };
+</script>
+<script src="js/schedule.js"></script>
+</head>
+<body></body>
+</html>
