@@ -1239,7 +1239,6 @@ function openEditEmployeeModal(empName = null) {
     document.getElementById('emp-original-name').value = isEdit ? emp.name : '';
     document.getElementById('emp-name').value = isEdit ? emp.name : '';
     document.getElementById('emp-type').value = isEdit ? emp.type : 'Part-time';
-    document.getElementById('emp-status').value = isEdit ? (emp.status || 'Active') : 'Active';
     document.getElementById('emp-target-days').value = isEdit ? emp.targetDays : 4;
     document.getElementById('emp-note').value = isEdit ? emp.note : '';
     
@@ -1268,7 +1267,6 @@ function saveEmployeeConfig() {
     const originalName = document.getElementById('emp-original-name').value;
     const newName = document.getElementById('emp-name').value.trim();
     const type = document.getElementById('emp-type').value;
-    const status = document.getElementById('emp-status').value;
     const targetDays = parseInt(document.getElementById('emp-target-days').value) || 4;
     const note = document.getElementById('emp-note').value.trim();
     const isAvailableAll = document.getElementById('emp-avail-all').checked;
@@ -1282,6 +1280,9 @@ function saveEmployeeConfig() {
         showToast('ชื่อพนักงานนี้มีอยู่แล้ว', true);
         return;
     }
+
+    const existingIdx = state.employees.findIndex(e => e.name === originalName);
+    const existingStatus = existingIdx !== -1 ? (state.employees[existingIdx].status || 'Active') : 'Active';
 
     const availability = {};
     if (!isAvailableAll) {
@@ -1298,9 +1299,8 @@ function saveEmployeeConfig() {
         checkedStations.push(cb.value);
     });
 
-    const newData = { name: newName, type, status, targetDays, availability, note, isAvailableAll, stations: checkedStations };
+    const newData = { name: newName, type, status: existingStatus, targetDays, availability, note, isAvailableAll, stations: checkedStations };
     
-    const existingIdx = state.employees.findIndex(e => e.name === originalName);
     if (existingIdx !== -1) {
         state.employees[existingIdx] = newData;
         // Update schedules name

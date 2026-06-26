@@ -13,7 +13,7 @@
             const errBox = document.getElementById('debug-error-box');
             if(errBox) { errBox.style.display = 'block'; errBox.innerHTML += '<br>PROMISE ERR: ' + (e.reason ? e.reason.message || e.reason : 'Unknown'); }
         });
-        const APP_VERSION = "20260627_5";
+        const APP_VERSION = "20260627_6";
         const currentVersion = localStorage.getItem('APP_VERSION');
         if (currentVersion !== APP_VERSION) {
             console.log("New version detected, clearing cache...");
@@ -249,13 +249,6 @@
                             <option value="Full-time">Full-time</option>
                         </select>
                     </div>
-                    <div class="form-group w-32">
-                        <label>สถานะ</label>
-                        <select id="emp-status" class="form-control">
-                            <option value="Active">ทำงานอยู่</option>
-                            <option value="Inactive">ลาออก</option>
-                        </select>
-                    </div>
                     <div class="form-group w-36">
                         <label>เป้าหมาย (วัน/สัปดาห์)</label>
                         <input type="number" id="emp-target-days" class="form-control" min="1" max="7" value="4">
@@ -308,7 +301,7 @@
     <!-- Toast Notification Container -->
     <div id="toast-container" class="toast-container"></div>
 
-    <script src="js/schedule.js?v=20260627_5"></script>
+    <script src="js/schedule.js?v=20260627_6"></script>
 </body>
 </html>
     <button onclick="sessionStorage.clear(); navigator.serviceWorker.getRegistrations().then(r => r.forEach(reg => reg.unregister())); caches.keys().then(k => k.forEach(name => caches.delete(name))); setTimeout(() => window.location.reload(true), 1000);" style="position: fixed; bottom: 10px; left: 10px; z-index: 9999; background: #e2e8f0; border: none; padding: 5px 10px; border-radius: 4px; font-size: 10px; color: #475569;">ล้างแคช</button>
