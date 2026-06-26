@@ -1,4 +1,4 @@
-const CACHE_NAME = 'snk-cache-v129';
+const CACHE_NAME = 'snk-cache-v131';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -16,14 +16,20 @@ self.addEventListener('install', event => {
     caches.open(CACHE_NAME)
       .then(cache => {
         console.log('Opened cache');
-        return cache.addAll(urlsToCache);
+        return Promise.all(urlsToCache.map(url => {
+          return fetch(new Request(url, { cache: 'reload' })).then(res => {
+            if (res.ok) {
+              return cache.put(url, res);
+            }
+          }).catch(err => console.log('Cache fetch error', err));
+        }));
       })
   );
 });
 
 self.addEventListener('fetch', event => {
   event.respondWith(
-    fetch(event.request)
+    fetch(event.request.method === 'GET' ? new Request(event.request.url, { cache: 'reload' }) : event.request)
       .then(response => {
         // Network first: if success, put a copy in cache
         if (response && response.status === 200) {
