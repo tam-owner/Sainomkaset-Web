@@ -176,24 +176,50 @@ function setLeaves(rawLeaves) {
 
 function normalizeShiftId(shiftStr) {
     if (!shiftStr || typeof shiftStr !== 'string') return shiftStr;
+    
+    let parsedTime = shiftStr;
     if (shiftStr.includes('T')) {
         const timePart = shiftStr.split('T')[1];
         if (timePart) {
             let h = parseInt(timePart.substring(0, 2), 10);
             const m = timePart.substring(3, 5);
             h = (h + 7) % 24;
-            return h + ':' + m;
+            parsedTime = h + ':' + m;
         }
     }
+    
     // Auto-correct corrupted cache from the 1899 bug or timezone shifting
-    const corrections = {
-        '11:12': '11:30', '12:55': '11:30',
-        '14:12': '14:30', '15:55': '14:30',
-        '16:12': '16:30', '17:55': '16:30',
-        '17:42': '18:00', '19:25': '18:00'
-    };
-    if (corrections[shiftStr]) return corrections[shiftStr];
-    return shiftStr;
+    // Snap to the closest valid shift
+    if (parsedTime.includes(':')) {
+        const parts = parsedTime.split(':');
+        const minutes = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+        
+        // Define valid shifts in minutes
+        const validShifts = [
+            { id: '11:30', mins: 11 * 60 + 30 },
+            { id: '14:30', mins: 14 * 60 + 30 },
+            { id: '16:30', mins: 16 * 60 + 30 },
+            { id: '18:00', mins: 18 * 60 }
+        ];
+        
+        let closest = validShifts[0];
+        let minDiff = Math.abs(minutes - closest.mins);
+        
+        for (let i = 1; i < validShifts.length; i++) {
+            const diff = Math.abs(minutes - validShifts[i].mins);
+            if (diff < minDiff) {
+                minDiff = diff;
+                closest = validShifts[i];
+            }
+        }
+        
+        // If it's within a reasonable threshold (e.g., 3 hours = 180 mins), snap it
+        if (minDiff <= 180) {
+            return closest.id;
+        }
+    }
+    
+    return parsedTime;
 }
 
 function setEmployees(rawEmployees) {

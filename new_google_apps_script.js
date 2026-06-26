@@ -996,7 +996,7 @@ function handleSaveSchedules(data) {
   sheet.appendRow(["Date", "Shift", "Station", "EmployeeName"]);
   var rows = [];
   for (var i = 0; i < data.length; i++) {
-    rows.push([data[i].date, data[i].shift, data[i].station, data[i].employeeName]);
+    rows.push([data[i].date, "'" + data[i].shift, data[i].station, data[i].employeeName]);
   }
   if (rows.length > 0) {
     sheet.getRange(2, 1, rows.length, 4).setValues(rows);
