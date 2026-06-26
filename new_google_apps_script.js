@@ -166,7 +166,7 @@ function getSheetByNameOrCreateOld(name) {
     sheet = ss.insertSheet(name);
     if (name === "Employees") sheet.appendRow(["Name", "PIN", "NormalRate", "OTRate", "DeductionType"]);
     else if (name === "Deductions") sheet.appendRow(["ID", "Period", "Name", "Amount", "Reason", "Timestamp", "Type"]);
-    else if (name === "Leaves") sheet.appendRow(["ID", "Name", "StartDate", "EndDate", "LeaveType", "Reason", "Status", "Timestamp"]);
+    else if (name === "Leaves") sheet.appendRow(["Timestamp", "ID", "Name", "StartDate", "EndDate", "LeaveType", "Reason", "Status"]);
   }
   return sheet;
 }
@@ -183,7 +183,7 @@ function getSheetByNameOrCreateNew(name) {
     } else if (name === "Deductions") {
       sheet.appendRow(["ID", "Period", "Name", "Amount", "Reason", "Timestamp", "Type"]);
     } else if (name === "Leaves") {
-      sheet.appendRow(["ID", "Name", "StartDate", "EndDate", "LeaveType", "Reason", "Status", "Timestamp"]);
+      sheet.appendRow(["Timestamp", "ID", "Name", "StartDate", "EndDate", "LeaveType", "Reason", "Status"]);
     } else if (name === "TimeEditRequests") {
       sheet.appendRow(["ID", "Timestamp", "Name", "Date", "OriginalIn", "OriginalOut", "NewIn", "NewOut", "Reason", "Status"]);
     } else if (name === "Settings") {
@@ -504,37 +504,136 @@ function getDeductionsData() {
     return result;
   } catch (e) { return []; }
 }
-
-function getLeavesData() {
+function autoFormatAndSortLeaves() {
   try {
     var sheet = getSheetByNameOrCreateNew("Leaves");
     var data = sheet.getDataRange().getValues();
-    var result = [];
-    var hasEmptyId = false;
+    if (data.length <= 1) return;
+    
+    var headers = data[0];
+    var targetHeaders = ["Timestamp", "ID", "Name", "StartDate", "EndDate", "LeaveType", "Reason", "Status"];
+    
+    var hMap = {};
+    for (var i = 0; i < headers.length; i++) {
+      hMap[String(headers[i]).trim().toLowerCase()] = i;
+    }
+    
+    if (hMap["name"] === undefined || hMap["startdate"] === undefined) return; 
+
+    var rows = [];
+    var changed = false;
+    var todayStr = Utilities.formatDate(new Date(), "Asia/Bangkok", "yyyy-MM-dd");
+    
     for (var i = 1; i < data.length; i++) {
       var row = data[i];
-      if (!row[0] || String(row[0]).trim() === "") {
-        if (row[1] && row[2]) {
-          row[0] = Utilities.getUuid();
-          hasEmptyId = true;
-        } else {
-          continue;
+      var nameVal = row[hMap["name"]];
+      var idVal = hMap["id"] !== undefined ? row[hMap["id"]] : "";
+      
+      if (!idVal || String(idVal).trim() === "") {
+        if (!nameVal || String(nameVal).trim() === "") continue;
+        idVal = Utilities.getUuid();
+        changed = true;
+      }
+      
+      var stIdx = hMap["status"];
+      var stVal = "Approved";
+      if (stIdx !== undefined) {
+         var rawSt = String(row[stIdx] || "").trim();
+         if (rawSt === "Approved" || rawSt === "Disapproved" || rawSt === "Pending") {
+            stVal = rawSt;
+         } else {
+            changed = true;
+         }
+      } else {
+         changed = true;
+      }
+      
+      var tsVal = hMap["timestamp"] !== undefined ? row[hMap["timestamp"]] : "";
+      var sdVal = hMap["startdate"] !== undefined ? row[hMap["startdate"]] : "";
+      var edVal = hMap["enddate"] !== undefined ? row[hMap["enddate"]] : "";
+      var ltVal = hMap["leavetype"] !== undefined ? row[hMap["leavetype"]] : "";
+      var rVal = hMap["reason"] !== undefined ? row[hMap["reason"]] : "";
+      
+      var newRow = [ tsVal, idVal, nameVal, sdVal, edVal, ltVal, rVal, stVal ];
+      rows.push(newRow);
+    }
+    
+    var orderChanged = false;
+    if (headers.length !== targetHeaders.length) {
+      orderChanged = true;
+    } else {
+      for (var j = 0; j < targetHeaders.length; j++) {
+        if (headers[j] !== targetHeaders[j]) {
+          orderChanged = true;
+          break;
         }
       }
-      if (!isDateValid(row[2])) continue;
-      result.push({
-        id: String(row[0]), name: String(row[1]), startDate: String(row[2]),
-        endDate: String(row[3]), leaveType: String(row[4]), reason: String(row[5] || ""),
-        status: String(row[6]), timestamp: row[7]
-      });
     }
-    if (hasEmptyId) {
-      sheet.getRange(1, 1, data.length, data[0].length).setValues(data);
+    
+    var origOrderStr = rows.map(function(r) { return r[1]; }).join(",");
+    
+    rows.sort(function(a, b) {
+      var dateA = a[3] ? Utilities.formatDate(new Date(a[3]), "Asia/Bangkok", "yyyy-MM-dd") : "9999-99-99";
+      var dateB = b[3] ? Utilities.formatDate(new Date(b[3]), "Asia/Bangkok", "yyyy-MM-dd") : "9999-99-99";
+      var isFutureA = dateA >= todayStr;
+      var isFutureB = dateB >= todayStr;
+      if (isFutureA && !isFutureB) return -1;
+      if (!isFutureA && isFutureB) return 1;
+      if (isFutureA && isFutureB) {
+         return dateA.localeCompare(dateB);
+      } else {
+         return dateB.localeCompare(dateA);
+      }
+    });
+    
+    var newOrderStr = rows.map(function(r) { return r[1]; }).join(",");
+    if (origOrderStr !== newOrderStr) changed = true;
+    
+    if (changed || orderChanged) {
+      sheet.getRange(1, 1, sheet.getMaxRows(), sheet.getMaxColumns()).clearContent();
+      var outputData = [targetHeaders].concat(rows);
+      sheet.getRange(1, 1, outputData.length, targetHeaders.length).setValues(outputData);
+      sheet.getRange(2, 1, rows.length, 1).setNumberFormat("d/M/yyyy HH:mm");
+      sheet.getRange(2, 4, rows.length, 2).setNumberFormat("d/M/yyyy");
+    }
+  } catch (e) {}
+}
+
+function getLeavesData() {
+  autoFormatAndSortLeaves();
+  try {
+    var sheet = getSheetByNameOrCreateNew("Leaves");
+    var data = sheet.getDataRange().getValues();
+    if (data.length <= 1) return [];
+    
+    var headers = data[0];
+    var hMap = {};
+    for (var i = 0; i < headers.length; i++) {
+      hMap[String(headers[i]).trim().toLowerCase()] = i;
+    }
+    
+    var result = [];
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      if (hMap["id"] === undefined || !row[hMap["id"]] || String(row[hMap["id"]]).trim() === "") continue;
+      
+      var sdIdx = hMap["startdate"];
+      if (sdIdx !== undefined && !isDateValid(row[sdIdx])) continue;
+      
+      result.push({
+        id: String(row[hMap["id"]]), 
+        name: String(row[hMap["name"]] || ""), 
+        startDate: String(row[hMap["startdate"]] || ""),
+        endDate: String(row[hMap["enddate"]] || ""), 
+        leaveType: String(row[hMap["leavetype"]] || ""), 
+        reason: String(row[hMap["reason"]] || ""),
+        status: String(row[hMap["status"]] || ""), 
+        timestamp: String(row[hMap["timestamp"]] || "")
+      });
     }
     return result;
   } catch (e) { return []; }
 }
-
 // ----------------------------------------------------
 // Post Data Logic
 // ----------------------------------------------------
@@ -1007,8 +1106,8 @@ function handleDeleteDeduction(id) {
 function handleRequestLeave(leave) {
   var sheet = getSheetByNameOrCreateNew("Leaves");
   var newId = Utilities.getUuid();
-  var timestamp = new Date().toISOString();
-  sheet.appendRow([newId, leave.name, leave.startDate, leave.endDate, leave.leaveType, leave.reason, "Pending", timestamp]);
+  var timestamp = Utilities.formatDate(new Date(), "Asia/Bangkok", "yyyy-MM-dd HH:mm");
+  sheet.appendRow([timestamp, newId, leave.name, leave.startDate, leave.endDate, leave.leaveType, leave.reason, "Pending"]);
   
   var flexMessage = {
     "type": "flex",
