@@ -1,4 +1,4 @@
-const CACHE_NAME = 'snk-cache-v143';
+const CACHE_NAME = 'snk-cache-v144';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -28,8 +28,13 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('fetch', event => {
+  // Cannot recreate a Request with mode 'navigate', so we pass it directly.
+  const req = (event.request.method === 'GET' && event.request.mode !== 'navigate')
+    ? new Request(event.request.url, { cache: 'reload' })
+    : event.request;
+
   event.respondWith(
-    fetch(event.request.method === 'GET' ? new Request(event.request.url, { cache: 'reload' }) : event.request)
+    fetch(req)
       .then(response => {
         // Network first: if success, put a copy in cache
         if (response && response.status === 200) {
