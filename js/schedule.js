@@ -133,7 +133,7 @@ let isHideEmptyShifts = false;
 function formatAsISODate(dateStr) {
     if (!dateStr) return "";
     const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return dateStr; // fallback if invalid
+    if (isNaN(d.getTime())) return ""; // fallback if invalid: return empty string
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
@@ -171,7 +171,7 @@ function setLeaves(rawLeaves) {
         ...l,
         startDate: formatAsISODate(l.startDate),
         endDate: formatAsISODate(l.endDate)
-    }));
+    })).filter(l => l.startDate && l.endDate);
 }
 
 function normalizeShiftId(shiftStr) {
