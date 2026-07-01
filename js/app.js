@@ -3152,6 +3152,14 @@ function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) 
         return opts;
     };
 
+    const formatDisplayDate = (dStr) => {
+        if (!dStr) return "-";
+        const d = new Date(dStr);
+        if (isNaN(d)) return dStr;
+        const days = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+        return `${days[d.getDay()]} ${formatDateStr(dStr)}`;
+    };
+
     Swal.fire({
         title: '<div class="text-[18px] font-black text-slate-800 mb-1">แก้ไขเวลา</div>',
         html: `
@@ -3159,7 +3167,7 @@ function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) 
                 <!-- Header -->
                 <div class="text-center">
                     <div class="inline-flex items-center justify-center px-4 py-1.5 bg-indigo-50 text-indigo-700 rounded-full text-[14px] font-bold border border-indigo-100">
-                        ${formatDateStr(date)}
+                        ${formatDisplayDate(date)}
                     </div>
                 </div>
 
