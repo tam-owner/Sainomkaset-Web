@@ -3117,6 +3117,31 @@ document.addEventListener('DOMContentLoaded', () => {
 // ----------------------------------------------------
 // Time Edit Requests (Employee)
 // ----------------------------------------------------
+window.closeAllTimeDropdowns = function() {
+    document.querySelectorAll('.time-dropdown-menu').forEach(el => el.classList.add('hidden'));
+};
+
+window.openTimeDropdown = function(event, inputId) {
+    event.stopPropagation();
+    window.closeAllTimeDropdowns();
+    const menu = document.getElementById('dropdown-' + inputId);
+    if (menu) {
+        menu.classList.remove('hidden');
+    }
+};
+
+window.selectTimeOption = function(event, inputId, value) {
+    event.stopPropagation();
+    document.getElementById(inputId).value = value;
+    document.getElementById(inputId + '-display').innerText = value;
+    window.closeAllTimeDropdowns();
+};
+
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.time-dropdown-container')) {
+        if(window.closeAllTimeDropdowns) window.closeAllTimeDropdowns();
+    }
+});
 function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) {
     const formatTime = t => (t && t.trim() !== '') ? t : '-';
     const getH = t => {
@@ -3143,13 +3168,15 @@ function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) 
         outM = parseInt(outM) < 15 ? '00' : (parseInt(outM) < 45 ? '30' : '00');
     }
 
-    const hoursOptions = (selected) => {
-        let opts = '';
-        for (let i = 0; i <= 23; i++) {
-            let v = String(i).padStart(2, '0');
-            opts += `<option value="${v}" ${selected === v ? 'selected' : ''}>${v}</option>`;
-        }
-        return opts;
+    const hours = ['11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '00'];
+    const mins = ['00', '30'];
+
+    const renderOptions = (inputId, options, selected) => {
+        return options.map(opt => `
+            <div onclick="selectTimeOption(event, '${inputId}', '${opt}')" class="px-3 py-2 text-[15px] font-bold text-center cursor-pointer hover:bg-indigo-50 ${selected === opt ? 'bg-indigo-100 text-indigo-700' : 'text-slate-700'} transition-colors border-b border-slate-50 last:border-0">
+                ${opt}
+            </div>
+        `).join('');
     };
 
     const formatDisplayDate = (dStr) => {
@@ -3182,16 +3209,25 @@ function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) 
                                 <span class="text-[11px] text-slate-500 font-medium">เดิม: ${formatTime(schedIn || actualIn)}</span>
                             </div>
                             <div class="flex items-center gap-1.5">
-                                <select id="req-in-h" class="bg-white border border-slate-300 text-indigo-700 font-bold text-[16px] rounded-lg px-2 py-1.5 focus:border-indigo-500 outline-none w-[65px] text-center shadow-sm">
-                                    <option value="">--</option>
-                                    ${hoursOptions(inH)}
-                                </select>
+                                <div class="relative time-dropdown-container">
+                                    <div onclick="openTimeDropdown(event, 'req-in-h')" id="req-in-h-display" class="bg-white border border-slate-300 text-indigo-700 font-bold text-[16px] rounded-lg px-2 py-1.5 w-[60px] text-center shadow-sm cursor-pointer hover:border-indigo-500 active:bg-slate-50 transition-all select-none">
+                                        ${inH || '--'}
+                                    </div>
+                                    <input type="hidden" id="req-in-h" value="${inH || ''}">
+                                    <div id="dropdown-req-in-h" class="hidden time-dropdown-menu absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[70px] max-h-[180px] overflow-y-auto bg-white rounded-xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)] border border-slate-200 z-[9999] py-1 custom-scrollbar ring-1 ring-black/5 animate-fade-in-up">
+                                        ${renderOptions('req-in-h', hours, inH)}
+                                    </div>
+                                </div>
                                 <span class="font-bold text-slate-400">:</span>
-                                <select id="req-in-m" class="bg-white border border-slate-300 text-indigo-700 font-bold text-[16px] rounded-lg px-2 py-1.5 focus:border-indigo-500 outline-none w-[65px] text-center shadow-sm">
-                                    <option value="">--</option>
-                                    <option value="00" ${inM === '00' ? 'selected' : ''}>00</option>
-                                    <option value="30" ${inM === '30' ? 'selected' : ''}>30</option>
-                                </select>
+                                <div class="relative time-dropdown-container">
+                                    <div onclick="openTimeDropdown(event, 'req-in-m')" id="req-in-m-display" class="bg-white border border-slate-300 text-indigo-700 font-bold text-[16px] rounded-lg px-2 py-1.5 w-[60px] text-center shadow-sm cursor-pointer hover:border-indigo-500 active:bg-slate-50 transition-all select-none">
+                                        ${inM || '--'}
+                                    </div>
+                                    <input type="hidden" id="req-in-m" value="${inM || ''}">
+                                    <div id="dropdown-req-in-m" class="hidden time-dropdown-menu absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[70px] overflow-hidden bg-white rounded-xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)] border border-slate-200 z-[9999] py-1 ring-1 ring-black/5 animate-fade-in-up">
+                                        ${renderOptions('req-in-m', mins, inM)}
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -3204,16 +3240,25 @@ function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) 
                                 <span class="text-[11px] text-slate-500 font-medium">เดิม: ${formatTime(schedOut || actualOut)}</span>
                             </div>
                             <div class="flex items-center gap-1.5">
-                                <select id="req-out-h" class="bg-white border border-slate-300 text-indigo-700 font-bold text-[16px] rounded-lg px-2 py-1.5 focus:border-indigo-500 outline-none w-[65px] text-center shadow-sm">
-                                    <option value="">--</option>
-                                    ${hoursOptions(outH)}
-                                </select>
+                                <div class="relative time-dropdown-container">
+                                    <div onclick="openTimeDropdown(event, 'req-out-h')" id="req-out-h-display" class="bg-white border border-slate-300 text-indigo-700 font-bold text-[16px] rounded-lg px-2 py-1.5 w-[60px] text-center shadow-sm cursor-pointer hover:border-indigo-500 active:bg-slate-50 transition-all select-none">
+                                        ${outH || '--'}
+                                    </div>
+                                    <input type="hidden" id="req-out-h" value="${outH || ''}">
+                                    <div id="dropdown-req-out-h" class="hidden time-dropdown-menu absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[70px] max-h-[180px] overflow-y-auto bg-white rounded-xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)] border border-slate-200 z-[9999] py-1 custom-scrollbar ring-1 ring-black/5 animate-fade-in-up">
+                                        ${renderOptions('req-out-h', hours, outH)}
+                                    </div>
+                                </div>
                                 <span class="font-bold text-slate-400">:</span>
-                                <select id="req-out-m" class="bg-white border border-slate-300 text-indigo-700 font-bold text-[16px] rounded-lg px-2 py-1.5 focus:border-indigo-500 outline-none w-[65px] text-center shadow-sm">
-                                    <option value="">--</option>
-                                    <option value="00" ${outM === '00' ? 'selected' : ''}>00</option>
-                                    <option value="30" ${outM === '30' ? 'selected' : ''}>30</option>
-                                </select>
+                                <div class="relative time-dropdown-container">
+                                    <div onclick="openTimeDropdown(event, 'req-out-m')" id="req-out-m-display" class="bg-white border border-slate-300 text-indigo-700 font-bold text-[16px] rounded-lg px-2 py-1.5 w-[60px] text-center shadow-sm cursor-pointer hover:border-indigo-500 active:bg-slate-50 transition-all select-none">
+                                        ${outM || '--'}
+                                    </div>
+                                    <input type="hidden" id="req-out-m" value="${outM || ''}">
+                                    <div id="dropdown-req-out-m" class="hidden time-dropdown-menu absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[70px] overflow-hidden bg-white rounded-xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)] border border-slate-200 z-[9999] py-1 ring-1 ring-black/5 animate-fade-in-up">
+                                        ${renderOptions('req-out-m', mins, outM)}
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -3228,13 +3273,20 @@ function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) 
                     <textarea id="req-reason" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[13.5px] focus:border-indigo-400 outline-none resize-none shadow-inner" placeholder="ระบุเหตุผล..."></textarea>
                 </div>
             </div>
+            <style>
+                .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+                .swal2-html-container { overflow: visible !important; }
+            </style>
         `,
         showCancelButton: true,
         confirmButtonText: 'ส่งคำขอ',
         cancelButtonText: 'ยกเลิก',
         width: '90%',
         customClass: {
-            popup: 'rounded-[20px] max-w-md w-full',
+            popup: 'rounded-[20px] max-w-md w-full !overflow-visible',
             confirmButton: 'bg-[#5b52f6] text-white rounded-xl px-6 py-2.5 font-bold shadow-sm',
             cancelButton: 'bg-slate-100 text-slate-600 rounded-xl px-6 py-2.5 font-bold'
         },
