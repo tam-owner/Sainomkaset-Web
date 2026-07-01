@@ -3281,7 +3281,8 @@ function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) 
                 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
                 .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-                .swal2-html-container { overflow: visible !important; }
+                .swal2-html-container { overflow: visible !important; z-index: 10 !important; position: relative !important; }
+                .swal2-actions { z-index: 1 !important; position: relative !important; }
             </style>
         `,
         showCancelButton: true,
