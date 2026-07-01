@@ -27,8 +27,8 @@
         .opacity-0 { opacity: 0 !important; }
         .opacity-100 { opacity: 1 !important; }
 
-        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700;900&display=swap');
-        body { font-family: 'IBM Plex Sans Thai', sans-serif; background-color: #F1F5F9; color: #333; -webkit-tap-highlight-color: transparent; }
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Prompt', sans-serif; background-color: #F1F5F9; color: #333; -webkit-tap-highlight-color: transparent; }
         
         select.modern-select { border: 1px solid #E2E8F0; border-radius: 10px; padding: 12px 14px; font-weight: 600; width: 100%; outline: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.2em; background-color: white; }
         select.modern-select:focus { border-color: #4F46E5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
@@ -69,15 +69,25 @@
             100% { transform: translate(0, 0) scale(1); }
         }
 
+        /* Font Pairing */
+        h1, h2, h3, h4, h5, h6, 
+        button, 
+        .font-black,
+        .text-xl, .text-2xl, .text-3xl, .text-4xl,
+        .text-lg {
+            font-family: 'Kanit', sans-serif !important;
+        }
+
         /* SweetAlert2 Customizations */
         div.swal2-popup {
             border-radius: 24px !important;
             padding: 1.2rem 1rem !important;
             width: 300px !important;
-            font-family: 'IBM Plex Sans Thai', sans-serif !important;
+            font-family: 'Prompt', sans-serif !important;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
         }
         h2.swal2-title {
+            font-family: 'Kanit', sans-serif !important;
             font-size: 1.15rem !important;
             font-weight: 700 !important;
             padding: 0 1rem !important;
