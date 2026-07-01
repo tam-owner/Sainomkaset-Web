@@ -187,7 +187,13 @@ function applyInitData(data, isSilent = false) {
         }
 
         if (isAdmin) {
+            setupPeriods();
+            if (!currentPeriodVal && availablePeriods.length > 0) {
+                currentPeriodVal = availablePeriods[0].value;
+            }
             showAdminDashboard();
+            if (currentPeriodVal) renderAdminSummary();
+            
             if (hash && hash !== 'view-admin-dashboard' && document.getElementById(hash)) {
                 if (hash === 'view-admin-employees') openAdminEmployees(false);
                 else if (hash === 'view-admin-leaves') showView('view-admin-leaves', false);
@@ -197,7 +203,13 @@ function applyInitData(data, isSilent = false) {
             const updatedEmp = employees.find(e => e.name === loggedInEmployee.name);
             if (updatedEmp) {
                 loggedInEmployee = updatedEmp;
+                setupPeriods();
+                if (!currentPeriodVal && availablePeriods.length > 0) {
+                    currentPeriodVal = availablePeriods[0].value;
+                }
                 showEmployeeDashboard();
+                if (currentPeriodVal) renderEmployeeDashboard();
+                
                 if (hash && hash !== 'view-dashboard' && document.getElementById(hash)) {
                     if (hash === 'view-profile') openProfile(false);
                     else if (hash === 'view-leave') openLeave(false);
