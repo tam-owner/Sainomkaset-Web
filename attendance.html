@@ -9,6 +9,18 @@
     <title>Attendance System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* Critical Fallbacks for when Tailwind CDN is slow/offline */
+        img { max-width: 100%; height: auto; }
+        #view-login img { max-width: 150px; border-radius: 20px; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .text-center { text-align: center; }
+        .hidden { display: none !important; }
+        .opacity-0 { opacity: 0 !important; }
+        .opacity-100 { opacity: 1 !important; }
+
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap');
         body { font-family: 'IBM Plex Sans Thai', sans-serif; background-color: #F8F9FC; -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
         .input-modern { border: 2px solid #E2E8F0; border-radius: 18px; padding: 16px; width: 100%; text-align: center; font-weight: 700; outline: none; transition: all 0.2s; background: white; appearance: none; }

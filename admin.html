@@ -17,6 +17,18 @@
     <link rel="apple-touch-icon" href="logo-admin.jpg">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* Critical Fallbacks for when Tailwind CDN is slow/offline */
+        img { max-width: 100%; height: auto; }
+        #view-login img { max-width: 150px; border-radius: 20px; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .text-center { text-align: center; }
+        .hidden { display: none !important; }
+        .opacity-0 { opacity: 0 !important; }
+        .opacity-100 { opacity: 1 !important; }
+
         @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700;900&display=swap');
         body { font-family: 'IBM Plex Sans Thai', sans-serif; background-color: #F1F5F9; color: #333; -webkit-tap-highlight-color: transparent; }
         
@@ -117,7 +129,7 @@
     <!-- ===================================== -->
     <!-- VIEW: LOGIN                           -->
     <!-- ===================================== -->
-    <div id="view-login" class="px-4 flex flex-col justify-center min-h-[80vh]">
+    <div id="view-login" class="hidden px-4 flex flex-col justify-center min-h-[80vh]">
         <!-- Decorative Background -->
         <div class="fixed inset-0 z-[-1] bg-[#eef2f6] overflow-hidden pointer-events-none">
             <div class="absolute -top-[10%] -left-[10%] w-[350px] h-[350px] rounded-full bg-blue-400/30 blur-[70px] animate-blob-1"></div>

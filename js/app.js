@@ -41,13 +41,32 @@ document.addEventListener('DOMContentLoaded', () => {
 let isInitialLoad = true;
 
 function initData() {
-    const overlay = document.getElementById('loading-overlay');
-    const loadingText = document.getElementById('loading-text');
-    overlay.classList.remove('hidden');
-    loadingText.innerText = "กำลังเชื่อมต่อฐานข้อมูล Real-time...";
+    showLoading("กำลังเชื่อมต่อฐานข้อมูล Real-time...");
+
+    let isConnected = false;
+    const timeoutId = setTimeout(() => {
+        if (!isConnected && isInitialLoad) {
+            console.warn("Firebase connection timeout, attempting offline mode");
+            const cachedStr = localStorage.getItem('snk_payroll_data');
+            if (cachedStr) {
+                try {
+                    const cachedJson = JSON.parse(cachedStr);
+                    if (cachedJson.status === "success") {
+                        applyInitData(cachedJson.data);
+                    }
+                } catch(e){}
+            }
+            hideLoading();
+            if (!cachedStr) {
+                showView('view-login', false);
+            }
+        }
+    }, 5000);
 
     // Listen to Firebase Realtime Database
     database.ref('data').on('value', snapshot => {
+        isConnected = true;
+        clearTimeout(timeoutId);
         const data = snapshot.val();
         if (data) {
             // Save to cache just in case they go offline later
@@ -59,7 +78,7 @@ function initData() {
             if (isInitialLoad) {
                 isInitialLoad = false;
                 if (!isAdmin && !loggedInEmployee) {
-                    overlay.classList.add('hidden');
+                    hideLoading();
                 }
             } else {
                 // This acts like fetchFreshDataSilently: UI updates if already logged in
@@ -97,7 +116,7 @@ function initData() {
             }
         } else {
             console.warn("No data in Firebase yet.");
-            if (isInitialLoad) overlay.classList.add('hidden');
+            if (isInitialLoad) hideLoading();
         }
     }, error => {
         console.error("Firebase fetch error", error);
@@ -111,7 +130,12 @@ function initData() {
                 }
             } catch(e){}
         }
-        if (isInitialLoad) overlay.classList.add('hidden');
+        if (isInitialLoad) {
+            hideLoading();
+            if (!cachedStr) {
+                showView('view-login', false);
+            }
+        }
     });
 }
 
@@ -184,7 +208,7 @@ function applyInitData(data, isSilent = false) {
             }
         } else {
             // Not logged in. Must stay on login page.
-            overlay.classList.add('hidden');
+            hideLoading();
             if (hash && hash !== 'view-login') {
                 // If they tried to access a protected view, redirect to login by clearing the hash
                 history.replaceState(null, '', window.location.pathname);
