@@ -1210,12 +1210,14 @@ function renderEmployeeDashboard() {
         let outStr = formatTime(row.outTime);
         if (outStr === '-') outStr = '';
         
+        let inDisplay = inStr;
+        let outDisplay = outStr;
         const isPartialScan = (row.inTime && !row.outTime) || (!row.inTime && row.outTime);
         
-        if (isPartialScan && !row.inTime) inStr = '<span class="text-red-500 text-[10px] font-bold">ลืมสแกน!</span>';
-        if (isPartialScan && !row.outTime) outStr = '<span class="text-red-500 text-[10px] font-bold">ลืมสแกน!</span>';
+        if (isPartialScan && !row.inTime) inDisplay = '<span class="text-red-600 text-[10.5px] font-bold tracking-tight px-1 py-0.5 bg-red-100 rounded-md">ไม่มีเวลาเข้างาน</span>';
+        if (isPartialScan && !row.outTime) outDisplay = '<span class="text-red-600 text-[10.5px] font-bold tracking-tight px-1 py-0.5 bg-red-100 rounded-md">ไม่มีเวลาออกงาน</span>';
         
-        if (isPartialScan) bgColor = 'bg-red-50 border border-red-100';
+        if (isPartialScan) bgColor = 'bg-red-50 border-y border-red-200';
 
         const schedInStr = row.scheduledIn && row.scheduledIn !== '-' ? row.scheduledIn : '';
         const schedOutStr = row.scheduledOut && row.scheduledOut !== '-' ? row.scheduledOut : '';
@@ -1231,12 +1233,12 @@ function renderEmployeeDashboard() {
                 
                 <div class="text-center flex flex-col items-center justify-start">
                     <span class="${schedInClass}" ${inClick}>${schedInStr}</span>
-                    <span class="${inClass}">${inStr}</span>
+                    <span class="${inClass}">${inDisplay}</span>
                 </div>
                 
                 <div class="text-center flex flex-col items-center justify-start">
                     <span class="${schedOutClass}" ${outClick}>${schedOutStr}</span>
-                    <span class="${outClass}">${outStr}</span>
+                    <span class="${outClass}">${outDisplay}</span>
                 </div>
                 
                 <div class="text-center flex flex-col items-center justify-start pt-[2px]">
