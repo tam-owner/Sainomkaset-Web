@@ -3133,16 +3133,18 @@ function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) 
                     <div class="text-[11px] font-bold text-slate-500 mb-2">เวลาเดิมที่บันทึกไว้:</div>
                     
                     <div class="flex items-center justify-between gap-2">
-                        <div class="flex-1 bg-white rounded-xl p-2.5 border border-slate-200 shadow-sm flex flex-col items-center">
+                        <div class="flex-1 bg-white rounded-xl p-2.5 border border-slate-200 shadow-sm flex flex-col items-center justify-center">
                             <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">เข้างาน</div>
-                            <div class="text-lg font-black ${actualIn ? 'text-indigo-700' : 'text-slate-300'}">${formatTime(actualIn)}</div>
+                            <div class="text-lg font-black ${(schedIn || actualIn) ? 'text-indigo-700' : 'text-slate-300'} leading-none mb-1">${formatTime(schedIn || actualIn)}</div>
+                            ${schedIn && schedIn !== actualIn ? `<div class="text-[9px] font-medium text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded leading-tight">จริง: ${formatTime(actualIn)}</div>` : ''}
                         </div>
                         <div class="text-indigo-200">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                         </div>
-                        <div class="flex-1 bg-white rounded-xl p-2.5 border border-slate-200 shadow-sm flex flex-col items-center">
+                        <div class="flex-1 bg-white rounded-xl p-2.5 border border-slate-200 shadow-sm flex flex-col items-center justify-center">
                             <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">ออกงาน</div>
-                            <div class="text-lg font-black ${actualOut ? 'text-indigo-700' : 'text-slate-300'}">${formatTime(actualOut)}</div>
+                            <div class="text-lg font-black ${(schedOut || actualOut) ? 'text-indigo-700' : 'text-slate-300'} leading-none mb-1">${formatTime(schedOut || actualOut)}</div>
+                            ${schedOut && schedOut !== actualOut ? `<div class="text-[9px] font-medium text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded leading-tight">จริง: ${formatTime(actualOut)}</div>` : ''}
                         </div>
                     </div>
                 </div>
