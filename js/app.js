@@ -3125,8 +3125,7 @@ function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) 
         html: `
             <div class="text-left mt-2">
                 <div class="bg-indigo-50/50 rounded-2xl p-4 mb-5 border border-indigo-100 shadow-sm">
-                    <div class="flex items-center justify-between mb-3 pb-3 border-b border-indigo-100">
-                        <div class="text-[11px] font-bold text-indigo-600 bg-indigo-100/70 px-2.5 py-1 rounded-md uppercase tracking-wider">Date</div>
+                    <div class="flex items-center justify-center mb-3 pb-3 border-b border-indigo-100">
                         <div class="text-base font-black text-slate-800">${formatDateStr(date)}</div>
                     </div>
                     
@@ -3152,11 +3151,11 @@ function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) 
                 <div class="space-y-4">
                     <div>
                         <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">เวลาเข้างานใหม่</label>
-                        <input type="time" id="req-time-in" value="${schedIn || actualIn || ''}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm">
+                        <input type="text" id="req-time-in" value="${schedIn || actualIn || ''}" class="flatpickr-time w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm">
                     </div>
                     <div>
                         <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">เวลาออกงานใหม่</label>
-                        <input type="time" id="req-time-out" value="${schedOut || actualOut || ''}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm">
+                        <input type="text" id="req-time-out" value="${schedOut || actualOut || ''}" class="flatpickr-time w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm">
                     </div>
                     <div>
                         <label class="block text-[11px] font-bold text-red-500 uppercase tracking-wider mb-1.5 ml-1">เหตุผลที่ขอแก้ไข (บังคับ)</label>
@@ -3173,6 +3172,18 @@ function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) 
             popup: 'rounded-[24px] max-w-2xl w-full',
             confirmButton: 'bg-[#5b52f6] text-white rounded-xl px-6 py-2.5 font-bold shadow-sm',
             cancelButton: 'bg-slate-100 text-slate-600 rounded-xl px-6 py-2.5 font-bold'
+        },
+        didOpen: () => {
+            if (typeof flatpickr !== 'undefined') {
+                flatpickr(".flatpickr-time", {
+                    enableTime: true,
+                    noCalendar: true,
+                    dateFormat: "H:i",
+                    time_24hr: true,
+                    disableMobile: true,
+                    minuteIncrement: 1
+                });
+            }
         },
         preConfirm: () => {
             const newIn = document.getElementById('req-time-in').value;
