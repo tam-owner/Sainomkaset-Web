@@ -213,6 +213,7 @@ function applyInitData(data, isSilent = false) {
                 if (hash && hash !== 'view-dashboard' && document.getElementById(hash)) {
                     if (hash === 'view-profile') openProfile(false);
                     else if (hash === 'view-leave') openLeave(false);
+                    else if (hash === 'view-employee') openTimesheet(false);
                     else showView(hash, false);
                 }
             } else {
