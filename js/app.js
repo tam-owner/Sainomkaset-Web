@@ -1209,13 +1209,19 @@ function renderEmployeeDashboard() {
         if (inStr === '-') inStr = '';
         let outStr = formatTime(row.outTime);
         if (outStr === '-') outStr = '';
+        
+        const isPartialScan = (row.inTime && !row.outTime) || (!row.inTime && row.outTime);
+        
+        if (isPartialScan && !row.inTime) inStr = '<span class="text-red-500 text-[10px] font-bold">ลืมสแกน!</span>';
+        if (isPartialScan && !row.outTime) outStr = '<span class="text-red-500 text-[10px] font-bold">ลืมสแกน!</span>';
+        
+        if (isPartialScan) bgColor = 'bg-red-50 border border-red-100';
+
         const schedInStr = row.scheduledIn && row.scheduledIn !== '-' ? row.scheduledIn : '';
         const schedOutStr = row.scheduledOut && row.scheduledOut !== '-' ? row.scheduledOut : '';
 
-        const hasMissing = (!row.inTime || !row.outTime);
-
         tableHtml += `
-        <div class="data-row px-1 py-3 ${bgColor} ${hasMissing ? 'border-l-4 border-red-500' : ''}">
+        <div class="data-row px-1 py-3 ${bgColor} ${isPartialScan ? 'border-l-4 border-red-500' : ''}">
             <div class="table-grid text-[13px]">
                 <div class="flex flex-col text-left pl-1 justify-start cursor-pointer transition-transform hover:scale-105 active:scale-95" onclick="openRequestTimeEditModal('${row.date}', '${inStr}', '${outStr}', '${schedInStr}', '${schedOutStr}')">
                     <span class="font-black text-[13px] text-indigo-900 leading-tight date-text">${shortDateStr}</span>
