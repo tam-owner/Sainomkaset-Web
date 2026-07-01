@@ -3177,10 +3177,16 @@ function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) 
         return m ? m[1] : '';
     };
 
-    const inH = getH(schedIn || actualIn);
-    let inM = getM(schedIn || actualIn);
-    const outH = getH(schedOut || actualOut);
-    let outM = getM(schedOut || actualOut);
+    const inH = getH(actualIn || schedIn);
+    let inM = getM(actualIn || schedIn);
+    const outH = getH(actualOut || schedOut);
+    let outM = getM(actualOut || schedOut);
+
+    const formatTimeLabels = (s, a) => {
+        let st = s ? formatTime(s) : '-';
+        let at = a ? formatTime(a) : '-';
+        return `ตาราง: <span class="font-bold text-slate-600">${st}</span> | จริง: <span class="font-bold text-slate-600">${at}</span>`;
+    };
 
     // Normalize minutes to 00 or 30 for the dropdown
     if (inM && inM !== '00' && inM !== '30') {
@@ -3228,7 +3234,7 @@ function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) 
                         <div class="flex items-center justify-between">
                             <div class="flex flex-col">
                                 <span class="text-[13px] font-bold text-slate-700">เข้างาน</span>
-                                <span class="text-[11px] text-slate-500 font-medium">เดิม: ${formatTime(schedIn || actualIn)}</span>
+                                <span class="text-[11px] text-slate-500 font-medium">${formatTimeLabels(schedIn, actualIn)}</span>
                             </div>
                             <div class="flex items-center gap-1.5">
                                 <div class="relative time-dropdown-container">
@@ -3259,7 +3265,7 @@ function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) 
                         <div class="flex items-center justify-between">
                             <div class="flex flex-col">
                                 <span class="text-[13px] font-bold text-slate-700">ออกงาน</span>
-                                <span class="text-[11px] text-slate-500 font-medium">เดิม: ${formatTime(schedOut || actualOut)}</span>
+                                <span class="text-[11px] text-slate-500 font-medium">${formatTimeLabels(schedOut, actualOut)}</span>
                             </div>
                             <div class="flex items-center gap-1.5">
                                 <div class="relative time-dropdown-container">
@@ -3344,8 +3350,8 @@ function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) 
             return {
                 name: loggedInEmployee.name,
                 date: date,
-                originalIn: formatTime(actualIn),
-                originalOut: formatTime(actualOut),
+                originalIn: actualIn ? formatTime(actualIn) : '-',
+                originalOut: actualOut ? formatTime(actualOut) : '-',
                 newIn: newIn || '-',
                 newOut: newOut || '-',
                 reason: reason
