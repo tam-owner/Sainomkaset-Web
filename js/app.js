@@ -3123,43 +3123,80 @@ function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) 
     Swal.fire({
         title: '<div class="text-xl font-black text-slate-800">ขอแก้ไขเวลาเข้า-ออกงาน</div>',
         html: `
-            <div class="text-left mt-2">
-                <div class="bg-indigo-50/50 rounded-2xl p-4 mb-5 border border-indigo-100 shadow-sm">
-                    <div class="flex items-center justify-center mb-3 pb-3 border-b border-indigo-100">
-                        <div class="text-base font-black text-slate-800">${formatDateStr(date)}</div>
+            <div class="text-left mt-1">
+                <!-- Header / Date -->
+                <div class="text-center mb-5">
+                    <div class="inline-flex items-center justify-center px-5 py-2 bg-indigo-100 text-indigo-800 rounded-full text-[15px] font-black tracking-wide shadow-sm border border-indigo-200/50">
+                        ${formatDateStr(date)}
+                    </div>
+                </div>
+
+                <!-- Previous Time -->
+                <div class="bg-slate-50/80 rounded-2xl p-4 mb-4 border border-slate-200 shadow-sm relative overflow-hidden">
+                    <div class="text-[11px] font-bold text-slate-500 mb-3 flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        เวลาเดิมที่บันทึกไว้
                     </div>
                     
-                    <div class="text-[11px] font-bold text-slate-500 mb-2">เวลาเดิมที่บันทึกไว้:</div>
-                    
-                    <div class="flex items-center justify-between gap-2">
-                        <div class="flex-1 bg-white rounded-xl p-2.5 border border-slate-200 shadow-sm flex flex-col items-center justify-center">
-                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">เข้างาน</div>
-                            <div class="text-lg font-black ${(schedIn || actualIn) ? 'text-indigo-700' : 'text-slate-300'} leading-none mb-1">${formatTime(schedIn || actualIn)}</div>
-                            ${schedIn && schedIn !== actualIn ? `<div class="text-[9px] font-medium text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded leading-tight">จริง: ${formatTime(actualIn)}</div>` : ''}
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="flex-1 flex flex-col items-center justify-center">
+                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">เข้างาน</div>
+                            <div class="text-xl font-black ${(schedIn || actualIn) ? 'text-slate-700' : 'text-slate-300'} leading-none mb-1.5">${formatTime(schedIn || actualIn)}</div>
+                            ${schedIn && schedIn !== actualIn ? `<div class="text-[9px] font-bold text-slate-500 bg-slate-200 px-2 py-0.5 rounded-md leading-tight">จริง: ${formatTime(actualIn)}</div>` : ''}
                         </div>
-                        <div class="text-indigo-200">
+                        <div class="text-slate-300">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                         </div>
-                        <div class="flex-1 bg-white rounded-xl p-2.5 border border-slate-200 shadow-sm flex flex-col items-center justify-center">
-                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">ออกงาน</div>
-                            <div class="text-lg font-black ${(schedOut || actualOut) ? 'text-indigo-700' : 'text-slate-300'} leading-none mb-1">${formatTime(schedOut || actualOut)}</div>
-                            ${schedOut && schedOut !== actualOut ? `<div class="text-[9px] font-medium text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded leading-tight">จริง: ${formatTime(actualOut)}</div>` : ''}
+                        <div class="flex-1 flex flex-col items-center justify-center">
+                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">ออกงาน</div>
+                            <div class="text-xl font-black ${(schedOut || actualOut) ? 'text-slate-700' : 'text-slate-300'} leading-none mb-1.5">${formatTime(schedOut || actualOut)}</div>
+                            ${schedOut && schedOut !== actualOut ? `<div class="text-[9px] font-bold text-slate-500 bg-slate-200 px-2 py-0.5 rounded-md leading-tight">จริง: ${formatTime(actualOut)}</div>` : ''}
                         </div>
                     </div>
                 </div>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">เวลาเข้างานใหม่</label>
-                        <input type="text" id="req-time-in" value="${schedIn || actualIn || ''}" class="flatpickr-time w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm">
+
+                <!-- New Time Selection -->
+                <div class="bg-indigo-50/50 rounded-2xl p-4 mb-4 border border-indigo-100 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-1.5 h-full bg-indigo-500"></div>
+                    <div class="text-[12px] font-bold text-indigo-700 mb-3 flex items-center gap-1.5 pl-1.5">
+                        <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        ระบุเวลาใหม่ที่ต้องการแก้ไข
                     </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">เวลาออกงานใหม่</label>
-                        <input type="text" id="req-time-out" value="${schedOut || actualOut || ''}" class="flatpickr-time w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm">
+                    
+                    <div class="flex items-center justify-between gap-3 pl-1.5">
+                        <div class="flex-1 relative group">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 text-center">เข้างาน</label>
+                            <div class="relative">
+                                <input type="text" id="req-time-in" value="${schedIn || actualIn || ''}" class="flatpickr-time w-full bg-white border border-indigo-200 rounded-xl py-3 pl-3 pr-8 text-center text-xl font-black text-indigo-700 cursor-pointer focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all shadow-sm hover:border-indigo-300">
+                                <div class="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-400 pointer-events-none group-hover:text-indigo-600 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-indigo-300 mt-6">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </div>
+                        <div class="flex-1 relative group">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 text-center">ออกงาน</label>
+                            <div class="relative">
+                                <input type="text" id="req-time-out" value="${schedOut || actualOut || ''}" class="flatpickr-time w-full bg-white border border-indigo-200 rounded-xl py-3 pl-3 pr-8 text-center text-xl font-black text-indigo-700 cursor-pointer focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all shadow-sm hover:border-indigo-300">
+                                <div class="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-400 pointer-events-none group-hover:text-indigo-600 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-red-500 uppercase tracking-wider mb-1.5 ml-1">เหตุผลที่ขอแก้ไข (บังคับ)</label>
-                        <textarea id="req-reason" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm" placeholder="โปรดระบุเหตุผลที่ชัดเจน"></textarea>
+                </div>
+
+                <!-- Reason -->
+                <div class="bg-rose-50/50 rounded-2xl p-4 border border-rose-100 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-1.5 h-full bg-rose-400"></div>
+                    <label class="block text-[12px] font-bold text-rose-700 mb-2 flex items-center gap-1.5 pl-1.5">
+                        <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        เหตุผลที่ขอแก้ไข <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="pl-1.5">
+                        <textarea id="req-reason" rows="2" class="w-full bg-white border border-rose-200 rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-rose-500/20 focus:border-rose-400 transition-all shadow-sm resize-none placeholder-slate-400" placeholder="โปรดระบุเหตุผลที่ชัดเจน (เช่น ลืมสแกน, สแกนไม่ติด)..."></textarea>
                     </div>
                 </div>
             </div>
