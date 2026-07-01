@@ -3124,9 +3124,12 @@ window.closeAllTimeDropdowns = function() {
 window.openTimeDropdown = function(event, inputId) {
     event.stopPropagation();
     window.closeAllTimeDropdowns();
+    document.querySelectorAll('.time-dropdown-container').forEach(el => el.style.zIndex = '1');
     const menu = document.getElementById('dropdown-' + inputId);
     if (menu) {
         menu.classList.remove('hidden');
+        const container = event.currentTarget.closest('.time-dropdown-container');
+        if (container) container.style.zIndex = '9999';
     }
 };
 
@@ -3173,7 +3176,7 @@ function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) 
 
     const renderOptions = (inputId, options, selected) => {
         return options.map(opt => `
-            <div onclick="selectTimeOption(event, '${inputId}', '${opt}')" class="px-3 py-2 text-[15px] font-bold text-center cursor-pointer hover:bg-indigo-50 ${selected === opt ? 'bg-indigo-100 text-indigo-700' : 'text-slate-700'} transition-colors border-b border-slate-50 last:border-0">
+            <div onclick="selectTimeOption(event, '${inputId}', '${opt}')" class="px-3 py-3 text-[18px] font-bold text-center cursor-pointer hover:bg-indigo-50 ${selected === opt ? 'bg-indigo-100 text-indigo-700' : 'text-slate-700'} transition-colors border-b border-slate-50 last:border-0">
                 ${opt}
             </div>
         `).join('');
@@ -3210,21 +3213,21 @@ function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) 
                             </div>
                             <div class="flex items-center gap-1.5">
                                 <div class="relative time-dropdown-container">
-                                    <div onclick="openTimeDropdown(event, 'req-in-h')" id="req-in-h-display" class="bg-white border border-slate-300 text-indigo-700 font-bold text-[16px] rounded-lg px-2 py-1.5 w-[60px] text-center shadow-sm cursor-pointer hover:border-indigo-500 active:bg-slate-50 transition-all select-none">
+                                    <div onclick="openTimeDropdown(event, 'req-in-h')" id="req-in-h-display" class="bg-white border border-slate-300 text-indigo-700 font-bold text-[18px] rounded-lg px-2 py-2 w-[70px] text-center shadow-sm cursor-pointer hover:border-indigo-500 active:bg-slate-50 transition-all select-none">
                                         ${inH || '--'}
                                     </div>
                                     <input type="hidden" id="req-in-h" value="${inH || ''}">
-                                    <div id="dropdown-req-in-h" class="hidden time-dropdown-menu absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[70px] max-h-[180px] overflow-y-auto bg-white rounded-xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)] border border-slate-200 z-[9999] py-1 custom-scrollbar ring-1 ring-black/5 animate-fade-in-up">
+                                    <div id="dropdown-req-in-h" class="hidden time-dropdown-menu absolute top-full left-0 mt-1 w-full max-h-[220px] overflow-y-auto bg-white rounded-xl shadow-[0_10px_30px_-5px_rgba(0,0,0,0.15)] border border-slate-200 z-[9999] py-1 custom-scrollbar animate-fade-in-up">
                                         ${renderOptions('req-in-h', hours, inH)}
                                     </div>
                                 </div>
-                                <span class="font-bold text-slate-400">:</span>
+                                <span class="font-bold text-slate-400 text-lg">:</span>
                                 <div class="relative time-dropdown-container">
-                                    <div onclick="openTimeDropdown(event, 'req-in-m')" id="req-in-m-display" class="bg-white border border-slate-300 text-indigo-700 font-bold text-[16px] rounded-lg px-2 py-1.5 w-[60px] text-center shadow-sm cursor-pointer hover:border-indigo-500 active:bg-slate-50 transition-all select-none">
+                                    <div onclick="openTimeDropdown(event, 'req-in-m')" id="req-in-m-display" class="bg-white border border-slate-300 text-indigo-700 font-bold text-[18px] rounded-lg px-2 py-2 w-[70px] text-center shadow-sm cursor-pointer hover:border-indigo-500 active:bg-slate-50 transition-all select-none">
                                         ${inM || '--'}
                                     </div>
                                     <input type="hidden" id="req-in-m" value="${inM || ''}">
-                                    <div id="dropdown-req-in-m" class="hidden time-dropdown-menu absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[70px] overflow-hidden bg-white rounded-xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)] border border-slate-200 z-[9999] py-1 ring-1 ring-black/5 animate-fade-in-up">
+                                    <div id="dropdown-req-in-m" class="hidden time-dropdown-menu absolute top-full left-0 mt-1 w-full overflow-hidden bg-white rounded-xl shadow-[0_10px_30px_-5px_rgba(0,0,0,0.15)] border border-slate-200 z-[9999] py-1 animate-fade-in-up">
                                         ${renderOptions('req-in-m', mins, inM)}
                                     </div>
                                 </div>
@@ -3241,21 +3244,21 @@ function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) 
                             </div>
                             <div class="flex items-center gap-1.5">
                                 <div class="relative time-dropdown-container">
-                                    <div onclick="openTimeDropdown(event, 'req-out-h')" id="req-out-h-display" class="bg-white border border-slate-300 text-indigo-700 font-bold text-[16px] rounded-lg px-2 py-1.5 w-[60px] text-center shadow-sm cursor-pointer hover:border-indigo-500 active:bg-slate-50 transition-all select-none">
+                                    <div onclick="openTimeDropdown(event, 'req-out-h')" id="req-out-h-display" class="bg-white border border-slate-300 text-indigo-700 font-bold text-[18px] rounded-lg px-2 py-2 w-[70px] text-center shadow-sm cursor-pointer hover:border-indigo-500 active:bg-slate-50 transition-all select-none">
                                         ${outH || '--'}
                                     </div>
                                     <input type="hidden" id="req-out-h" value="${outH || ''}">
-                                    <div id="dropdown-req-out-h" class="hidden time-dropdown-menu absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[70px] max-h-[180px] overflow-y-auto bg-white rounded-xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)] border border-slate-200 z-[9999] py-1 custom-scrollbar ring-1 ring-black/5 animate-fade-in-up">
+                                    <div id="dropdown-req-out-h" class="hidden time-dropdown-menu absolute top-full left-0 mt-1 w-full max-h-[220px] overflow-y-auto bg-white rounded-xl shadow-[0_10px_30px_-5px_rgba(0,0,0,0.15)] border border-slate-200 z-[9999] py-1 custom-scrollbar animate-fade-in-up">
                                         ${renderOptions('req-out-h', hours, outH)}
                                     </div>
                                 </div>
-                                <span class="font-bold text-slate-400">:</span>
+                                <span class="font-bold text-slate-400 text-lg">:</span>
                                 <div class="relative time-dropdown-container">
-                                    <div onclick="openTimeDropdown(event, 'req-out-m')" id="req-out-m-display" class="bg-white border border-slate-300 text-indigo-700 font-bold text-[16px] rounded-lg px-2 py-1.5 w-[60px] text-center shadow-sm cursor-pointer hover:border-indigo-500 active:bg-slate-50 transition-all select-none">
+                                    <div onclick="openTimeDropdown(event, 'req-out-m')" id="req-out-m-display" class="bg-white border border-slate-300 text-indigo-700 font-bold text-[18px] rounded-lg px-2 py-2 w-[70px] text-center shadow-sm cursor-pointer hover:border-indigo-500 active:bg-slate-50 transition-all select-none">
                                         ${outM || '--'}
                                     </div>
                                     <input type="hidden" id="req-out-m" value="${outM || ''}">
-                                    <div id="dropdown-req-out-m" class="hidden time-dropdown-menu absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[70px] overflow-hidden bg-white rounded-xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)] border border-slate-200 z-[9999] py-1 ring-1 ring-black/5 animate-fade-in-up">
+                                    <div id="dropdown-req-out-m" class="hidden time-dropdown-menu absolute top-full left-0 mt-1 w-full overflow-hidden bg-white rounded-xl shadow-[0_10px_30px_-5px_rgba(0,0,0,0.15)] border border-slate-200 z-[9999] py-1 animate-fade-in-up">
                                         ${renderOptions('req-out-m', mins, outM)}
                                     </div>
                                 </div>
