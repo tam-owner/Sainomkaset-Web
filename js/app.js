@@ -424,7 +424,7 @@ function handleLogin() {
         return;
     }
 
-    if (emp.pin === pin) {
+    if (String(emp.pin) === String(pin)) {
         isAdmin = false;
         loggedInEmployee = emp;
         sessionStorage.setItem('snk_payroll_user', JSON.stringify(emp));
