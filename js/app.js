@@ -3124,9 +3124,27 @@ function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) 
         title: '<div class="text-xl font-black text-slate-800">ขอแก้ไขเวลาเข้า-ออกงาน</div>',
         html: `
             <div class="text-left mt-2">
-                <div class="bg-indigo-50/50 rounded-2xl p-4 mb-4 border border-indigo-100/50 shadow-sm">
-                    <p class="text-lg font-bold text-slate-700 mb-1"><span class="text-indigo-600">${formatDateStr(date)}</span></p>
-                    <p class="text-xs text-slate-500">เวลาเดิมที่บันทึก: เข้า <span class="font-bold text-slate-700">${formatTime(actualIn)}</span> - ออก <span class="font-bold text-slate-700">${formatTime(actualOut)}</span></p>
+                <div class="bg-indigo-50/50 rounded-2xl p-4 mb-5 border border-indigo-100 shadow-sm">
+                    <div class="flex items-center justify-between mb-3 pb-3 border-b border-indigo-100">
+                        <div class="text-[11px] font-bold text-indigo-600 bg-indigo-100/70 px-2.5 py-1 rounded-md uppercase tracking-wider">Date</div>
+                        <div class="text-base font-black text-slate-800">${formatDateStr(date)}</div>
+                    </div>
+                    
+                    <div class="text-[11px] font-bold text-slate-500 mb-2">เวลาเดิมที่บันทึกไว้:</div>
+                    
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex-1 bg-white rounded-xl p-2.5 border border-slate-200 shadow-sm flex flex-col items-center">
+                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">เข้างาน</div>
+                            <div class="text-lg font-black ${actualIn ? 'text-indigo-700' : 'text-slate-300'}">${formatTime(actualIn)}</div>
+                        </div>
+                        <div class="text-indigo-200">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </div>
+                        <div class="flex-1 bg-white rounded-xl p-2.5 border border-slate-200 shadow-sm flex flex-col items-center">
+                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">ออกงาน</div>
+                            <div class="text-lg font-black ${actualOut ? 'text-indigo-700' : 'text-slate-300'}">${formatTime(actualOut)}</div>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="space-y-4">
