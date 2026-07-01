@@ -941,10 +941,29 @@ function setupPeriods() {
 function renderPeriodDropdown() {
     const list = document.getElementById('period-dropdown-list');
     let html = '';
-    if (availablePeriods.length === 0) {
+    
+    // Apply business rules for period filtering based on deduction type
+    let filteredPeriods = availablePeriods.filter(p => {
+        if (!isAdmin && loggedInEmployee) {
+            let empDedType = String(loggedInEmployee.deductionType || "").trim();
+            let isTax = (empDedType === "3%" || empDedType === "0.03" || empDedType.includes("3%") || empDedType === "" || empDedType === "None");
+            let isSS = (empDedType === "5%" || empDedType === "0.05" || empDedType.includes("5%"));
+            
+            if (isTax) {
+                // หักภาษีให้แสดงแค่รอบ 1-สิ้นเดือนเท่านั้น
+                return p.value.startsWith('all_');
+            } else if (isSS) {
+                // ประกันสังคมให้แสดง 1-15 และ 1-สิ้นเดือน
+                return p.value.startsWith('h1_') || p.value.startsWith('all_');
+            }
+        }
+        return true;
+    });
+
+    if (filteredPeriods.length === 0) {
         html = '<div class="text-center py-4 text-slate-500 font-bold text-sm">ไม่พบข้อมูลในระบบ</div>';
     } else {
-        availablePeriods.forEach(p => {
+        filteredPeriods.forEach(p => {
             let isSel = (p.value === currentPeriodVal);
             let bg = isSel ? 'bg-indigo-50 border-indigo-200' : 'bg-white border-slate-100';
             let txt = isSel ? 'text-indigo-700 font-bold' : 'text-slate-700 font-semibold';
