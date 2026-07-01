@@ -46,7 +46,7 @@
 <body class="text-slate-900 bg-[#F8F9FC] m-0 p-0">
     <div id="summary-modal" class="modal-overlay">
         <div id="modal-card" class="modal-card shadow-2xl space-y-6 text-center transition-all">
-            <h3 id="modal-title" class="text-2xl font-black tracking-tight text-slate-950">แจ้งเตือน</h3>
+            <h3 id="modal-title" class="text-2xl font-bold tracking-tight text-slate-950">แจ้งเตือน</h3>
             <div id="summary-content" class="border-y border-slate-100 py-6 text-sm w-full text-slate-800"></div>
             <div id="admin-login-area" class="hidden space-y-4 pt-2">
                 <input type="password" id="admin-pass-input" class="input-modern" placeholder="ใส่รหัสผ่าน 5 หลัก" maxlength="5">
@@ -65,7 +65,7 @@
             <div id="wifi-icon" class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-2">
                 <svg class="w-8 h-8 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
             </div>
-            <h3 id="wifi-title" class="text-2xl font-black tracking-tight text-slate-950">กำลังตรวจสอบระบบ...</h3>
+            <h3 id="wifi-title" class="text-2xl font-bold tracking-tight text-slate-950">กำลังตรวจสอบระบบ...</h3>
             <p id="wifi-desc" class="text-sm text-slate-600 font-medium">รอสักครู่ ระบบกำลังตรวจสอบการเชื่อมต่อ Wi-Fi</p>
             <div id="wifi-admin-area" class="hidden space-y-3 pt-2 pb-2">
                 <input type="password" id="wifi-admin-pass" class="input-modern py-3 text-sm" placeholder="รหัสผู้ดูแลเพื่ออัปเดต IP" maxlength="5">
@@ -81,7 +81,7 @@
 
     <div id="add-user-modal" class="modal-overlay">
         <div class="modal-card shadow-2xl space-y-6 text-center transition-all">
-            <h3 class="text-2xl font-black tracking-tight text-slate-950">เพิ่มรายชื่อใหม่</h3>
+            <h3 class="text-2xl font-bold tracking-tight text-slate-950">เพิ่มรายชื่อใหม่</h3>
             <div id="add-user-step-1" class="space-y-4 pt-2">
                 <div class="grid grid-cols-2 gap-2">
                     <div class="text-left space-y-1">
@@ -132,12 +132,12 @@
     <div class="sticky top-0 z-40 bg-[#F8F9FC] shadow-sm pb-4 rounded-b-3xl">
         <div class="px-5 pt-10 max-w-md mx-auto space-y-6">
             <header class="text-center mb-6">
-                <h1 id="clock" class="text-6xl font-black tabular-nums tracking-tighter" style="font-family: 'Inter';">--:--:--</h1>
+                <h1 id="clock" class="text-6xl font-bold tabular-nums tracking-tighter" style="font-family: 'Inter';">--:--:--</h1>
                 <p id="date-display" class="text-sm font-bold text-slate-400 mt-2 tracking-widest uppercase"></p>
             </header>
 
             <section id="step-1" class="space-y-4">
-                <h2 class="text-[10px] font-black text-slate-400 tracking-widest uppercase text-center">01. ระบุพนักงาน</h2>
+                <h2 class="text-[10px] font-bold text-slate-400 tracking-widest uppercase text-center">01. ระบุพนักงาน</h2>
                 <div class="relative">
                     <input list="user-datalist" id="user-input" class="input-modern shadow-md border-slate-300" placeholder="พิมพ์ชื่อ หรือกดเลือก" oninput="handleNameInput()">
                     <datalist id="user-datalist"></datalist>
@@ -150,7 +150,7 @@
             </section>
 
             <section id="step-2" class="step-hidden space-y-4 border-t pt-6 text-center">
-                <h2 class="text-[10px] font-black text-slate-400 tracking-widest uppercase">02. เลือกสถานะ</h2>
+                <h2 class="text-[10px] font-bold text-slate-400 tracking-widest uppercase">02. เลือกสถานะ</h2>
                 <div class="grid grid-cols-2 gap-4">
                     <button onclick="setMode('in')" id="btn-in" class="btn-toggle text-blue-600 shadow-sm">เข้า (IN)</button>
                     <button onclick="setMode('out')" id="btn-out" class="btn-toggle text-red-600 shadow-sm">ออก (OUT)</button>
@@ -158,34 +158,34 @@
             </section>
 
             <section id="step-3" class="step-hidden space-y-4 border-t pt-6 text-center">
-                <h2 class="text-[10px] font-black text-slate-400 tracking-widest uppercase">03. เลือกเวลาตามตาราง</h2>
+                <h2 class="text-[10px] font-bold text-slate-400 tracking-widest uppercase">03. เลือกเวลาตามตาราง</h2>
                 <div id="shift-area" class="grid grid-cols-3 gap-3"></div>
                 <div id="custom-time-area" class="hidden mt-4 p-5 bg-white rounded-[24px] border-2 border-dashed border-slate-200">
                     <p class="text-[10px] font-bold text-slate-500 mb-2 italic text-center text-blue-600 tracking-widest uppercase">ระบุเวลาเอง (11:30 - 24:00)</p>
-                    <input type="text" id="custom-time" placeholder="HH:MM" maxlength="5" class="input-modern text-3xl font-black shadow-inner" oninput="formatTimeInput(this); checkCustomTimeRealtime(); validateFinal();">
+                    <input type="text" id="custom-time" placeholder="HH:MM" maxlength="5" class="input-modern text-3xl font-bold shadow-inner" oninput="formatTimeInput(this); checkCustomTimeRealtime(); validateFinal();">
                     <p id="custom-time-error" class="text-[11px] font-bold text-red-500 hidden text-center mt-3 italic">✘ เวลาไม่ถูกต้อง (ระบุ 11:30-24:00 นาทีเป็น 00 หรือ 30)</p>
                 </div>
             </section>
 
             <section id="step-remark" class="step-hidden space-y-5 border-t pt-6">
-                <div id="time-warning" class="hidden warning-box"><div class="flex items-center gap-4"><input type="checkbox" id="time-confirm" class="w-7 h-7 rounded-lg text-orange-500 shadow-sm" onchange="validateFinal()"><label for="time-confirm" class="text-sm font-black text-orange-800">เวลาห่างเกิน 30 นาที ยืนยันว่าถูกต้อง</label></div></div>
-                <div id="duplicate-warning" class="hidden duplicate-box"><div class="flex items-center gap-4"><input type="checkbox" id="duplicate-confirm" class="w-7 h-7 rounded-lg text-red-500 shadow-sm" onchange="validateFinal()"><label for="duplicate-confirm" class="text-sm font-black text-red-800 italic" id="duplicate-label">บันทึกไปแล้ว ยืนยันว่าถูกต้อง</label></div></div>
+                <div id="time-warning" class="hidden warning-box"><div class="flex items-center gap-4"><input type="checkbox" id="time-confirm" class="w-7 h-7 rounded-lg text-orange-500 shadow-sm" onchange="validateFinal()"><label for="time-confirm" class="text-sm font-bold text-orange-800">เวลาห่างเกิน 30 นาที ยืนยันว่าถูกต้อง</label></div></div>
+                <div id="duplicate-warning" class="hidden duplicate-box"><div class="flex items-center gap-4"><input type="checkbox" id="duplicate-confirm" class="w-7 h-7 rounded-lg text-red-500 shadow-sm" onchange="validateFinal()"><label for="duplicate-confirm" class="text-sm font-bold text-red-800 italic" id="duplicate-label">บันทึกไปแล้ว ยืนยันว่าถูกต้อง</label></div></div>
                 <div class="bg-white rounded-[28px] p-6 border border-slate-200 shadow-sm transition-all" id="remark-card">
-                    <h2 class="text-[11px] font-black text-slate-500 tracking-widest uppercase mb-3 text-center transition-all" id="remark-title">04. หมายเหตุ <span id="remark-req-text" class="text-red-500 hidden">(บังคับกรอก)</span></h2>
+                    <h2 class="text-[11px] font-bold text-slate-500 tracking-widest uppercase mb-3 text-center transition-all" id="remark-title">04. หมายเหตุ <span id="remark-req-text" class="text-red-500 hidden">(บังคับกรอก)</span></h2>
                     <textarea id="remark" rows="2" placeholder="ระบุหมายเหตุหากมี" class="input-modern text-sm w-full font-normal border-slate-300" oninput="validateFinal()"></textarea>
                     <p id="remark-error" class="text-[10px] font-bold text-red-500 hidden text-center mt-2 italic tracking-tight">✘ กรุณาระบุข้อมูลอย่างน้อย 3 ตัวอักษร</p>
                 </div>
             </section>
 
             <div id="save-btn-container" class="step-hidden pt-4">
-                <button id="btn-save" onclick="confirmData()" class="w-full py-5 bg-emerald-600 text-white rounded-[28px] font-black text-xl shadow-xl disabled:opacity-20 transition-all active:scale-95">ตรวจสอบข้อมูล 📋</button>
+                <button id="btn-save" onclick="confirmData()" class="w-full py-5 bg-emerald-600 text-white rounded-[28px] font-bold text-xl shadow-xl disabled:opacity-20 transition-all active:scale-95">ตรวจสอบข้อมูล 📋</button>
             </div>
         </div>
     </div>
 
     <div class="px-5 max-w-md mx-auto pb-10">
         <section id="history-section" class="pt-6 relative z-10">
-            <h2 class="text-sm font-black uppercase text-slate-700 text-center tracking-widest mb-4">ประวัติล่าสุด</h2>
+            <h2 class="text-sm font-bold uppercase text-slate-700 text-center tracking-widest mb-4">ประวัติล่าสุด</h2>
             <div class="relative">
                 <div id="history-list" class="space-y-3 max-h-[310px] overflow-y-auto custom-scroll pb-16 px-1"></div>
                 <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#F8F9FC] to-transparent pointer-events-none rounded-b-2xl"></div>
@@ -489,7 +489,7 @@
             isSuccessState = isSuccess; const t = document.getElementById('modal-title'), c = document.getElementById('modal-card'), b = document.getElementById('btn-modal-close'), sc = document.getElementById('summary-content');
             t.innerText = title; if(isSuccess) c.classList.add('modal-success'); else c.classList.remove('modal-success');
             sc.style.display = isSuccess ? 'none' : 'block'; document.getElementById('admin-login-area').classList.add('hidden'); document.getElementById('btn-admin-login-submit').classList.add('hidden');
-            if(isSuccess) { t.className = "text-3xl font-black text-emerald-600"; b.innerText = "ตกลง"; b.className = "w-full py-4 btn-ok-success rounded-2xl font-bold active:scale-95 transition shadow-md mt-4"; } 
+            if(isSuccess) { t.className = "text-3xl font-bold text-emerald-600"; b.innerText = "ตกลง"; b.className = "w-full py-4 btn-ok-success rounded-2xl font-bold active:scale-95 transition shadow-md mt-4"; } 
             else { t.className = "text-2xl font-bold text-slate-800"; b.innerText = "ยกเลิก"; b.className = "flex-1 py-4 bg-slate-100 text-slate-900 rounded-2xl font-bold active:scale-95 transition"; }
             sc.innerHTML = content; if(isSuccess || !showConfirm) document.getElementById('btn-confirm-final').classList.add('hidden'); else document.getElementById('btn-confirm-final').classList.remove('hidden');
             document.getElementById('summary-modal').style.display = 'flex';
@@ -571,7 +571,7 @@
             const dateStr = `${rd.getDate()}/${rd.getMonth() + 1}/${rd.getFullYear().toString().slice(-2)}`, timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             const dupWarnVisible = !document.getElementById('duplicate-warning').classList.contains('hidden'), timeWarnVisible = !document.getElementById('time-warning').classList.contains('hidden');
             pendingEntry = { name: name.trim(), mode: mode, shift: shift, actualTime: shift==='อื่นๆ'?customT:shift, time: timeStr, displayDate: dateStr, fullDateTime: `${dateStr} | ${timeStr}`, remark: rem || "-", isDuplicate: dupWarnVisible ? "ซ้ำ" : "ไม่ซ้ำ", isTimeWarn: timeWarnVisible ? "ใช่" : "ไม่" };
-            const html = `<div class="space-y-4 text-left"><div class="pt-1"><span class="text-slate-400 text-xs block mb-1">หมายเหตุ:</span><p class="font-semibold text-slate-800 bg-slate-50 p-3 rounded-xl border border-slate-100 break-words italic">"${pendingEntry.remark}"</p></div><div class="flex justify-between border-b pb-2"><span>พนักงาน:</span><span class="font-bold text-slate-900">${pendingEntry.name}</span></div><div class="flex justify-between border-b pb-2"><span>สถานะ:</span><span class="font-bold ${pendingEntry.mode==='in'?'text-blue-600':'text-red-600'}">${pendingEntry.mode==='in'?'เข้างาน (IN)':'ออกงาน (OUT)'}</span></div><div class="flex justify-between border-b pb-2"><span>เวลาตาราง:</span><span class="text-xl font-black text-slate-950">${pendingEntry.actualTime}</span></div><div class="flex justify-between border-b pb-2"><span>เวลาบันทึก:</span><span class="font-bold text-slate-700">${pendingEntry.fullDateTime}</span></div></div>`;
+            const html = `<div class="space-y-4 text-left"><div class="pt-1"><span class="text-slate-400 text-xs block mb-1">หมายเหตุ:</span><p class="font-semibold text-slate-800 bg-slate-50 p-3 rounded-xl border border-slate-100 break-words italic">"${pendingEntry.remark}"</p></div><div class="flex justify-between border-b pb-2"><span>พนักงาน:</span><span class="font-bold text-slate-900">${pendingEntry.name}</span></div><div class="flex justify-between border-b pb-2"><span>สถานะ:</span><span class="font-bold ${pendingEntry.mode==='in'?'text-blue-600':'text-red-600'}">${pendingEntry.mode==='in'?'เข้างาน (IN)':'ออกงาน (OUT)'}</span></div><div class="flex justify-between border-b pb-2"><span>เวลาตาราง:</span><span class="text-xl font-bold text-slate-950">${pendingEntry.actualTime}</span></div><div class="flex justify-between border-b pb-2"><span>เวลาบันทึก:</span><span class="font-bold text-slate-700">${pendingEntry.fullDateTime}</span></div></div>`;
             showAlert("ยืนยันข้อมูลอีกครั้ง", html, true, false);
         }
         function executeSave() {
@@ -584,7 +584,7 @@
         }
         function renderHistory() {
             let displayData = historyData.slice(0, 20); let html = '';
-            for(let i=0; i<displayData.length; i++) { let r = displayData[i]; html += `<div class="px-5 py-4 rounded-[22px] border shadow-sm space-y-2 transition-all ${r.mode==='in'?'bg-blue-50 border-blue-100':'bg-red-50 border-red-100'}"><div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="px-2 py-0.5 border-2 rounded-lg font-black text-[10px] ${r.mode==='in'?'border-blue-500 text-blue-600':'border-red-500 text-red-600'}">${r.mode==='in'?'เข้า':'ออก'}</span><span class="font-black text-slate-800 text-lg">${r.name}</span></div><div class="text-right"><span class="text-[10px] text-slate-500 font-bold block leading-none mb-1">เวลาตาราง</span><p class="text-[26px] font-black text-slate-900 tracking-tighter leading-none">${r.actualTime}</p></div></div><p class="text-sm font-bold text-slate-500">บันทึกเมื่อ: <span class="font-bold text-slate-700">${r.fullDateTime}</span></p>${r.remark !== '-' && r.remark !== '' ? `<div class="pt-1 border-t border-black/5 text-xs text-slate-600 font-medium break-words whitespace-pre-wrap leading-tight">หมายเหตุ: ${r.remark}</div>` : ''}</div>`; }
+            for(let i=0; i<displayData.length; i++) { let r = displayData[i]; html += `<div class="px-5 py-4 rounded-[22px] border shadow-sm space-y-2 transition-all ${r.mode==='in'?'bg-blue-50 border-blue-100':'bg-red-50 border-red-100'}"><div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="px-2 py-0.5 border-2 rounded-lg font-bold text-[10px] ${r.mode==='in'?'border-blue-500 text-blue-600':'border-red-500 text-red-600'}">${r.mode==='in'?'เข้า':'ออก'}</span><span class="font-bold text-slate-800 text-lg">${r.name}</span></div><div class="text-right"><span class="text-[10px] text-slate-500 font-bold block leading-none mb-1">เวลาตาราง</span><p class="text-[26px] font-bold text-slate-900 tracking-tighter leading-none">${r.actualTime}</p></div></div><p class="text-sm font-bold text-slate-500">บันทึกเมื่อ: <span class="font-bold text-slate-700">${r.fullDateTime}</span></p>${r.remark !== '-' && r.remark !== '' ? `<div class="pt-1 border-t border-black/5 text-xs text-slate-600 font-medium break-words whitespace-pre-wrap leading-tight">หมายเหตุ: ${r.remark}</div>` : ''}</div>`; }
             document.getElementById('history-list').innerHTML = html;
         }
         function showAdminLogin() { showAlert("ระบบผู้ดูแลระบบ", "", false, false); document.getElementById('admin-login-area').classList.remove('hidden'); document.getElementById('btn-admin-login-submit').classList.remove('hidden'); document.getElementById('summary-content').style.display='none'; }
