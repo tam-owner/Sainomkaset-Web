@@ -1210,17 +1210,20 @@ function renderEmployeeDashboard() {
         let outStr = formatTime(row.outTime);
         if (outStr === '-') outStr = '';
         
+        const schedInStr = row.scheduledIn && row.scheduledIn !== '-' ? row.scheduledIn : '';
+        const schedOutStr = row.scheduledOut && row.scheduledOut !== '-' ? row.scheduledOut : '';
+        
         let inDisplay = inStr;
         let outDisplay = outStr;
         const isPartialScan = (row.inTime && !row.outTime) || (!row.inTime && row.outTime);
         
-        if (isPartialScan && !row.inTime) inDisplay = '<span class="text-red-600 text-[10.5px] font-bold tracking-tight px-1 py-0.5 bg-red-100 rounded-md">ไม่มีเวลาเข้างาน</span>';
-        if (isPartialScan && !row.outTime) outDisplay = '<span class="text-red-600 text-[10.5px] font-bold tracking-tight px-1 py-0.5 bg-red-100 rounded-md">ไม่มีเวลาออกงาน</span>';
+        const onclickStr = `onclick="openRequestTimeEditModal('${row.date}', '${inStr}', '${outStr}', '${schedInStr}', '${schedOutStr}')"`;
+
+        if (isPartialScan && !row.inTime) inDisplay = `<div ${onclickStr} class="text-white text-[10px] font-bold tracking-tight px-1.5 py-1.5 bg-orange-500 rounded-lg shadow-sm hover:bg-orange-600 active:scale-95 transition-all cursor-pointer inline-block mt-0.5 leading-tight w-[90%] mx-auto">ไม่มีเวลาเข้างาน<br/><span class="text-[9px] font-medium opacity-90">กดเพื่อขอแก้ไข</span></div>`;
+        
+        if (isPartialScan && !row.outTime) outDisplay = `<div ${onclickStr} class="text-white text-[10px] font-bold tracking-tight px-1.5 py-1.5 bg-orange-500 rounded-lg shadow-sm hover:bg-orange-600 active:scale-95 transition-all cursor-pointer inline-block mt-0.5 leading-tight w-[90%] mx-auto">ไม่มีเวลาออกงาน<br/><span class="text-[9px] font-medium opacity-90">กดเพื่อขอแก้ไข</span></div>`;
         
         if (isPartialScan) bgColor = 'bg-red-50 border-y border-red-200';
-
-        const schedInStr = row.scheduledIn && row.scheduledIn !== '-' ? row.scheduledIn : '';
-        const schedOutStr = row.scheduledOut && row.scheduledOut !== '-' ? row.scheduledOut : '';
 
         tableHtml += `
         <div class="data-row px-1 py-3 ${bgColor} ${isPartialScan ? 'border-l-4 border-red-500' : ''}">
