@@ -13,7 +13,7 @@
     <title>Sainom Kaset - Payroll & Management</title>
     <!-- Auto Cache Clear Script -->
     <script>
-        const APP_VERSION = "20260701_14";
+        const APP_VERSION = "20260701_15";
         const currentVersion = localStorage.getItem('APP_VERSION');
         if (currentVersion !== APP_VERSION) {
             console.log("New version detected, clearing cache...");
@@ -37,6 +37,7 @@
             }
             clearAllAndReload();
         }
+
     </script>
     <!-- PWA Setup -->
     <link rel="manifest" href="manifest.json">
@@ -116,8 +117,9 @@
         /* SweetAlert2 Customizations */
         div.swal2-popup {
             border-radius: 24px !important;
-            padding: 1.2rem 1rem !important;
-            width: 300px !important;
+            padding: 1.5rem 1rem !important;
+            width: 92% !important;
+            max-width: 450px !important;
             font-family: 'Prompt', sans-serif !important;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
         }
@@ -165,6 +167,21 @@
 
         body.custom-modal-open { overflow: hidden !important; touch-action: none; }
         body.swal2-shown #timelogs-content { overflow: hidden !important; touch-action: none; }
+    
+        /* Flatpickr Mobile Enhancements */
+        .flatpickr-time {
+            font-size: 1.1rem !important;
+            padding-top: 12px !important;
+            padding-bottom: 12px !important;
+        }
+        .flatpickr-calendar {
+            border-radius: 16px !important;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
+        }
+        .numInputWrapper span, .numInputWrapper input {
+            font-size: 1.2rem !important;
+            padding: 8px !important;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1116,10 +1133,10 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <!-- Add Firebase products that you want to use -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-    <script src="js/firebase-init.js?v=20260701_14"></script>
+    <script src="js/firebase-init.js?v=20260701_15"></script>
 
     <script src="js/customSelect.js"></script>
-    <script src="js/app.js?v=20260701_14"></script>
+    <script src="js/app.js?v=20260701_15"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -1162,7 +1179,7 @@
         ล้างแคช
     </button>
     <div id="app-version-display" class="fixed bottom-2 right-2 text-[10px] text-slate-400 font-medium z-[9999] pointer-events-none opacity-50">
-        v2.1.8 (Firebase)
+        v2.1.9 (Firebase)
     </div>
 </body>
 </html>
