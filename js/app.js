@@ -1219,9 +1219,9 @@ function renderEmployeeDashboard() {
         
         const onclickStr = `onclick="openRequestTimeEditModal('${row.date}', '${inStr}', '${outStr}', '${schedInStr}', '${schedOutStr}')"`;
 
-        if (isPartialScan && !row.inTime) inDisplay = `<div ${onclickStr} class="text-white text-[10px] font-bold tracking-tight px-1.5 py-1.5 bg-orange-500 rounded-lg shadow-sm hover:bg-orange-600 active:scale-95 transition-all cursor-pointer inline-block mt-0.5 leading-tight w-[90%] mx-auto">ไม่มีเวลาเข้างาน<br/><span class="text-[9px] font-medium opacity-90">กดเพื่อขอแก้ไข</span></div>`;
+        if (isPartialScan && !row.inTime) inDisplay = `<span class="text-red-500 text-[10px] font-bold tracking-tight block">ไม่มีเวลาเข้างาน</span><div ${onclickStr} class="text-white text-[9.5px] font-bold tracking-tight px-2 py-1 bg-orange-500 rounded-md shadow-sm hover:bg-orange-600 active:scale-95 transition-all cursor-pointer inline-block mt-1">ขอแก้ไข</div>`;
         
-        if (isPartialScan && !row.outTime) outDisplay = `<div ${onclickStr} class="text-white text-[10px] font-bold tracking-tight px-1.5 py-1.5 bg-orange-500 rounded-lg shadow-sm hover:bg-orange-600 active:scale-95 transition-all cursor-pointer inline-block mt-0.5 leading-tight w-[90%] mx-auto">ไม่มีเวลาออกงาน<br/><span class="text-[9px] font-medium opacity-90">กดเพื่อขอแก้ไข</span></div>`;
+        if (isPartialScan && !row.outTime) outDisplay = `<span class="text-red-500 text-[10px] font-bold tracking-tight block">ไม่มีเวลาออกงาน</span><div ${onclickStr} class="text-white text-[9.5px] font-bold tracking-tight px-2 py-1 bg-orange-500 rounded-md shadow-sm hover:bg-orange-600 active:scale-95 transition-all cursor-pointer inline-block mt-1">ขอแก้ไข</div>`;
         
         if (isPartialScan) bgColor = 'bg-red-50 border-y border-red-200';
 
