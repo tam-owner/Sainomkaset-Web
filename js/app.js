@@ -91,6 +91,11 @@ function initData() {
                             if (countEl) countEl.innerText = employees.length;
                             renderAdminEmployees();
                         }
+                        
+                        const timelogsModal = document.getElementById('timelogs-modal');
+                        if (timelogsModal && !timelogsModal.classList.contains('hidden') && typeof currentLogsEmp !== 'undefined' && currentLogsEmp) {
+                            fetchTimeLogs(currentLogsEmp.name);
+                        }
                     } else {
                         const freshEmp = employees.find(e => e.name === loggedInEmployee.name);
                         if (freshEmp) {
@@ -3098,7 +3103,7 @@ async function saveEmployeeLog(data, actionType) {
             // Need to reload attendance data
             // We can just call init() to refresh everything or just fetchTimeLogs again
             await fetchTimeLogs(currentLogsEmp.name);
-            fetchSummaryData(); // Re-trigger the whole admin refresh in background
+            // Data will be updated automatically via Firebase listener
             Swal.fire({title: 'สำเร็จ', text: 'อัพเดตข้อมูลเรียบร้อย', icon: 'success', timer: 1500, showConfirmButton: false});
         } else {
             Swal.fire("Error: " + json.message);
@@ -3387,7 +3392,7 @@ async function submitTimeEditRequest(data) {
                 text: 'กรุณารอแอดมินอนุมัติ',
                 customClass: { popup: 'rounded-[24px]' }
             });
-            fetchFreshDataSilently();
+            
         } else {
             Swal.fire('เกิดข้อผิดพลาด', json.message, 'error');
         }
@@ -3482,7 +3487,7 @@ async function updateTimeEditStatus(id, status) {
             if (idx > -1) timeEditRequests[idx].status = status;
             renderAdminTimeEdits();
             renderAdminDashboardNotifications();
-            if (status === 'Approved') fetchFreshDataSilently(); // To update the actual logs in memory
+            if (status === 'Approved')  // To update the actual logs in memory
         } else Swal.fire("Error: " + json.message);
     } catch(e) { console.error(e); Swal.fire("เชื่อมต่อไม่สำเร็จ"); }
     finally { overlay.classList.add('hidden'); }
@@ -3597,7 +3602,7 @@ async function openWifiSettings() {
             if (result.isConfirmed) {
                 shopAllowedIP = result.value;
                 Swal.fire('สำเร็จ!', 'ตั้งค่า Wi-Fi ของร้านเรียบร้อยแล้ว พนักงานจะต้องใช้เน็ตวงนี้เพื่อบันทึกเวลา', 'success');
-                fetchFreshDataSilently();
+                
             }
         });
 
@@ -3955,7 +3960,7 @@ function submitQuickAttendance() {
                 timer: 2000,
                 showConfirmButton: false
             });
-            fetchFreshDataSilently();
+            
             btn.innerHTML = `บันทึกข้อมูล <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>`;
         } else {
             Swal.fire('ข้อผิดพลาด', data.message || 'ไม่สามารถบันทึกได้', 'error');
