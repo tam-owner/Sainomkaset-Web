@@ -310,17 +310,34 @@ function processData() {
                 let regularHours = 0;
                 let otHours = 0;
                 
-                if (rec.scheduledIn && rec.scheduledIn !== '-' && rec.scheduledOut && rec.scheduledOut !== '-') {
-                    let inParts = rec.scheduledIn.split(':');
-                    let outParts = rec.scheduledOut.split(':');
+                let calcInStr = (rec.scheduledIn && rec.scheduledIn !== '-') ? rec.scheduledIn : (rec.inTime ? `${String(rec.inTime.getHours()).padStart(2, '0')}:${String(rec.inTime.getMinutes()).padStart(2, '0')}` : null);
+                let calcOutStr = (rec.scheduledOut && rec.scheduledOut !== '-') ? rec.scheduledOut : (rec.outTime ? `${String(rec.outTime.getHours()).padStart(2, '0')}:${String(rec.outTime.getMinutes()).padStart(2, '0')}` : null);
+                
+                if (calcInStr && calcOutStr) {
+                    let inParts = calcInStr.split(':');
+                    let outParts = calcOutStr.split(':');
                     if (inParts.length > 1 && outParts.length > 1) {
                         let inMins = parseInt(inParts[0], 10) * 60 + parseInt(inParts[1], 10);
                         let outMins = parseInt(outParts[0], 10) * 60 + parseInt(outParts[1], 10);
                         if (outMins < inMins) outMins += 24 * 60;
-                        let workHours = (outMins - inMins) / 60 - breakTime;
+                        let diffHrs = (outMins - inMins) / 60;
+                        
+                        let breakHrs = 0;
+                        if (diffHrs >= 9) {
+                            breakHrs = 1;
+                        } else if (diffHrs > 5) {
+                            breakHrs = 1;
+                        }
+                        
+                        if (calcInStr.includes('18:00') && diffHrs <= 6) {
+                            breakHrs = 0;
+                        }
+                        
+                        let workHours = diffHrs - breakHrs;
                         if (workHours < 0) workHours = 0;
                         regularHours = Math.min(workHours, 8);
                         otHours = Math.max(0, workHours - 8);
+                        breakTime = breakHrs;
                     }
                 }
                 
@@ -2920,6 +2937,35 @@ async function fetchTimeLogs(nickname) {
         </div>
     `;
 }
+
+// Time Logs Modals and Logic
+window.submitEditLogModal = function() {
+    const data = {
+        date: document.getElementById('swal-log-date').value,
+        type: document.getElementById('swal-log-type').value,
+        in: document.getElementById('swal-log-in').value,
+        out: document.getElementById('swal-log-out').value
+    };
+    if (!data.date) return Swal.fire("กรุณาเลือกวันที่");
+    Swal.close();
+    saveEmployeeLog(data, "update");
+};
+
+window.submitDeleteLogModal = function(dateStr) {
+    Swal.fire({
+        title: 'ยืนยันการลบ?',
+        text: "ลบประวัติของวันนี้ใช่หรือไม่?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        confirmButtonText: 'ใช่, ลบเลย'
+    }).then((del) => {
+        if (del.isConfirmed) {
+            Swal.close();
+            saveEmployeeLog({date: dateStr, type: 'Work', in: '', out: ''}, "delete");
+        }
+    });
+};
 
 function openEditLogModal(dateStr = '', timeIn = '', timeOut = '', type = 'Work') {
     Swal.fire({
