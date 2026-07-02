@@ -1047,40 +1047,24 @@ function selectPeriod(val, text) {
 // ----------------------------------------------------
 // Employee Dashboard Logic
 // ----------------------------------------------------
-function renderEmployeeDashboard() {
-    if (!loggedInEmployee || !currentPeriodVal) return;
 
-    let parts = currentPeriodVal.split('_');
-    let type = parts[0];
-    let mStr = parts[1];
-
-    let myRecords = [];
+function generateSalarySummaryHtml(empObj, myRecords) {
     let totalNormalHours = 0;
     let totalOTHours = 0;
-
-    processedAttendance.forEach(r => {
-        if (r.name !== loggedInEmployee.name) return;
-
-        const d = r.dateObj;
-        const rMstr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-        if (rMstr !== mStr) return;
-        if (type === 'h1' && d.getDate() > 15) return;
-        if (type === 'h2' && d.getDate() < 16) return;
-
-        myRecords.push(r);
+    myRecords.forEach(r => {
         totalNormalHours += r.regularHours || 0;
         totalOTHours += r.otHours || 0;
     });
 
-    let normalPay = totalNormalHours * loggedInEmployee.normalRate;
-    let otPay = totalOTHours * loggedInEmployee.otRate;
+    let normalPay = totalNormalHours * empObj.normalRate;
+    let otPay = totalOTHours * empObj.otRate;
     let grossPay = normalPay + otPay;
     
     let customDeductTotal = 0;
     let customBonusTotal = 0;
     let customDeductHtml = '';
 
-    let empDeductions = deductions.filter(d => d.period === currentPeriodVal && d.name === loggedInEmployee.name);
+    let empDeductions = deductions.filter(d => d.period === currentPeriodVal && d.name === empObj.name);
     empDeductions.forEach(d => {
         if (d.type === 'Bonus') {
             customBonusTotal += d.amount;
@@ -1098,10 +1082,9 @@ function renderEmployeeDashboard() {
     });
 
     let payBeforeTax = grossPay + customBonusTotal - customDeductTotal;
-
     let standardDeduct = 0;
     let deductLabel = '';
-    let empDedType = String(loggedInEmployee.deductionType).trim();
+    let empDedType = String(empObj.deductionType).trim();
     if (empDedType === "3%" || empDedType === "0.03" || empDedType.includes("3%") || empDedType === "" || empDedType === "None") {
         standardDeduct = payBeforeTax * 0.03;
         deductLabel = "หัก ณ ที่จ่าย 3%";
@@ -1111,15 +1094,12 @@ function renderEmployeeDashboard() {
     }
 
     let netPay = payBeforeTax - standardDeduct;
-
     let formatCurrency = (val) => Number(val || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-
     let periodText = availablePeriods.find(p => p.value === currentPeriodVal)?.text || '';
 
-    let summaryHtml = `
+    return `
     <div class="bg-white rounded-[20px] shadow-lg shadow-emerald-900/5 border border-emerald-50 mb-6 flex flex-col relative overflow-hidden">
         <div class="relative">
-        <!-- Header -->
         <div class="bg-[#0fa981] text-white px-5 py-4 flex justify-between items-center">
             <div class="flex items-center gap-2">
                 <svg class="w-5 h-5 text-emerald-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -1131,71 +1111,56 @@ function renderEmployeeDashboard() {
         </div>
 
         <div class="p-5">
-            <!-- Summary Top -->
             <div class="flex justify-between items-end border-b-2 border-dashed border-emerald-100 pb-4 mb-4">
                 <div>
                     <p class="text-[11px] font-black text-emerald-500 uppercase tracking-widest mb-1">ชื่อพนักงาน</p>
-                    <p class="text-2xl font-black text-slate-800 leading-none drop-shadow-sm">${loggedInEmployee.name} ${loggedInEmployee.fullName ? `<span class="text-sm font-semibold text-slate-400 ml-1 tracking-tight">${loggedInEmployee.fullName}</span>` : ''}</p>
+                    <p class="text-2xl font-black text-slate-800 leading-none drop-shadow-sm">${empObj.name} ${empObj.fullName ? `<span class="text-sm font-semibold text-slate-400 ml-1 tracking-tight">${empObj.fullName}</span>` : ''}</p>
                 </div>
                 <div class="text-right">
                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">เรตรายวัน (8 ชม.)</p>
-                    <p class="text-lg font-black text-emerald-600 leading-none bg-emerald-50 px-2 py-1 rounded-md">฿${formatCurrency(loggedInEmployee.dailyRate)}</p>
+                    <p class="text-lg font-black text-emerald-600 leading-none bg-emerald-50 px-2 py-1 rounded-md">฿${formatCurrency(empObj.dailyRate)}</p>
                 </div>
             </div>
 
-            <!-- Detailed Breakdown -->
             <div class="space-y-3">
-                
-                <!-- Normal Pay -->
                 <div class="flex justify-between items-center p-3 bg-gradient-to-r from-emerald-50 to-white rounded-xl border border-emerald-100/50 shadow-sm transition-all hover:shadow-md">
                     <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 shadow-inner">
+                        <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-inner">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         </div>
-                        <div>
-                            <p class="text-sm font-bold text-slate-700">ค่าแรงชั่วโมงปกติ</p>
-                            <p class="text-xs font-medium text-emerald-600/80">${totalNormalHours.toFixed(1)} ชม. <span class="text-slate-500">x ฿${formatCurrency(loggedInEmployee.normalRate)}</span></p>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-slate-700">ค่าแรงปกติ</span>
+                            <span class="text-[11px] text-slate-500 font-medium">${totalNormalHours.toFixed(1)} ชม. × ฿${formatCurrency(empObj.normalRate)}/ชม.</span>
                         </div>
                     </div>
-                    <div class="text-right font-black text-slate-800 text-lg">
-                        <span class="text-emerald-500 mr-1">+</span>฿${formatCurrency(normalPay)}
-                    </div>
+                    <span class="text-lg font-black text-slate-800">฿${formatCurrency(normalPay)}</span>
                 </div>
 
-                <!-- OT Pay -->
                 <div class="flex justify-between items-center p-3 bg-gradient-to-r from-orange-50 to-white rounded-xl border border-orange-100/50 shadow-sm transition-all hover:shadow-md">
                     <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center shrink-0 shadow-inner">
+                        <div class="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center shadow-inner">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                         </div>
-                        <div>
-                            <p class="text-sm font-bold text-slate-700">ค่าแรงชั่วโมง OT</p>
-                            <p class="text-xs font-medium text-orange-500/80">${totalOTHours.toFixed(1)} ชม. <span class="text-slate-500">x ฿${formatCurrency(loggedInEmployee.otRate)}</span></p>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-slate-700">ค่าล่วงเวลา (OT)</span>
+                            <span class="text-[11px] text-slate-500 font-medium">${totalOTHours.toFixed(1)} ชม. × ฿${formatCurrency(empObj.otRate)}/ชม.</span>
                         </div>
                     </div>
-                    <div class="text-right font-black text-slate-800 text-lg">
-                        <span class="text-orange-500 mr-1">+</span>฿${formatCurrency(otPay)}
-                    </div>
-                </div>
-
-                ${customDeductHtml}
-            </div>
-
-            <!-- Totals Divider -->
-            <div class="my-6 relative">
-                <div class="absolute inset-0 flex items-center">
-                    <div class="w-full border-t-2 border-dashed border-emerald-100"></div>
-                </div>
-                <div class="relative flex justify-center text-sm">
-                    <span class="px-2 bg-white text-emerald-400">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
-                    </span>
+                    <span class="text-lg font-black text-slate-800">฿${formatCurrency(otPay)}</span>
                 </div>
             </div>
-
-            <!-- Subtotal -->
-            <div class="flex justify-between items-center px-2 mb-2">
-                <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">รวมค่าแรงปกติ + OT + พิเศษ - หักออก</span>
+            
+            ${customDeductHtml ? `
+            <div class="mt-4 pt-3 border-t border-slate-100">
+                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">รายการพิเศษ</p>
+                <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 space-y-1">
+                    ${customDeductHtml}
+                </div>
+            </div>
+            ` : ''}
+            
+            <div class="flex justify-between items-center px-2 mt-4 mb-2">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">รายได้ก่อนหักภาษี</span>
                 <span class="text-sm font-black text-slate-700">฿${formatCurrency(payBeforeTax)}</span>
             </div>
 
@@ -1206,8 +1171,7 @@ function renderEmployeeDashboard() {
             </div>
             ` : ''}
 
-            <!-- Net Pay (Grand Total) -->
-            <div onclick="downloadPayslipPdf()" class="bg-[#0fa981] rounded-[20px] p-5 flex justify-between items-center shadow-lg shadow-[#0fa981]/40 mt-4 relative overflow-hidden cursor-pointer active:scale-95 transition-transform duration-200 group">
+            <div onclick="downloadPayslipPdf('${empObj.name}')" class="bg-[#0fa981] rounded-[20px] p-5 flex justify-between items-center shadow-lg shadow-[#0fa981]/40 mt-4 relative overflow-hidden cursor-pointer active:scale-95 transition-transform duration-200 group">
                 <div class="relative z-10 flex flex-col">
                     <p class="text-[11px] font-black text-emerald-50 uppercase tracking-widest">รวมรายได้สุทธิ</p>
                     <div class="mt-2 flex items-center gap-1 bg-white/20 px-2 py-1 rounded-full w-max opacity-90 group-hover:opacity-100 transition-opacity">
@@ -1219,15 +1183,12 @@ function renderEmployeeDashboard() {
                     <span class="text-lg text-emerald-200 mr-1.5 font-bold">฿</span>${formatCurrency(netPay)}
                 </div>
             </div>
-            
-
-
         </div>
     </div>
     </div>`;
+}
 
-    document.getElementById('salary-summary-container').innerHTML = summaryHtml;
-
+function generateEmployeeTableHtml(empObj, myRecords, isAdmin = false) {
     function formatTime(dateObj) {
         if (!dateObj) return '-';
         const h = String(dateObj.getHours()).padStart(2, '0');
@@ -1236,6 +1197,10 @@ function renderEmployeeDashboard() {
     }
 
     let tableHtml = '';
+    if (myRecords.length === 0) {
+        return `<div class="text-center py-8 text-slate-400 font-bold text-sm">ไม่พบข้อมูลเวลาเข้า-ออกในรอบนี้</div>`;
+    }
+
     myRecords.forEach((row, i) => {
         let bgColor = (i % 2 === 0) ? 'bg-white' : 'bg-slate-50';
         
@@ -1270,18 +1235,23 @@ function renderEmployeeDashboard() {
         let inDisplay = inStr;
         let outDisplay = outStr;
         
-        const onclickStr = `onclick="openRequestTimeEditModal('${row.date}', '${inStr}', '${outStr}', '${schedInStr}', '${schedOutStr}')"`;
+        const onclickStr = isAdmin
+            ? `onclick="openEditLogModal('${row.date}', '${inStr}', '${outStr}', '${row.type || 'Work'}')"`
+            : `onclick="openRequestTimeEditModal('${row.date}', '${inStr}', '${outStr}', '${schedInStr}', '${schedOutStr}')"`;
 
-        if (isPartialScan && !row.inTime) inDisplay = `<span class="text-red-500 text-[11px] font-bold tracking-tight block leading-tight">ไม่มี<br>เข้างาน</span><div ${onclickStr} class="scan-time-text text-white text-[9.5px] font-bold tracking-tight px-2 py-1 bg-orange-500 rounded-md shadow-sm hover:bg-orange-600 active:scale-95 transition-all cursor-pointer inline-block mt-1">ขอแก้ไข</div>`;
+        const rowClickStr = isAdmin ? onclickStr : '';
+        const colClickStr = isAdmin ? '' : onclickStr;
+
+        if (isPartialScan && !row.inTime) inDisplay = `<span class="text-red-500 text-[11px] font-bold tracking-tight block leading-tight">ไม่มี<br>เข้างาน</span><div ${onclickStr} class="scan-time-text text-white text-[9.5px] font-bold tracking-tight px-2 py-1 bg-orange-500 rounded-md shadow-sm hover:bg-orange-600 active:scale-95 transition-all cursor-pointer inline-block mt-1">${isAdmin ? 'แก้ไข' : 'ขอแก้ไข'}</div>`;
         
-        if (isPartialScan && !row.outTime) outDisplay = `<span class="text-red-500 text-[11px] font-bold tracking-tight block leading-tight">ไม่มี<br>ออกงาน</span><div ${onclickStr} class="scan-time-text text-white text-[9.5px] font-bold tracking-tight px-2 py-1 bg-orange-500 rounded-md shadow-sm hover:bg-orange-600 active:scale-95 transition-all cursor-pointer inline-block mt-1">ขอแก้ไข</div>`;
+        if (isPartialScan && !row.outTime) outDisplay = `<span class="text-red-500 text-[11px] font-bold tracking-tight block leading-tight">ไม่มี<br>ออกงาน</span><div ${onclickStr} class="scan-time-text text-white text-[9.5px] font-bold tracking-tight px-2 py-1 bg-orange-500 rounded-md shadow-sm hover:bg-orange-600 active:scale-95 transition-all cursor-pointer inline-block mt-1">${isAdmin ? 'แก้ไข' : 'ขอแก้ไข'}</div>`;
         
         if (isPartialScan) bgColor = 'bg-red-50 border-y border-red-200';
 
         tableHtml += `
-        <div class="data-row px-1 py-3 ${bgColor} ${isPartialScan ? 'border-l-4 border-red-500' : ''}">
+        <div class="data-row px-1 py-3 ${bgColor} ${isPartialScan ? 'border-l-4 border-red-500' : ''} ${isAdmin ? 'cursor-pointer hover:bg-slate-100 transition' : ''}" ${rowClickStr}>
             <div class="table-grid text-[13px]">
-                <div class="flex flex-col text-left pl-1 justify-start cursor-pointer transition-transform hover:scale-105 active:scale-95" onclick="openRequestTimeEditModal('${row.date}', '${inStr}', '${outStr}', '${schedInStr}', '${schedOutStr}')">
+                <div class="flex flex-col text-left pl-1 justify-start ${!isAdmin ? 'cursor-pointer transition-transform hover:scale-105 active:scale-95' : ''}" ${colClickStr}>
                     <span class="font-black text-[13px] text-indigo-900 leading-tight date-text">${shortDateStr}</span>
                     <span class="text-[11px] text-slate-500 font-medium leading-tight day-text mt-1">${dayStr}</span>
                     ${row.isLate ? `<span class="text-[10px] font-normal text-red-500 leading-tight late-text mt-0.5">สาย ${row.lateMins} น.${row.lateDeduction > 0 ? `<br>(-${row.lateDeduction} ชม)` : ''}</span>` : ''}
@@ -1312,13 +1282,67 @@ function renderEmployeeDashboard() {
             </div>` : ''}
         </div>`;
     });
+    return tableHtml;
+}
 
-    if (myRecords.length === 0) {
-        tableHtml = `<div class="text-center py-8 text-slate-400 font-bold text-sm">ไม่พบข้อมูลเวลาเข้า-ออกในรอบนี้</div>`;
-    }
+function renderEmployeeDashboard() {
+    if (!loggedInEmployee || !currentPeriodVal) return;
 
+    let parts = currentPeriodVal.split('_');
+    let type = parts[0];
+    let mStr = parts[1];
+
+    let myRecords = [];
+    let myLeavesInMonth = [];
+
+    processedAttendance.forEach(r => {
+        if (r.name !== loggedInEmployee.name) return;
+        const d = r.dateObj;
+        const rMstr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        if (rMstr !== mStr) return;
+        if (type === 'h1' && d.getDate() > 15) return;
+        if (type === 'h2' && d.getDate() < 16) return;
+        myRecords.push(r);
+    });
+
+    const [year, month] = mStr.split('-');
+    const targetMonth = parseInt(month, 10);
+    const targetYear = parseInt(year, 10);
+    
+    leaves.forEach(l => {
+        if (l.name === loggedInEmployee.name && l.status === 'Approved') {
+            let sDate = new Date(l.startDate);
+            let eDate = new Date(l.endDate);
+            for (let d = new Date(sDate); d <= eDate; d.setDate(d.getDate() + 1)) {
+                if (d.getMonth() + 1 === targetMonth && d.getFullYear() === targetYear) {
+                    if (type === 'h1' && d.getDate() > 15) continue;
+                    if (type === 'h2' && d.getDate() < 16) continue;
+                    
+                    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                    if (!myRecords.find(r => r.date === dateStr)) {
+                        myLeavesInMonth.push({
+                            name: loggedInEmployee.name,
+                            date: dateStr,
+                            dateObj: new Date(d),
+                            inTime: null,
+                            outTime: null,
+                            type: l.leaveType === 'ลาป่วย' ? 'Leave_Paid' : (l.leaveType === 'ลากิจ (ได้ค่าแรง)' ? 'Leave_Paid' : 'Leave_Unpaid'),
+                            isLate: false,
+                            regularHours: l.leaveType === 'ลาป่วย' ? 8 : (l.leaveType === 'ลากิจ (ได้ค่าแรง)' ? 8 : 0),
+                            otHours: 0
+                        });
+                    }
+                }
+            }
+        }
+    });
+
+    myRecords = myRecords.concat(myLeavesInMonth);
+    myRecords.sort((a, b) => a.dateObj - b.dateObj);
+
+    document.getElementById('salary-summary-container').innerHTML = generateSalarySummaryHtml(loggedInEmployee, myRecords);
+    document.getElementById('table-container').innerHTML = generateEmployeeTableHtml(loggedInEmployee, myRecords, false);
     renderEmployeeTimeEditRequests();
-    document.getElementById('table-container').innerHTML = tableHtml;
 }
 
 // Tooltips
@@ -2823,228 +2847,79 @@ function closeTimeLogsModal() {
 }
 
 async function fetchTimeLogs(nickname) {
-    if (!currentPeriodVal) return;
-    const parts = currentPeriodVal.split('_');
-    const mStr = parts[1]; // e.g. "2026-06"
+    if (!currentPeriodVal || !currentLogsEmp) return;
+
+    let parts = currentPeriodVal.split('_');
+    let type = parts[0];
+    let mStr = parts[1];
+
+    let myRecords = [];
+    let myLeavesInMonth = [];
+
+    processedAttendance.forEach(r => {
+        if (r.name !== nickname) return;
+        const d = r.dateObj;
+        const rMstr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        if (rMstr !== mStr) return;
+        if (type === 'h1' && d.getDate() > 15) return;
+        if (type === 'h2' && d.getDate() < 16) return;
+        myRecords.push(r);
+    });
+
     const [year, month] = mStr.split('-');
-    
-    document.getElementById('timelogs-content').innerHTML = `
-        <div class="flex justify-center items-center py-10">
-            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-        </div>
-    `;
-    
-    currentLogsData = [];
     const targetMonth = parseInt(month, 10);
     const targetYear = parseInt(year, 10);
     
-    // Group from processedAttendance
-    processedAttendance.forEach(rec => {
-        if (rec.name === nickname && rec.dateObj.getMonth() + 1 === targetMonth && rec.dateObj.getFullYear() === targetYear) {
-            let inStr = rec.inTime ? `${String(rec.inTime.getHours()).padStart(2, '0')}:${String(rec.inTime.getMinutes()).padStart(2, '0')}` : '';
-            let outStr = rec.outTime ? `${String(rec.outTime.getHours()).padStart(2, '0')}:${String(rec.outTime.getMinutes()).padStart(2, '0')}` : '';
-            
-            let existing = currentLogsData.find(x => x.date === rec.date);
-            if (!existing) {
-                currentLogsData.push({
-                    date: rec.date,
-                    in: inStr,
-                    out: outStr,
-                    scheduledIn: rec.scheduledIn && rec.scheduledIn !== '-' ? rec.scheduledIn : '',
-                    scheduledOut: rec.scheduledOut && rec.scheduledOut !== '-' ? rec.scheduledOut : '',
-                    type: 'Work'
-                });
-            } else {
-                if (inStr) existing.in = inStr;
-                if (outStr) existing.out = outStr;
-            }
-        }
-    });
-
-    // Fetch manual overrides from backend API
-    // Removed API call here for instant loading. 
-    // manualLogs are already applied in processData() when Firebase pushes updates, 
-    // and manually applied during saveEmployeeLog().
-    // Add leaves
     leaves.forEach(l => {
         if (l.name === nickname && l.status === 'Approved') {
             let sDate = new Date(l.startDate);
             let eDate = new Date(l.endDate);
             for (let d = new Date(sDate); d <= eDate; d.setDate(d.getDate() + 1)) {
                 if (d.getMonth() + 1 === targetMonth && d.getFullYear() === targetYear) {
+                    if (type === 'h1' && d.getDate() > 15) continue;
+                    if (type === 'h2' && d.getDate() < 16) continue;
+                    
                     const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                    let existing = currentLogsData.find(x => x.date === dateStr);
-                    if (!existing) {
-                        currentLogsData.push({
+                    if (!myRecords.find(r => r.date === dateStr)) {
+                        myLeavesInMonth.push({
+                            name: nickname,
                             date: dateStr,
-                            in: '',
-                            out: '',
-                            type: l.leaveType === 'ลาป่วย' ? 'Leave_Paid' : (l.leaveType === 'ลากิจ (ได้ค่าแรง)' ? 'Leave_Paid' : 'Leave_Unpaid')
+                            dateObj: new Date(d),
+                            inTime: null,
+                            outTime: null,
+                            type: l.leaveType === 'ลาป่วย' ? 'Leave_Paid' : (l.leaveType === 'ลากิจ (ได้ค่าแรง)' ? 'Leave_Paid' : 'Leave_Unpaid'),
+                            isLate: false,
+                            regularHours: l.leaveType === 'ลาป่วย' ? 8 : (l.leaveType === 'ลากิจ (ได้ค่าแรง)' ? 8 : 0),
+                            otHours: 0
                         });
-                    } else if (!existing.in && !existing.out) {
-                        existing.type = l.leaveType === 'ลาป่วย' ? 'Leave_Paid' : (l.leaveType === 'ลากิจ (ได้ค่าแรง)' ? 'Leave_Paid' : 'Leave_Unpaid');
                     }
                 }
             }
         }
     });
 
-    currentLogsData = currentLogsData.filter(log => log.in || log.out);
-    currentLogsData.sort((a, b) => new Date(a.date) - new Date(b.date));
-    
-    setTimeout(() => {
-        renderTimeLogs();
-    }, 100);
-}
+    myRecords = myRecords.concat(myLeavesInMonth);
+    myRecords.sort((a, b) => a.dateObj - b.dateObj);
 
-function renderTimeLogs() {
-    const container = document.getElementById('timelogs-content');
-    
-    let html = ``;
-    
-    if (currentLogsData.length === 0) {
-        html += `<div class="p-4"><div class="text-center py-10 text-slate-400 font-bold text-sm bg-white rounded-xl border border-slate-200">ไม่พบประวัติในเดือนนี้</div></div>`;
-    } else {
-        html += `
+    document.getElementById('timelogs-content').innerHTML = `
+        <div class="px-4 pt-4">
+            ${generateSalarySummaryHtml(currentLogsEmp, myRecords)}
+        </div>
         <div class="px-4 pb-4">
-        <div class="border-x border-b border-slate-200 rounded-b-xl bg-white shadow-sm">
-            <div id="employee-table-header" class="table-grid font-bold text-white bg-slate-800/95 backdrop-blur-md text-[12px] py-2.5 px-1 text-center shadow-md sticky top-0 z-40 border-b border-slate-700 items-center">
+            <div id="employee-table-header" class="table-grid font-bold text-white bg-slate-800/95 backdrop-blur-md text-[12px] py-2.5 px-1 rounded-t-lg text-center shadow-md sticky top-0 z-40 border-b border-slate-700 items-center">
                 <div class="text-left pl-2">วันที่</div>
                 <div>เข้างาน</div>
                 <div>ออกงาน</div>
                 <div class="leading-tight">พัก<br>ชม.</div>
-                <div class="leading-tight">ปกติ<br>ชม.</div>
-                <div class="leading-tight">OT<br>ชม.</div>
+                <div class="leading-tight text-blue-200">ปกติ<br>ชม.</div>
+                <div class="leading-tight text-orange-200">OT<br>ชม.</div>
             </div>
-            <div class="bg-white">
-        `;
-        
-        function formatTime(tStr) {
-            if (!tStr || tStr === '-') return '';
-            return tStr;
-        }
-
-        currentLogsData.forEach((log, i) => {
-            const isLeave = log.type && log.type.includes("Leave");
-            const dateObj = new Date(log.date);
-            const dayNum = String(dateObj.getDate()).padStart(2, '0');
-            const monthNum = String(dateObj.getMonth()+1).padStart(2, '0');
-            const yearNum = dateObj.getFullYear().toString().substr(-2);
-            const shortDateStr = `${dayNum}/${monthNum}/${yearNum}`;
-            const dayStr = dateObj.toLocaleDateString('th-TH', { weekday: 'long' });
-            
-            let breakHrs = '';
-            let normalHrs = '';
-            let otHrs = '';
-            let bgColor = (i % 2 === 0) ? 'bg-white' : 'bg-slate-50';
-            
-            if (dateObj.getDay() === 0) {
-                bgColor = 'bg-rose-50/30';
-            }
-            
-            if (log.in && log.out && !isLeave) {
-                let calcIn = log.scheduledIn && log.scheduledIn !== '-' ? log.scheduledIn : log.in;
-                let calcOut = log.scheduledOut && log.scheduledOut !== '-' ? log.scheduledOut : log.out;
-                let t1 = new Date(`2000-01-01T${calcIn}:00`);
-                let t2 = new Date(`2000-01-01T${calcOut}:00`);
-                if (t2 < t1) t2.setDate(t2.getDate() + 1);
-                let diffMs = t2 - t1;
-                let diffHrs = diffMs / (1000 * 60 * 60);
-
-                if (diffHrs >= 9) {
-                    breakHrs = 1;
-                    normalHrs = 8.0;
-                    otHrs = diffHrs - 9;
-                } else if (diffHrs > 5) {
-                    breakHrs = 1;
-                    normalHrs = diffHrs - 1;
-                } else {
-                    normalHrs = diffHrs;
-                }
-                
-                if (otHrs === 0) otHrs = '';
-            }
-
-            let leaveBadge = '';
-            let rowClass = 'data-row px-1 py-3 cursor-pointer hover:bg-slate-100 transition relative ';
-            if (isLeave) {
-                leaveBadge = `<span class="text-[10px] ${log.type === 'Leave_Paid' ? 'text-emerald-600 bg-emerald-50' : 'text-orange-600 bg-orange-50'} px-2 py-0.5 rounded mt-1 inline-block">ลา</span>`;
-                rowClass += log.type === 'Leave_Paid' ? 'border-l-4 border-emerald-500' : 'border-l-4 border-orange-500';
-            }
-
-            let inStr = formatTime(log.in);
-            let outStr = formatTime(log.out);
-            const schedInStr = log.scheduledIn && log.scheduledIn !== '-' ? log.scheduledIn : '';
-            const schedOutStr = log.scheduledOut && log.scheduledOut !== '-' ? log.scheduledOut : '';
-            
-            let schedInClass = `font-black text-[13px] text-slate-800`;
-            let schedOutClass = `font-black text-[13px] text-slate-800`;
-            let inClass = `scan-time-text text-[11px] font-medium mt-1 text-slate-500`;
-            let outClass = `scan-time-text text-[11px] font-medium mt-1 text-slate-500`;
-
-            html += `
-            <div onclick="openEditLogModal('${log.date}', '${log.scheduledIn || ''}', '${log.scheduledOut || ''}', '${log.type || 'Work'}')" class="${rowClass} ${bgColor}">
-                <div class="table-grid text-[13px]">
-                    <div class="flex flex-col text-left pl-2 justify-start">
-                        <span class="font-black text-[13px] text-indigo-900 leading-tight date-text">${shortDateStr}</span>
-                        <span class="text-[11px] text-slate-500 font-medium leading-tight day-text mt-1">${dayStr}</span>
-                        ${leaveBadge}
-                    </div>
-                    
-                    <div class="text-center flex flex-col items-center justify-start">
-                        <span class="${schedInClass}">${schedInStr || inStr || '-'}</span>
-                        <span class="${inClass}">${schedInStr && inStr ? inStr : ''}</span>
-                    </div>
-                    
-                    <div class="text-center flex flex-col items-center justify-start">
-                        <span class="${schedOutClass}">${schedOutStr || outStr || '-'}</span>
-                        <span class="${outClass}">${schedOutStr && outStr ? outStr : ''}</span>
-                    </div>
-                    
-                    <div class="text-center flex flex-col items-center justify-start pt-[2px]">
-                        <span class="text-slate-600 font-medium">${breakHrs || ''}</span>
-                    </div>
-                    
-                    <div class="text-center flex flex-col items-center justify-start font-black pt-[1px] ${normalHrs > 0 ? 'text-blue-600' : 'text-slate-400'}">${normalHrs > 0 ? Number(normalHrs).toFixed(1) : ''}</div>
-                    
-                    <div class="text-center flex flex-col items-center justify-start font-black pt-[1px] ${otHrs > 0 ? 'text-orange-500' : 'text-slate-400'}">${otHrs > 0 ? Number(otHrs).toFixed(1) : ''}</div>
-                </div>
-            </div>`;
-        });
-        
-        html += `
+            <div class="border border-t-0 border-slate-200 rounded-b-lg bg-white shadow-sm overflow-hidden text-center divide-y divide-slate-100">
+                ${generateEmployeeTableHtml(currentLogsEmp, myRecords, true)}
             </div>
         </div>
-        </div>`;
-    }
-    
-    container.innerHTML = html;
+    `;
 }
-// Time Logs Modals and Logic
-window.submitEditLogModal = function() {
-    const data = {
-        date: document.getElementById('swal-log-date').value,
-        type: document.getElementById('swal-log-type').value,
-        in: document.getElementById('swal-log-in').value,
-        out: document.getElementById('swal-log-out').value
-    };
-    if (!data.date) return Swal.fire("กรุณาเลือกวันที่");
-    Swal.close();
-    saveEmployeeLog(data, "update");
-};
-
-window.submitDeleteLogModal = function(dateStr) {
-    Swal.fire({
-        title: 'ยืนยันการลบ?',
-        text: "ลบประวัติของวันนี้ใช่หรือไม่?",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#ef4444',
-        confirmButtonText: 'ใช่, ลบเลย'
-    }).then((del) => {
-        if (del.isConfirmed) saveEmployeeLog({date: dateStr}, "delete");
-    });
-};
 
 function openEditLogModal(dateStr = '', timeIn = '', timeOut = '', type = 'Work') {
     Swal.fire({
