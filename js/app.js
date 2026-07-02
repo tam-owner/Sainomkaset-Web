@@ -142,23 +142,12 @@ function initData() {
             }
         }
     });
-    } catch (e) {
-        console.error("Error in applyInitData:", e);
-        hideLoading();
-        Swal.fire('Error', 'เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + e.message, 'error');
-    }
+
 }
 
 function applyInitData(data, isSilent = false) {
-    try {
-        if (!data) {
-            console.error("Firebase data is null!");
-            hideLoading();
-            Swal.fire('Error', 'ไม่พบข้อมูลในฐานข้อมูล (Firebase return null)', 'error');
-            return;
-        }
-        const overlay = document.getElementById('loading-overlay');
-        rawAttendance = data.attendance || [];
+    const overlay = document.getElementById('loading-overlay');
+    rawAttendance = data.attendance || [];
     window.manualLogs = data.logs || [];
     employees = data.employees.map(emp => {
         if (String(emp.employeeType).trim().toLowerCase() === "part time") {
