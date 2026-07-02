@@ -308,8 +308,8 @@ function processData() {
                 let regularHours = 0;
                 let otHours = 0;
                 
-                let calcInStr = (rec.scheduledIn && rec.scheduledIn !== '-') ? rec.scheduledIn : (rec.inTime ? `${String(rec.inTime.getHours()).padStart(2, '0')}:${String(rec.inTime.getMinutes()).padStart(2, '0')}` : null);
-                let calcOutStr = (rec.scheduledOut && rec.scheduledOut !== '-') ? rec.scheduledOut : (rec.outTime ? `${String(rec.outTime.getHours()).padStart(2, '0')}:${String(rec.outTime.getMinutes()).padStart(2, '0')}` : null);
+                let calcInStr = (rec.manualIn) ? rec.manualIn : ((rec.scheduledIn && rec.scheduledIn !== '-') ? rec.scheduledIn : (rec.inTime ? `${String(rec.inTime.getHours()).padStart(2, '0')}:${String(rec.inTime.getMinutes()).padStart(2, '0')}` : null));
+                let calcOutStr = (rec.manualOut) ? rec.manualOut : ((rec.scheduledOut && rec.scheduledOut !== '-') ? rec.scheduledOut : (rec.outTime ? `${String(rec.outTime.getHours()).padStart(2, '0')}:${String(rec.outTime.getMinutes()).padStart(2, '0')}` : null));
                 
                 if (calcInStr && calcOutStr) {
                     let inParts = calcInStr.split(':');
@@ -1227,10 +1227,12 @@ function generateEmployeeTableHtml(empObj, myRecords, isAdmin = false) {
         let schedOutClass = `font-black text-[13px] ${schedOutTextColor} ${row.noteOut ? 'cursor-pointer active:scale-90 inline-block transition-transform' : ''}`.trim();
         let outClick = row.noteOut ? `data-note="${(row.noteOut||'').replace(/"/g, '&quot;')}" onclick="showNoteTooltip(event)"` : '';
         
-        const isPartialScan = (row.inTime && !row.outTime) || (!row.inTime && row.outTime);
+        let effectiveIn = row.manualIn || row.inTime;
+        let effectiveOut = row.manualOut || row.outTime;
+        const isPartialScan = (effectiveIn && !effectiveOut) || (!effectiveIn && effectiveOut);
 
-        let inClass = `${isPartialScan && !row.inTime ? '' : 'scan-time-text'} text-[11px] font-medium mt-1 ${row.isLate ? 'text-red-500' : 'text-slate-500'}`;
-        let outClass = `${isPartialScan && !row.outTime ? '' : 'scan-time-text'} text-[11px] font-medium mt-1 text-slate-500`;
+        let inClass = `${isPartialScan && !effectiveIn ? '' : 'scan-time-text'} text-[11px] font-medium mt-1 ${row.isLate ? 'text-red-500' : 'text-slate-500'}`;
+        let outClass = `${isPartialScan && !effectiveOut ? '' : 'scan-time-text'} text-[11px] font-medium mt-1 text-slate-500`;
         
         const d = row.dateObj;
         const dayNum = String(d.getDate()).padStart(2, '0');
@@ -1260,9 +1262,9 @@ function generateEmployeeTableHtml(empObj, myRecords, isAdmin = false) {
         const rowClickStr = isAdmin ? onclickStr : '';
         const colClickStr = isAdmin ? '' : onclickStr;
 
-        if (isPartialScan && !row.inTime) inDisplay = `<span class="text-red-500 text-[11px] font-bold tracking-tight block leading-tight">ไม่มี<br>เข้างาน</span><div ${onclickStr} class="scan-time-text text-white text-[9.5px] font-bold tracking-tight px-2 py-1 bg-orange-500 rounded-md shadow-sm hover:bg-orange-600 active:scale-95 transition-all cursor-pointer inline-block mt-1">${isAdmin ? 'แก้ไข' : 'ขอแก้ไข'}</div>`;
+        if (isPartialScan && !effectiveIn) inDisplay = `<span class="text-red-500 text-[11px] font-bold tracking-tight block leading-tight">ไม่มี<br>เข้างาน</span><div ${onclickStr} class="scan-time-text text-white text-[9.5px] font-bold tracking-tight px-2 py-1 bg-orange-500 rounded-md shadow-sm hover:bg-orange-600 active:scale-95 transition-all cursor-pointer inline-block mt-1">${isAdmin ? 'แก้ไข' : 'ขอแก้ไข'}</div>`;
         
-        if (isPartialScan && !row.outTime) outDisplay = `<span class="text-red-500 text-[11px] font-bold tracking-tight block leading-tight">ไม่มี<br>ออกงาน</span><div ${onclickStr} class="scan-time-text text-white text-[9.5px] font-bold tracking-tight px-2 py-1 bg-orange-500 rounded-md shadow-sm hover:bg-orange-600 active:scale-95 transition-all cursor-pointer inline-block mt-1">${isAdmin ? 'แก้ไข' : 'ขอแก้ไข'}</div>`;
+        if (isPartialScan && !effectiveOut) outDisplay = `<span class="text-red-500 text-[11px] font-bold tracking-tight block leading-tight">ไม่มี<br>ออกงาน</span><div ${onclickStr} class="scan-time-text text-white text-[9.5px] font-bold tracking-tight px-2 py-1 bg-orange-500 rounded-md shadow-sm hover:bg-orange-600 active:scale-95 transition-all cursor-pointer inline-block mt-1">${isAdmin ? 'แก้ไข' : 'ขอแก้ไข'}</div>`;
         
         if (isPartialScan) bgColor = 'bg-red-50 border-y border-red-200';
 
