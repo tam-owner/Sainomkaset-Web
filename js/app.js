@@ -1426,7 +1426,7 @@ function closeChangePinModal() {
     box.classList.add('scale-95');
     setTimeout(() => {
         overlay.classList.add('opacity-0', 'pointer-events-none');
-        overlay.classList.add('hidden');
+        hideLoading();
     }, 300);
 }
 
@@ -1452,9 +1452,7 @@ async function changePin() {
     };
 
     closeChangePinModal();
-    const overlay = document.getElementById('loading-overlay');
-    document.getElementById('loading-text').innerText = "กำลังเปลี่ยนรหัสผ่าน...";
-    overlay.classList.remove('hidden');
+    showLoading("กำลังเปลี่ยนรหัสผ่าน...");
 
     try {
         const res = await fetch(WEB_APP_URL, {
@@ -1476,7 +1474,7 @@ async function changePin() {
         console.error(e);
         Swal.fire("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
     } finally {
-        overlay.classList.add('hidden');
+        hideLoading();
     }
 }
 
@@ -1705,7 +1703,7 @@ function closeDeductionModal() {
     box.classList.add('scale-95');
     setTimeout(() => {
         overlay.classList.add('opacity-0', 'pointer-events-none');
-        overlay.classList.add('hidden');
+        hideLoading();
     }, 300);
 }
 
@@ -1728,9 +1726,7 @@ async function saveDeduction() {
     };
 
     closeDeductionModal();
-    const overlay = document.getElementById('loading-overlay');
-    document.getElementById('loading-text').innerText = "กำลังบันทึกข้อมูล...";
-    overlay.classList.remove('hidden');
+    showLoading("กำลังบันทึกข้อมูล...");
 
     try {
         const res = await fetch(WEB_APP_URL, {
@@ -1758,7 +1754,7 @@ async function saveDeduction() {
         console.error(e);
         Swal.fire("ไม่สามารถบันทึกข้อมูลได้");
     } finally {
-        overlay.classList.add('hidden');
+        hideLoading();
     }
 }
 
@@ -1769,9 +1765,7 @@ async function deleteDeduction() {
     const payload = { action: "deleteDeduction", id };
 
     closeDeductionModal();
-    const overlay = document.getElementById('loading-overlay');
-    document.getElementById('loading-text').innerText = "กำลังลบข้อมูล...";
-    overlay.classList.remove('hidden');
+    showLoading("กำลังลบข้อมูล...");
 
     try {
         const res = await fetch(WEB_APP_URL, {
@@ -1790,7 +1784,7 @@ async function deleteDeduction() {
         console.error(e);
         Swal.fire("ไม่สามารถลบข้อมูลได้");
     } finally {
-        overlay.classList.add('hidden');
+        hideLoading();
     }
 }
 
@@ -1830,9 +1824,7 @@ function renderAdminLeaves() {
 
 async function updateLeaveStatus(id, status) {
     const payload = { action: "updateLeaveStatus", id, status };
-    const overlay = document.getElementById('loading-overlay');
-    document.getElementById('loading-text').innerText = "กำลังอัปเดต...";
-    overlay.classList.remove('hidden');
+    showLoading("กำลังอัปเดต...");
 
     try {
         const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
@@ -1844,7 +1836,7 @@ async function updateLeaveStatus(id, status) {
             renderAdminDashboardNotifications();
         } else Swal.fire("Error: " + json.message);
     } catch(e) { console.error(e); Swal.fire("เชื่อมต่อไม่สำเร็จ"); }
-    finally { overlay.classList.add('hidden'); }
+    finally { hideLoading(); }
 }
 
 // ----------------------------------------------------
@@ -2247,9 +2239,7 @@ async function confirmDeleteEmployee() {
     const nickname = document.getElementById('delete-nickname').value;
     const fullName = document.getElementById('delete-fullname').value;
 
-    const overlay = document.getElementById('loading-overlay');
-    document.getElementById('loading-text').innerText = "กำลังลบข้อมูล...";
-    overlay.classList.remove('hidden');
+    showLoading("กำลังลบข้อมูล...");
     closeDeleteModal();
 
     try {
@@ -2274,7 +2264,7 @@ async function confirmDeleteEmployee() {
         console.error(e);
         Swal.fire("Failed to connect to server. Details: " + e.message);
     } finally {
-        overlay.classList.add('hidden');
+        hideLoading();
     }
 }
 
@@ -2700,9 +2690,7 @@ async function submitLeaveRequest() {
         }
     };
 
-    const overlay = document.getElementById('loading-overlay');
-    document.getElementById('loading-text').innerText = "กำลังส่งคำขอ...";
-    overlay.classList.remove('hidden');
+    showLoading("กำลังส่งคำขอ...");
 
     try {
         let res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
@@ -2720,17 +2708,17 @@ async function submitLeaveRequest() {
             renderEmployeeLeaves();
             renderEmployeeTimeEditRequests();
             
-            overlay.classList.add('hidden');
+            hideLoading();
             Swal.fire("ส่งคำขอลางานเรียบร้อยแล้ว");
         } else {
-            overlay.classList.add('hidden');
+            hideLoading();
             Swal.fire("Error: " + json.message);
         }
     } catch (e) {
         console.error(e);
         Swal.fire("เชื่อมต่อเซิร์ฟเวอร์ล้มเหลว");
     } finally {
-        overlay.classList.add('hidden');
+        hideLoading();
     }
 }
 
@@ -2751,16 +2739,14 @@ function downloadPayslipPdf() {
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    const overlay = document.getElementById('loading-overlay');
-    document.getElementById('loading-text').innerText = "กำลังสร้าง PDF...";
-    overlay.classList.remove('hidden');
+    showLoading("กำลังสร้าง PDF...");
 
     html2pdf().set(opt).from(element).save().then(() => {
-        overlay.classList.add('hidden');
+        hideLoading();
     }).catch(e => {
         console.error(e);
         Swal.fire("เกิดข้อผิดพลาดในการสร้าง PDF");
-        overlay.classList.add('hidden');
+        hideLoading();
     });
 }
 
@@ -3036,9 +3022,7 @@ function openEditLogModal(dateStr = '', timeIn = '', timeOut = '', type = 'Work'
 
 async function saveEmployeeLog(data, actionType) {
     if (!currentLogsEmp) return;
-    const overlay = document.getElementById('loading-overlay');
-    document.getElementById('loading-text').innerText = "กำลังบันทึก...";
-    overlay.classList.remove('hidden');
+    showLoading("กำลังบันทึก...");
     
     try {
         const res = await fetch(WEB_APP_URL, {
@@ -3094,7 +3078,7 @@ async function saveEmployeeLog(data, actionType) {
         else errorMsg += ": " + e.message;
         Swal.fire("ข้อผิดพลาด", errorMsg, "error");
     } finally {
-        overlay.classList.add('hidden');
+        hideLoading();
     }
 }
 
@@ -3353,9 +3337,7 @@ function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) 
 }
 
 async function submitTimeEditRequest(data) {
-    const overlay = document.getElementById('loading-overlay');
-    document.getElementById('loading-text').innerText = "กำลังส่งคำขอ...";
-    overlay.classList.remove('hidden');
+    showLoading("กำลังส่งคำขอ...");
 
     try {
         const res = await fetch(WEB_APP_URL, {
@@ -3366,7 +3348,7 @@ async function submitTimeEditRequest(data) {
             })
         });
         const json = await res.json();
-        overlay.classList.add('hidden');
+        hideLoading();
         if (json.status === 'success') {
             Swal.fire({
                 icon: 'success',
@@ -3379,7 +3361,7 @@ async function submitTimeEditRequest(data) {
             Swal.fire('เกิดข้อผิดพลาด', json.message, 'error');
         }
     } catch (e) {
-        overlay.classList.add('hidden');
+        hideLoading();
         Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error');
     }
 }
@@ -3457,9 +3439,7 @@ function renderAdminTimeEdits() {
 
 async function updateTimeEditStatus(id, status) {
     const payload = { action: "updateEditRequestStatus", id, status };
-    const overlay = document.getElementById('loading-overlay');
-    document.getElementById('loading-text').innerText = "กำลังอัปเดต...";
-    overlay.classList.remove('hidden');
+    showLoading("กำลังอัปเดต...");
 
     try {
         const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
@@ -3474,7 +3454,7 @@ async function updateTimeEditStatus(id, status) {
             }
         } else Swal.fire("Error: " + json.message);
     } catch(e) { console.error(e); Swal.fire("เชื่อมต่อไม่สำเร็จ"); }
-    finally { overlay.classList.add('hidden'); }
+    finally { hideLoading(); }
 }
 
 function renderAdminDashboardNotifications() {
