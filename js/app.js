@@ -1,4 +1,4 @@
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwXxmYkriVuwEcVwN8qMwbcZkae7uOm2Vt-ogdIjIc8GiGIBFcuNvAhiDgmK71eCm0/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxCQlUS3NNQTRxqGfpZsliDTAO3oRL6u7sKQJx-OjA5a-8w-FFn9afqpjkWkElx5dQ/exec';
 
 window.onerror = function(msg, url, line, col, error) {
     alert("Error: " + msg + "\nLine: " + line + "\nCol: " + col);
