@@ -349,8 +349,16 @@ function processData() {
                 
                 if (rec.scheduledIn && rec.scheduledIn !== '-') {
                     let sch = rec.scheduledIn.split(':');
-                    let act = [rec.inTime.getHours(), rec.inTime.getMinutes()];
-                    if (sch.length > 1) {
+                    let act = null;
+                    if (rec.manualIn) {
+                        let parts = rec.manualIn.split(':');
+                        if (parts.length > 1) {
+                            act = [parseInt(parts[0], 10), parseInt(parts[1], 10)];
+                        }
+                    } else if (rec.inTime) {
+                        act = [rec.inTime.getHours(), rec.inTime.getMinutes()];
+                    }
+                    if (sch.length > 1 && act) {
                         let schMins = parseInt(sch[0], 10)*60 + parseInt(sch[1], 10);
                         let actMins = act[0]*60 + act[1];
                         if (actMins - schMins > 0) {
