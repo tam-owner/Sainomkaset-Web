@@ -146,95 +146,101 @@ function initData() {
 }
 
 function applyInitData(data, isSilent = false) {
-    const overlay = document.getElementById('loading-overlay');
-    rawAttendance = data.attendance || [];
-    window.manualLogs = data.logs || [];
-    employees = data.employees.map(emp => {
-        if (String(emp.employeeType).trim().toLowerCase() === "part time") {
-            let dailyRate = Number(emp.dailyRate) || 0;
-            emp.normalRate = dailyRate / 8;
-            emp.otRate = emp.normalRate * 1.5;
-        }
-        return emp;
-    });
-    deductions = data.deductions || [];
-    leaves = data.leaves || [];
-    timeEditRequests = data.timeEditRequests || [];
-    if (data.settings && data.settings['ShopIP']) {
-        shopAllowedIP = data.settings['ShopIP'];
-    }
-
-    // Auto-register missing names
-    let attendanceNames = new Set(rawAttendance.map(r => r.name).filter(n => n));
-    let employeeNames = new Set(employees.map(e => e.name));
-    let missingNames = [...attendanceNames].filter(n => !employeeNames.has(n));
-
-    if (missingNames.length > 0) {
-        missingNames.forEach(name => {
-            employees.push({ name: name, pin: "1234", normalRate: 46.88, otRate: 8.79, deductionType: "3%", isGhost: true });
+    try {
+        const overlay = document.getElementById('loading-overlay');
+        rawAttendance = data.attendance || [];
+        window.manualLogs = data.logs || [];
+        employees = (data.employees || []).map(emp => {
+            if (String(emp.employeeType).trim().toLowerCase() === "part time") {
+                let dailyRate = Number(emp.dailyRate) || 0;
+                emp.normalRate = dailyRate / 8;
+                emp.otRate = emp.normalRate * 1.5;
+            }
+            return emp;
         });
-        fetch(WEB_APP_URL, {
-            method: 'POST',
-            body: JSON.stringify({ action: "autoRegister", names: missingNames })
-        }).catch(e => console.error("Auto register error", e));
-    }
-
-    processData();
-    
-    // Remember current selection if any
-    const select = document.getElementById('login-name');
-    const currentSelection = select ? select.value : "";
-    populateLoginNames();
-    if (currentSelection && select) select.value = currentSelection;
-    
-    if (!isSilent) {
-        let hash = window.location.hash;
-        if (hash) {
-            hash = hash.substring(1); // Remove '#'
+        deductions = data.deductions || [];
+        leaves = data.leaves || [];
+        timeEditRequests = data.timeEditRequests || [];
+        if (data.settings && data.settings['ShopIP']) {
+            shopAllowedIP = data.settings['ShopIP'];
         }
 
-        if (isAdmin) {
-            setupPeriods();
-            if (!currentPeriodVal && availablePeriods.length > 0) {
-                currentPeriodVal = availablePeriods[0].value;
+        // Auto-register missing names
+        let attendanceNames = new Set(rawAttendance.map(r => r.name).filter(n => n));
+        let employeeNames = new Set(employees.map(e => e.name));
+        let missingNames = [...attendanceNames].filter(n => !employeeNames.has(n));
+
+        if (missingNames.length > 0) {
+            missingNames.forEach(name => {
+                employees.push({ name: name, pin: "1234", normalRate: 46.88, otRate: 8.79, deductionType: "3%", isGhost: true });
+            });
+            fetch(WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: "autoRegister", names: missingNames })
+            }).catch(e => console.error("Auto register error", e));
+        }
+
+        processData();
+        
+        // Remember current selection if any
+        const select = document.getElementById('login-name');
+        const currentSelection = select ? select.value : "";
+        populateLoginNames();
+        if (currentSelection && select) select.value = currentSelection;
+        
+        if (!isSilent) {
+            let hash = window.location.hash;
+            if (hash) {
+                hash = hash.substring(1); // Remove '#'
             }
-            showAdminDashboard();
-            if (currentPeriodVal) renderAdminSummary();
-            
-            if (hash && hash !== 'view-admin-dashboard' && document.getElementById(hash)) {
-                if (hash === 'view-admin-employees') openAdminEmployees(false);
-                else if (hash === 'view-admin-leaves') showView('view-admin-leaves', false);
-                else showView(hash, false);
-            }
-        } else if (loggedInEmployee) {
-            const updatedEmp = employees.find(e => e.name === loggedInEmployee.name);
-            if (updatedEmp) {
-                loggedInEmployee = updatedEmp;
+
+            if (isAdmin) {
                 setupPeriods();
                 if (!currentPeriodVal && availablePeriods.length > 0) {
                     currentPeriodVal = availablePeriods[0].value;
                 }
-                showEmployeeDashboard();
-                if (currentPeriodVal) renderEmployeeDashboard();
+                showAdminDashboard();
+                if (currentPeriodVal) renderAdminSummary();
                 
-                if (hash && hash !== 'view-dashboard' && document.getElementById(hash)) {
-                    if (hash === 'view-profile') openProfile(false);
-                    else if (hash === 'view-leave') openLeave(false);
-                    else if (hash === 'view-employee') openTimesheet(false);
+                if (hash && hash !== 'view-admin-dashboard' && document.getElementById(hash)) {
+                    if (hash === 'view-admin-employees') openAdminEmployees(false);
+                    else if (hash === 'view-admin-leaves') showView('view-admin-leaves', false);
                     else showView(hash, false);
                 }
+            } else if (loggedInEmployee) {
+                const updatedEmp = employees.find(e => e.name === loggedInEmployee.name);
+                if (updatedEmp) {
+                    loggedInEmployee = updatedEmp;
+                    setupPeriods();
+                    if (!currentPeriodVal && availablePeriods.length > 0) {
+                        currentPeriodVal = availablePeriods[0].value;
+                    }
+                    showEmployeeDashboard();
+                    if (currentPeriodVal) renderEmployeeDashboard();
+                    
+                    if (hash && hash !== 'view-dashboard' && document.getElementById(hash)) {
+                        if (hash === 'view-profile') openProfile(false);
+                        else if (hash === 'view-leave') openLeave(false);
+                        else if (hash === 'view-employee') openTimesheet(false);
+                        else showView(hash, false);
+                    }
+                } else {
+                    logout();
+                }
             } else {
-                logout();
+                // Not logged in. Must stay on login page.
+                hideLoading();
+                if (hash && hash !== 'view-login') {
+                    // If they tried to access a protected view, redirect to login by clearing the hash
+                    history.replaceState(null, '', window.location.pathname);
+                }
+                showView('view-login', false);
             }
-        } else {
-            // Not logged in. Must stay on login page.
-            hideLoading();
-            if (hash && hash !== 'view-login') {
-                // If they tried to access a protected view, redirect to login by clearing the hash
-                history.replaceState(null, '', window.location.pathname);
-            }
-            showView('view-login', false);
         }
+    } catch (e) {
+        console.error("Error in applyInitData:", e);
+        hideLoading();
+        alert('เกิดข้อผิดพลาดในการโหลดข้อมูล (applyInitData): ' + e.message);
     }
 }
 
