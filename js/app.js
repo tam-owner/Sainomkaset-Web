@@ -3487,7 +3487,9 @@ async function updateTimeEditStatus(id, status) {
             if (idx > -1) timeEditRequests[idx].status = status;
             renderAdminTimeEdits();
             renderAdminDashboardNotifications();
-            if (status === 'Approved')  // To update the actual logs in memory
+            if (status === 'Approved') {
+                // To update the actual logs in memory
+            }
         } else Swal.fire("Error: " + json.message);
     } catch(e) { console.error(e); Swal.fire("เชื่อมต่อไม่สำเร็จ"); }
     finally { overlay.classList.add('hidden'); }
