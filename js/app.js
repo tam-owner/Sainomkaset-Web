@@ -290,12 +290,10 @@ function processData() {
             rec.type = log.type || 'Work'; // Could be Leave
             
             if (log.in) {
-                const d = new Date(`${log.date}T${log.in}:00`);
-                rec.inTime = d;
+                rec.manualIn = log.in;
             }
             if (log.out) {
-                const d = new Date(`${log.date}T${log.out}:00`);
-                rec.outTime = d;
+                rec.manualOut = log.out;
             }
         });
     }
@@ -303,7 +301,7 @@ function processData() {
     const result = [];
     Object.values(recordsByDayAndName).forEach(dayObj => {
         Object.values(dayObj).forEach(rec => {
-            if (rec.inTime && rec.outTime) {
+            if ((rec.inTime && rec.outTime) || (rec.manualIn && rec.manualOut) || (rec.inTime && rec.manualOut) || (rec.manualIn && rec.outTime)) {
                 let breakTime = 1;
                 if (rec.scheduledIn && rec.scheduledIn.includes('18:00')) breakTime = 0;
                 
@@ -1246,14 +1244,17 @@ function generateEmployeeTableHtml(empObj, myRecords, isAdmin = false) {
         let outStr = formatTime(row.outTime);
         if (outStr === '-') outStr = '';
         
-        const schedInStr = row.scheduledIn && row.scheduledIn !== '-' ? row.scheduledIn : '';
-        const schedOutStr = row.scheduledOut && row.scheduledOut !== '-' ? row.scheduledOut : '';
+        let schedInStr = row.scheduledIn && row.scheduledIn !== '-' ? row.scheduledIn : '';
+        let schedOutStr = row.scheduledOut && row.scheduledOut !== '-' ? row.scheduledOut : '';
         
-        let inDisplay = inStr;
-        let outDisplay = outStr;
+        if (row.manualIn) schedInStr = row.manualIn;
+        if (row.manualOut) schedOutStr = row.manualOut;
+        
+        let inDisplay = inStr || '-';
+        let outDisplay = outStr || '-';
         
         const onclickStr = isAdmin
-            ? `onclick="openEditLogModal('${row.date}', '${inStr}', '${outStr}', '${row.type || 'Work'}')"`
+            ? `onclick="openEditLogModal('${row.date}', '${row.manualIn || inStr}', '${row.manualOut || outStr}', '${row.type || 'Work'}')"`
             : `onclick="openRequestTimeEditModal('${row.date}', '${inStr}', '${outStr}', '${schedInStr}', '${schedOutStr}')"`;
 
         const rowClickStr = isAdmin ? onclickStr : '';
