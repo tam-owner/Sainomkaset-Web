@@ -135,20 +135,14 @@
 <body class="pb-10 pt-4 max-w-md mx-auto relative min-h-screen">
 
     <!-- Global Loading Overlay -->
-    <div id="loading-overlay" class="fixed inset-0 bg-white/90 z-[999] flex flex-col items-center justify-center transition-all duration-300 backdrop-blur-sm">
-        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mb-3"></div>
-        <p class="text-indigo-600 font-bold" id="loading-text">กำลังเชื่อมต่อระบบ...</p>
-    </div>
-
-    <!-- ===================================== -->
-    <!-- VIEW: LOGIN                           -->
-    <!-- ===================================== -->
-    <!-- Decorative Background -->
-    <div class="fixed inset-0 z-[-1] bg-[#eef2f6] overflow-hidden pointer-events-none">
-        <div class="absolute -top-[10%] -left-[10%] w-[350px] h-[350px] rounded-full bg-blue-400/30 blur-[70px] animate-blob-1"></div>
-        <div class="absolute top-[35%] -right-[15%] w-[400px] h-[400px] rounded-full bg-cyan-300/30 blur-[70px] animate-blob-2"></div>
-        <div class="absolute -bottom-[10%] left-[10%] w-[450px] h-[450px] rounded-full bg-indigo-400/20 blur-[80px] animate-blob-3"></div>
-        <div class="absolute top-[20%] left-[30%] w-[300px] h-[300px] rounded-full bg-white/70 blur-[60px] animate-blob-4"></div>
+        <div id="loading-overlay" class="fixed inset-0 bg-slate-900/60 z-[9999] flex flex-col items-center justify-center transition-all duration-300 opacity-0 pointer-events-none backdrop-blur-sm">
+        <div class="bg-white rounded-2xl p-6 flex flex-col items-center shadow-xl">
+            <svg class="animate-spin h-10 w-10 text-indigo-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p id="loading-text" class="text-slate-800 font-bold text-lg">กำลังโหลดข้อมูล...</p>
+        </div>
     </div>
     
     <div id="view-login" class="hidden">
@@ -915,7 +909,7 @@
     </div>
 
     <script src="js/customSelect.js"></script>
-    <script src="js/app.js?v=20260703_12"></script>
+    <script src="js/app.js?v=20260703_13"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -935,7 +929,7 @@
         ล้างแคช
     </button>
     <div id="app-version-display" class="fixed bottom-2 right-2 text-[10px] text-slate-400 font-medium z-[9999] pointer-events-none opacity-50">
-        v2.2.24 (Firebase)
+        v2.2.25 (Firebase)
     </div>
     <script>
       function forceClearCache() {
