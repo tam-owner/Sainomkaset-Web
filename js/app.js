@@ -1,4 +1,4 @@
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx81NzgOse5b-aiTVJota9bv77DeZocJUE0Zgf-gzSA-eLCRHXXTJd4mmmdJQtw9j0/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxbuZV2BW_oLpsuIVoV9oQ_bt4yWiCr1XNTBAqXP0wCwDhtc0HnooihL5hJxG-FRLQ/exec';
 
 window.onerror = function(msg, url, line, col, error) {
     alert("Error: " + msg + "\nLine: " + line + "\nCol: " + col);
@@ -147,6 +147,7 @@ function initData() {
 function applyInitData(data, isSilent = false) {
     const overlay = document.getElementById('loading-overlay');
     rawAttendance = data.attendance;
+    window.manualLogs = data.logs || [];
     employees = data.employees.map(emp => {
         if (String(emp.employeeType).trim().toLowerCase() === "part time") {
             let dailyRate = Number(emp.dailyRate) || 0;
@@ -272,6 +273,32 @@ function processData() {
             rec.noteOut = r.note;
         }
     });
+
+    // Apply manual overrides from Logs
+    if (window.manualLogs && window.manualLogs.length > 0) {
+        window.manualLogs.forEach(log => {
+            if (!recordsByDayAndName[log.date]) recordsByDayAndName[log.date] = {};
+            if (!recordsByDayAndName[log.date][log.nickname]) {
+                const parts = log.date.split('-');
+                recordsByDayAndName[log.date][log.nickname] = { 
+                    name: log.nickname, 
+                    date: log.date, 
+                    dateObj: new Date(`${parts[0]}-${parts[1]}-${parts[2]}T00:00:00`) 
+                };
+            }
+            const rec = recordsByDayAndName[log.date][log.nickname];
+            rec.type = log.type || 'Work'; // Could be Leave
+            
+            if (log.in) {
+                const d = new Date(`${log.date}T${log.in}:00`);
+                rec.inTime = d;
+            }
+            if (log.out) {
+                const d = new Date(`${log.date}T${log.out}:00`);
+                rec.outTime = d;
+            }
+        });
+    }
 
     const result = [];
     Object.values(recordsByDayAndName).forEach(dayObj => {
@@ -2834,6 +2861,34 @@ async function fetchTimeLogs(nickname) {
         }
     });
 
+    // Fetch manual overrides from backend API
+    try {
+        const res = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: "getEmployeeLogs",
+                nickname: nickname,
+                month: month,
+                year: year
+            })
+        });
+        const json = await res.json();
+        if (json.status === "success" && json.logs) {
+            json.logs.forEach(manualLog => {
+                let existing = currentLogsData.find(x => x.date === manualLog.date);
+                if (existing) {
+                    if (manualLog.in) existing.in = manualLog.in;
+                    if (manualLog.out) existing.out = manualLog.out;
+                    if (manualLog.type) existing.type = manualLog.type;
+                } else {
+                    currentLogsData.push(manualLog);
+                }
+            });
+        }
+    } catch(e) {
+        console.error("Failed to fetch manual logs:", e);
+    }
+
     // Add leaves
     leaves.forEach(l => {
         if (l.name === nickname && l.status === 'Approved') {
@@ -3110,7 +3165,11 @@ async function saveEmployeeLog(data, actionType) {
         }
     } catch(e) {
         console.error(e);
-        Swal.fire("ไม่สามารถบันทึกได้");
+        let errorMsg = "ไม่สามารถบันทึกได้";
+        if (e instanceof TypeError) errorMsg = "ไม่สามารถติดต่อเซิร์ฟเวอร์ได้ (Network Error)";
+        else if (e instanceof SyntaxError) errorMsg = "เซิร์ฟเวอร์ตอบกลับผิดพลาด (API Error)";
+        else errorMsg += ": " + e.message;
+        Swal.fire("ข้อผิดพลาด", errorMsg, "error");
     } finally {
         overlay.classList.add('hidden');
     }

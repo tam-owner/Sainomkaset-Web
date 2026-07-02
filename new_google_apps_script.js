@@ -1037,9 +1037,33 @@ function handleGetInitPayrollData() {
       deductions: getDeductionsData(),
       leaves: getLeavesData(),
       timeEditRequests: getTimeEditRequestsData(),
-      settings: getSettingsData()
+      settings: getSettingsData(),
+      logs: getAllLogsData()
     }
   };
+}
+
+function getAllLogsData() {
+  try {
+    var sheet = getSheetByNameOrCreateNew("Logs");
+    var data = sheet.getDataRange().getValues();
+    var results = [];
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      if (row[0]) {
+        results.push({
+          date: Utilities.formatDate(new Date(row[0]), "Asia/Bangkok", "yyyy-MM-dd"),
+          nickname: String(row[1] || "").trim(),
+          type: String(row[2] || "").trim(),
+          in: row[3] ? Utilities.formatDate(new Date(row[3]), "Asia/Bangkok", "HH:mm") : "",
+          out: row[4] ? Utilities.formatDate(new Date(row[4]), "Asia/Bangkok", "HH:mm") : ""
+        });
+      }
+    }
+    return results;
+  } catch (e) {
+    return [];
+  }
 }
 
 function getSettingsData() {
