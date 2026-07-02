@@ -26,7 +26,8 @@ function syncToFirebase() {
     deductions: getDeductionsData(),
     leaves: getLeavesData(),
     timeEditRequests: getTimeEditRequestsData(),
-    settings: getSettingsData()
+    settings: getSettingsData(),
+    logs: getAllLogsData()
   };
   
   var options = {
