@@ -1256,7 +1256,7 @@ function generateEmployeeTableHtml(empObj, myRecords, isAdmin = false) {
         let outDisplay = outStr || '-';
         
         const onclickStr = isAdmin
-            ? `onclick="openEditLogModal('${row.date}', '${row.manualIn || inStr}', '${row.manualOut || outStr}', '${row.type || 'Work'}')"`
+            ? `onclick="openEditLogModal('${row.date}', '${schedInStr}', '${schedOutStr}', '${row.type || 'Work'}')"`
             : `onclick="openRequestTimeEditModal('${row.date}', '${inStr}', '${outStr}', '${schedInStr}', '${schedOutStr}')"`;
 
         const rowClickStr = isAdmin ? onclickStr : '';
