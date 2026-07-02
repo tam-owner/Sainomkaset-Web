@@ -805,12 +805,16 @@ function handleUpdateEmployeeLog(p) {
     
     var timeIn = p.in ? targetDateStr + "T" + p.in + ":00" : "";
     var timeOut = p.out ? targetDateStr + "T" + p.out + ":00" : "";
+    var actualIn = p.actualIn ? targetDateStr + "T" + p.actualIn + ":00" : "";
+    var actualOut = p.actualOut ? targetDateStr + "T" + p.actualOut + ":00" : "";
     var recordType = p.type || "Work"; // Work, Leave_Paid, Leave_Unpaid
     
     if (foundIdx !== -1) {
       sheet.getRange(foundIdx + 1, 3).setValue(recordType);
       sheet.getRange(foundIdx + 1, 4).setValue(timeIn);
       sheet.getRange(foundIdx + 1, 5).setValue(timeOut);
+      sheet.getRange(foundIdx + 1, 6).setValue(actualIn);
+      sheet.getRange(foundIdx + 1, 7).setValue(actualOut);
       return {status: "success", message: "Updated log successfully"};
     } else {
       sheet.appendRow([
@@ -818,7 +822,9 @@ function handleUpdateEmployeeLog(p) {
         nickname,
         recordType,
         timeIn,
-        timeOut
+        timeOut,
+        actualIn,
+        actualOut
       ]);
       return {status: "success", message: "Added log successfully"};
     }
@@ -1057,7 +1063,9 @@ function getAllLogsData() {
           nickname: String(row[1] || "").trim(),
           type: String(row[2] || "").trim(),
           in: row[3] ? Utilities.formatDate(new Date(row[3]), "Asia/Bangkok", "HH:mm") : "",
-          out: row[4] ? Utilities.formatDate(new Date(row[4]), "Asia/Bangkok", "HH:mm") : ""
+          out: row[4] ? Utilities.formatDate(new Date(row[4]), "Asia/Bangkok", "HH:mm") : "",
+          actualIn: row[5] ? Utilities.formatDate(new Date(row[5]), "Asia/Bangkok", "HH:mm") : "",
+          actualOut: row[6] ? Utilities.formatDate(new Date(row[6]), "Asia/Bangkok", "HH:mm") : ""
         });
       }
     }

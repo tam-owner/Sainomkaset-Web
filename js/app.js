@@ -295,21 +295,29 @@ function processData() {
             if (log.out) {
                 rec.manualOut = log.out;
             }
+            if (log.actualIn) {
+                rec.actualIn = log.actualIn;
+            }
+            if (log.actualOut) {
+                rec.actualOut = log.actualOut;
+            }
         });
     }
 
     const result = [];
     Object.values(recordsByDayAndName).forEach(dayObj => {
         Object.values(dayObj).forEach(rec => {
-            if ((rec.inTime && rec.outTime) || (rec.manualIn && rec.manualOut) || (rec.inTime && rec.manualOut) || (rec.manualIn && rec.outTime)) {
+            let effInTime = rec.actualIn ? (new Date(`2000-01-01T${rec.actualIn}:00`)) : rec.inTime;
+            let effOutTime = rec.actualOut ? (new Date(`2000-01-01T${rec.actualOut}:00`)) : rec.outTime;
+            if ((effInTime && effOutTime) || (rec.manualIn && rec.manualOut) || (effInTime && rec.manualOut) || (rec.manualIn && effOutTime)) {
                 let breakTime = 1;
                 if (rec.scheduledIn && rec.scheduledIn.includes('18:00')) breakTime = 0;
                 
                 let regularHours = 0;
                 let otHours = 0;
                 
-                let calcInStr = (rec.manualIn) ? rec.manualIn : ((rec.scheduledIn && rec.scheduledIn !== '-') ? rec.scheduledIn : (rec.inTime ? `${String(rec.inTime.getHours()).padStart(2, '0')}:${String(rec.inTime.getMinutes()).padStart(2, '0')}` : null));
-                let calcOutStr = (rec.manualOut) ? rec.manualOut : ((rec.scheduledOut && rec.scheduledOut !== '-') ? rec.scheduledOut : (rec.outTime ? `${String(rec.outTime.getHours()).padStart(2, '0')}:${String(rec.outTime.getMinutes()).padStart(2, '0')}` : null));
+                let calcInStr = (rec.manualIn) ? rec.manualIn : ((rec.scheduledIn && rec.scheduledIn !== '-') ? rec.scheduledIn : (effInTime ? `${String(effInTime.getHours()).padStart(2, '0')}:${String(effInTime.getMinutes()).padStart(2, '0')}` : null));
+                let calcOutStr = (rec.manualOut) ? rec.manualOut : ((rec.scheduledOut && rec.scheduledOut !== '-') ? rec.scheduledOut : (effOutTime ? `${String(effOutTime.getHours()).padStart(2, '0')}:${String(effOutTime.getMinutes()).padStart(2, '0')}` : null));
                 
                 if (calcInStr && calcOutStr) {
                     let inParts = calcInStr.split(':');
@@ -350,13 +358,13 @@ function processData() {
                 if (rec.scheduledIn && rec.scheduledIn !== '-') {
                     let sch = rec.scheduledIn.split(':');
                     let act = null;
-                    if (rec.manualIn) {
-                        let parts = rec.manualIn.split(':');
+                    if (rec.actualIn) {
+                        let parts = rec.actualIn.split(':');
                         if (parts.length > 1) {
                             act = [parseInt(parts[0], 10), parseInt(parts[1], 10)];
                         }
-                    } else if (rec.inTime) {
-                        act = [rec.inTime.getHours(), rec.inTime.getMinutes()];
+                    } else if (effInTime) {
+                        act = [effInTime.getHours(), effInTime.getMinutes()];
                     }
                     if (sch.length > 1 && act) {
                         let schMins = parseInt(sch[0], 10)*60 + parseInt(sch[1], 10);
@@ -1235,8 +1243,8 @@ function generateEmployeeTableHtml(empObj, myRecords, isAdmin = false) {
         let schedOutClass = `font-black text-[13px] ${schedOutTextColor} ${row.noteOut ? 'cursor-pointer active:scale-90 inline-block transition-transform' : ''}`.trim();
         let outClick = row.noteOut ? `data-note="${(row.noteOut||'').replace(/"/g, '&quot;')}" onclick="showNoteTooltip(event)"` : '';
         
-        let effectiveIn = row.manualIn || row.inTime;
-        let effectiveOut = row.manualOut || row.outTime;
+        let effectiveIn = row.actualIn || row.inTime;
+        let effectiveOut = row.actualOut || row.outTime;
         const isPartialScan = (effectiveIn && !effectiveOut) || (!effectiveIn && effectiveOut);
 
         let inClass = `${isPartialScan && !effectiveIn ? '' : 'scan-time-text'} text-[11px] font-medium mt-1 ${row.isLate ? 'text-red-500' : 'text-slate-500'}`;
@@ -1260,11 +1268,14 @@ function generateEmployeeTableHtml(empObj, myRecords, isAdmin = false) {
         if (row.manualIn) schedInStr = row.manualIn;
         if (row.manualOut) schedOutStr = row.manualOut;
         
-        let inDisplay = inStr || '-';
-        let outDisplay = outStr || '-';
+        let inDisplay = row.actualIn ? row.actualIn : (inStr || '-');
+        let outDisplay = row.actualOut ? row.actualOut : (outStr || '-');
+        
+        const actualInStr = row.actualIn || '';
+        const actualOutStr = row.actualOut || '';
         
         const onclickStr = isAdmin
-            ? `onclick="openEditLogModal('${row.date}', '${schedInStr}', '${schedOutStr}', '${row.type || 'Work'}')"`
+            ? `onclick="openEditLogModal('${row.date}', '${schedInStr}', '${schedOutStr}', '${row.type || 'Work'}', '${actualInStr}', '${actualOutStr}')"`
             : `onclick="openRequestTimeEditModal('${row.date}', '${inStr}', '${outStr}', '${schedInStr}', '${schedOutStr}')"`;
 
         const rowClickStr = isAdmin ? onclickStr : '';
@@ -2941,7 +2952,9 @@ window.submitEditLogModal = function() {
         date: document.getElementById('swal-log-date').value,
         type: document.getElementById('swal-log-type').value,
         in: document.getElementById('swal-log-in').value,
-        out: document.getElementById('swal-log-out').value
+        out: document.getElementById('swal-log-out').value,
+        actualIn: document.getElementById('swal-actual-in') ? document.getElementById('swal-actual-in').value : '',
+        actualOut: document.getElementById('swal-actual-out') ? document.getElementById('swal-actual-out').value : ''
     };
     if (!data.date) return Swal.fire("กรุณาเลือกวันที่");
     Swal.close();
@@ -2964,7 +2977,7 @@ window.submitDeleteLogModal = function(dateStr) {
     });
 };
 
-function openEditLogModal(dateStr = '', timeIn = '', timeOut = '', type = 'Work') {
+function openEditLogModal(dateStr = '', timeIn = '', timeOut = '', type = 'Work', actualInStr = '', actualOutStr = '') {
     Swal.fire({
         showConfirmButton: false,
         showCancelButton: false,
@@ -3005,14 +3018,31 @@ function openEditLogModal(dateStr = '', timeIn = '', timeOut = '', type = 'Work'
                     </div>
                 </div>
                 <div id="swal-time-inputs" style="display: ${type === 'Work' ? 'block' : 'none'};">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-[13px] font-bold text-slate-700 mb-1.5">เวลาเข้า</label>
-                            <input type="time" id="swal-log-in" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition" value="${timeIn}">
+                    <div class="bg-indigo-50/50 p-3 rounded-xl border border-indigo-100 mb-3">
+                        <div class="text-[12px] font-black text-indigo-700 mb-2">เวลาตามตาราง (เปลี่ยนกะ)</div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 mb-1">เวลาเข้าตาราง</label>
+                                <input type="time" id="swal-log-in" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition" value="${timeIn}">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 mb-1">เวลาออกตาราง</label>
+                                <input type="time" id="swal-log-out" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition" value="${timeOut}">
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-[13px] font-bold text-slate-700 mb-1.5">เวลาออก</label>
-                            <input type="time" id="swal-log-out" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition" value="${timeOut}">
+                    </div>
+                    
+                    <div class="bg-slate-50/50 p-3 rounded-xl border border-slate-200">
+                        <div class="text-[12px] font-black text-slate-700 mb-2">เวลาสแกนจริง (แก้ไขกรณีลืมสแกน)</div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 mb-1">เวลาเข้าจริง</label>
+                                <input type="time" id="swal-actual-in" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-700 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 outline-none transition" value="${actualInStr}">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 mb-1">เวลาออกจริง</label>
+                                <input type="time" id="swal-actual-out" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-700 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 outline-none transition" value="${actualOutStr}">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -3042,6 +3072,8 @@ async function saveEmployeeLog(data, actionType) {
                 type: data.type,
                 in: data.in,
                 out: data.out,
+                actualIn: data.actualIn,
+                actualOut: data.actualOut,
                 actionType: actionType
             })
         });
