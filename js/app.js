@@ -1214,16 +1214,18 @@ function renderEmployeeDashboard() {
         let schedOutTextColor = row.noteOut ? 'text-amber-500' : 'text-slate-800';
         let schedOutClass = `font-black text-[13px] ${schedOutTextColor} ${row.noteOut ? 'cursor-pointer active:scale-90 inline-block transition-transform' : ''}`.trim();
         let outClick = row.noteOut ? `data-note="${(row.noteOut||'').replace(/"/g, '&quot;')}" onclick="showNoteTooltip(event)"` : '';
+        
+        const isPartialScan = (row.inTime && !row.outTime) || (!row.inTime && row.outTime);
 
-        let inClass = `scan-time-text text-[11px] font-medium mt-1 ${row.isLate ? 'text-red-500' : 'text-slate-500'}`;
-        let outClass = `scan-time-text text-[11px] font-medium mt-1 text-slate-500`;
+        let inClass = `${isPartialScan && !row.inTime ? '' : 'scan-time-text'} text-[11px] font-medium mt-1 ${row.isLate ? 'text-red-500' : 'text-slate-500'}`;
+        let outClass = `${isPartialScan && !row.outTime ? '' : 'scan-time-text'} text-[11px] font-medium mt-1 text-slate-500`;
         
         const d = row.dateObj;
         const dayNum = String(d.getDate()).padStart(2, '0');
         const monthNum = String(d.getMonth()+1).padStart(2, '0');
         const yearNum = d.getFullYear().toString().substr(-2);
         const shortDateStr = `${dayNum}/${monthNum}/${yearNum}`;
-        const dayStr = d.toLocaleDateString('th-TH', { weekday: 'long' });
+        const dayStr = d.toLocaleDateString('th-TH', { weekday: 'long' }).replace('วัน', '');
 
         let inStr = formatTime(row.inTime);
         if (inStr === '-') inStr = '';
@@ -1235,13 +1237,12 @@ function renderEmployeeDashboard() {
         
         let inDisplay = inStr;
         let outDisplay = outStr;
-        const isPartialScan = (row.inTime && !row.outTime) || (!row.inTime && row.outTime);
         
         const onclickStr = `onclick="openRequestTimeEditModal('${row.date}', '${inStr}', '${outStr}', '${schedInStr}', '${schedOutStr}')"`;
 
-        if (isPartialScan && !row.inTime) inDisplay = `<span class="text-red-500 text-[10px] font-bold tracking-tight block">ไม่มีเวลาเข้างาน</span><div ${onclickStr} class="text-white text-[9.5px] font-bold tracking-tight px-2 py-1 bg-orange-500 rounded-md shadow-sm hover:bg-orange-600 active:scale-95 transition-all cursor-pointer inline-block mt-1">ขอแก้ไข</div>`;
+        if (isPartialScan && !row.inTime) inDisplay = `<span ${onclickStr} class="text-red-500 text-[11px] font-bold tracking-tight block leading-tight cursor-pointer hover:text-red-600 active:scale-95 transition-all">ไม่มี<br>เข้างาน</span>`;
         
-        if (isPartialScan && !row.outTime) outDisplay = `<span class="text-red-500 text-[10px] font-bold tracking-tight block">ไม่มีเวลาออกงาน</span><div ${onclickStr} class="text-white text-[9.5px] font-bold tracking-tight px-2 py-1 bg-orange-500 rounded-md shadow-sm hover:bg-orange-600 active:scale-95 transition-all cursor-pointer inline-block mt-1">ขอแก้ไข</div>`;
+        if (isPartialScan && !row.outTime) outDisplay = `<span ${onclickStr} class="text-red-500 text-[11px] font-bold tracking-tight block leading-tight cursor-pointer hover:text-red-600 active:scale-95 transition-all">ไม่มี<br>ออกงาน</span>`;
         
         if (isPartialScan) bgColor = 'bg-red-50 border-y border-red-200';
 
