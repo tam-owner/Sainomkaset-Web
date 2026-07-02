@@ -2862,33 +2862,9 @@ async function fetchTimeLogs(nickname) {
     });
 
     // Fetch manual overrides from backend API
-    try {
-        const res = await fetch(WEB_APP_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: "getEmployeeLogs",
-                nickname: nickname,
-                month: month,
-                year: year
-            })
-        });
-        const json = await res.json();
-        if (json.status === "success" && json.logs) {
-            json.logs.forEach(manualLog => {
-                let existing = currentLogsData.find(x => x.date === manualLog.date);
-                if (existing) {
-                    if (manualLog.in) existing.in = manualLog.in;
-                    if (manualLog.out) existing.out = manualLog.out;
-                    if (manualLog.type) existing.type = manualLog.type;
-                } else {
-                    currentLogsData.push(manualLog);
-                }
-            });
-        }
-    } catch(e) {
-        console.error("Failed to fetch manual logs:", e);
-    }
-
+    // Removed API call here for instant loading. 
+    // manualLogs are already applied in processData() when Firebase pushes updates, 
+    // and manually applied during saveEmployeeLog().
     // Add leaves
     leaves.forEach(l => {
         if (l.name === nickname && l.status === 'Approved') {
@@ -3155,10 +3131,33 @@ async function saveEmployeeLog(data, actionType) {
         });
         const json = await res.json();
         if (json.status === "success") {
-            // Need to reload attendance data
-            // We can just call init() to refresh everything or just fetchTimeLogs again
+            // Manually apply to local cache for instant UI
+            if (!window.manualLogs) window.manualLogs = [];
+            let existingIdx = window.manualLogs.findIndex(x => x.date === data.date && x.nickname === currentLogsEmp.name);
+            
+            if (actionType === "delete") {
+                if (existingIdx >= 0) window.manualLogs.splice(existingIdx, 1);
+            } else {
+                if (existingIdx >= 0) {
+                    window.manualLogs[existingIdx].in = data.in;
+                    window.manualLogs[existingIdx].out = data.out;
+                    window.manualLogs[existingIdx].type = data.type;
+                } else {
+                    window.manualLogs.push({
+                        date: data.date,
+                        nickname: currentLogsEmp.name,
+                        in: data.in,
+                        out: data.out,
+                        type: data.type
+                    });
+                }
+            }
+            
+            processData();
+            renderAdminSummary();
             await fetchTimeLogs(currentLogsEmp.name);
-            // Data will be updated automatically via Firebase listener
+            
+            // Data will be updated automatically via Firebase listener behind the scenes
             Swal.fire({title: 'สำเร็จ', text: 'อัพเดตข้อมูลเรียบร้อย', icon: 'success', timer: 1500, showConfirmButton: false});
         } else {
             Swal.fire("Error: " + json.message);
