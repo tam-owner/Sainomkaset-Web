@@ -1278,12 +1278,12 @@ function generateEmployeeTableHtml(empObj, myRecords, isAdmin = false) {
         let inDisplay = row.actualIn ? row.actualIn : (inStr || '-');
         let outDisplay = row.actualOut ? row.actualOut : (outStr || '-');
         
-        const actualInStr = row.actualIn || '';
-        const actualOutStr = row.actualOut || '';
+        const actualInStr = row.actualIn || inStr || '';
+        const actualOutStr = row.actualOut || outStr || '';
         
         const onclickStr = isAdmin
             ? `onclick="openEditLogModal('${row.date}', '${schedInStr}', '${schedOutStr}', '${row.type || 'Work'}', '${actualInStr}', '${actualOutStr}')"`
-            : `onclick="openRequestTimeEditModal('${row.date}', '${inStr}', '${outStr}', '${schedInStr}', '${schedOutStr}')"`;
+            : `onclick="openRequestTimeEditModal('${row.date}', '${actualInStr}', '${actualOutStr}', '${schedInStr}', '${schedOutStr}')"`;
 
         const rowClickStr = isAdmin ? onclickStr : '';
         const colClickStr = isAdmin ? '' : onclickStr;
