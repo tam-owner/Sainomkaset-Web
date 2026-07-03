@@ -1288,11 +1288,25 @@ function generateEmployeeTableHtml(empObj, myRecords, isAdmin = false) {
         const rowClickStr = isAdmin ? onclickStr : '';
         const colClickStr = isAdmin ? '' : onclickStr;
 
-        if (isPartialScan && !effectiveIn) inDisplay = `<span class="text-red-500 text-[11px] font-bold tracking-tight block leading-tight">ไม่มี<br>เข้างาน</span><div ${onclickStr} class="scan-time-text text-white text-[9.5px] font-bold tracking-tight px-2 py-1 bg-orange-500 rounded-md shadow-sm hover:bg-orange-600 active:scale-95 transition-all cursor-pointer inline-block mt-1">${isAdmin ? 'แก้ไข' : 'ขอแก้ไข'}</div>`;
+        const pendingReq = timeEditRequests.find(r => r.name === row.name && r.date === row.date && r.status === 'Pending');
+
+        if (isPartialScan && !effectiveIn) {
+            if (pendingReq && pendingReq.newIn !== '-') {
+                inDisplay = `<span class="text-amber-500 text-[11px] font-bold tracking-tight block leading-tight">รออนุมัติ<br>${pendingReq.newIn}</span>`;
+            } else {
+                inDisplay = `<span class="text-red-500 text-[11px] font-bold tracking-tight block leading-tight">ไม่มี<br>เข้างาน</span><div ${onclickStr} class="scan-time-text text-white text-[9.5px] font-bold tracking-tight px-2 py-1 bg-orange-500 rounded-md shadow-sm hover:bg-orange-600 active:scale-95 transition-all cursor-pointer inline-block mt-1">${isAdmin ? 'แก้ไข' : 'ขอแก้ไข'}</div>`;
+            }
+        }
         
-        if (isPartialScan && !effectiveOut) outDisplay = `<span class="text-red-500 text-[11px] font-bold tracking-tight block leading-tight">ไม่มี<br>ออกงาน</span><div ${onclickStr} class="scan-time-text text-white text-[9.5px] font-bold tracking-tight px-2 py-1 bg-orange-500 rounded-md shadow-sm hover:bg-orange-600 active:scale-95 transition-all cursor-pointer inline-block mt-1">${isAdmin ? 'แก้ไข' : 'ขอแก้ไข'}</div>`;
+        if (isPartialScan && !effectiveOut) {
+            if (pendingReq && pendingReq.newOut !== '-') {
+                outDisplay = `<span class="text-amber-500 text-[11px] font-bold tracking-tight block leading-tight">รออนุมัติ<br>${pendingReq.newOut}</span>`;
+            } else {
+                outDisplay = `<span class="text-red-500 text-[11px] font-bold tracking-tight block leading-tight">ไม่มี<br>ออกงาน</span><div ${onclickStr} class="scan-time-text text-white text-[9.5px] font-bold tracking-tight px-2 py-1 bg-orange-500 rounded-md shadow-sm hover:bg-orange-600 active:scale-95 transition-all cursor-pointer inline-block mt-1">${isAdmin ? 'แก้ไข' : 'ขอแก้ไข'}</div>`;
+            }
+        }
         
-        if (isPartialScan) bgColor = 'bg-red-50 border-y border-red-200';
+        if (isPartialScan && !pendingReq) bgColor = 'bg-red-50 border-y border-red-200';
 
         tableHtml += `
         <div class="data-row px-1 py-3 ${bgColor} ${isPartialScan ? 'border-l-4 border-red-500' : ''} ${isAdmin ? 'cursor-pointer hover:bg-slate-100 transition' : ''}" ${rowClickStr}>
