@@ -1250,8 +1250,8 @@ function generateEmployeeTableHtml(empObj, myRecords, isAdmin = false) {
         let schedOutClass = `font-black text-[13px] ${schedOutTextColor} ${row.noteOut ? 'cursor-pointer active:scale-90 inline-block transition-transform' : ''}`.trim();
         let outClick = row.noteOut ? `data-note="${(row.noteOut||'').replace(/"/g, '&quot;')}" onclick="showNoteTooltip(event)"` : '';
         
-        let effectiveIn = row.actualIn || row.inTime;
-        let effectiveOut = row.actualOut || row.outTime;
+        let effectiveIn = row.actualIn || row.inTime || row.manualIn;
+        let effectiveOut = row.actualOut || row.outTime || row.manualOut;
         const isPartialScan = (effectiveIn && !effectiveOut) || (!effectiveIn && effectiveOut);
 
         let inClass = `${isPartialScan && !effectiveIn ? '' : 'scan-time-text'} text-[11px] font-medium mt-1 ${row.isLate ? 'text-red-500' : 'text-slate-500'}`;
