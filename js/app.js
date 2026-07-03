@@ -3215,10 +3215,9 @@ function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) 
     const outH = getH(actualOut || schedOut);
     let outM = getM(actualOut || schedOut);
 
-    const formatTimeLabels = (s, a) => {
+    const formatTimeLabels = (s) => {
         let st = s ? formatTime(s) : '-';
-        let at = a ? formatTime(a) : '-';
-        return `ตาราง: <span class="font-bold text-slate-600">${st}</span> | จริง: <span class="font-bold text-slate-600">${at}</span>`;
+        return `ตาราง: <span class="font-bold text-slate-600">${st}</span>`;
     };
 
     // Normalize minutes to 00 or 30 for the dropdown
@@ -3249,7 +3248,7 @@ function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) 
     };
 
     Swal.fire({
-        title: '<div class="text-[18px] font-black text-slate-800 mb-1">แก้ไขเวลา</div>',
+        title: '<div class="text-[18px] font-black text-slate-800 mb-1">ขอแก้ไขเวลาตามตาราง</div>',
         html: `
             <div class="space-y-4 text-left px-1">
                 <!-- Header -->
@@ -3267,7 +3266,7 @@ function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) 
                         <div class="flex items-center justify-between">
                             <div class="flex flex-col">
                                 <span class="text-[13px] font-bold text-slate-700">เข้างาน</span>
-                                <span class="text-[11px] text-slate-500 font-medium">${formatTimeLabels(schedIn, actualIn)}</span>
+                                <span class="text-[11px] text-slate-500 font-medium">${formatTimeLabels(schedIn)}</span>
                             </div>
                             <div class="flex items-center gap-1.5">
                                 <div class="relative time-dropdown-container">
@@ -3298,7 +3297,7 @@ function openRequestTimeEditModal(date, actualIn, actualOut, schedIn, schedOut) 
                         <div class="flex items-center justify-between">
                             <div class="flex flex-col">
                                 <span class="text-[13px] font-bold text-slate-700">ออกงาน</span>
-                                <span class="text-[11px] text-slate-500 font-medium">${formatTimeLabels(schedOut, actualOut)}</span>
+                                <span class="text-[11px] text-slate-500 font-medium">${formatTimeLabels(schedOut)}</span>
                             </div>
                             <div class="flex items-center gap-1.5">
                                 <div class="relative time-dropdown-container">
