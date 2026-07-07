@@ -7,7 +7,29 @@ function onOpen() {
   var ui = SpreadsheetApp.getUi();
   ui.createMenu('Sainom Kaset')
       .addItem('🔄 ซิงค์ข้อมูลไปที่เว็บไซต์ (Firebase)', 'syncToFirebaseManually')
+      .addItem('⚡️ เปิดระบบซิงค์อัตโนมัติ (ทำครั้งเดียว)', 'setupAutoSyncTrigger')
       .addToUi();
+}
+
+function setupAutoSyncTrigger() {
+  var triggers = ScriptApp.getProjectTriggers();
+  for (var i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === 'autoSyncOnChange') {
+      SpreadsheetApp.getUi().alert('✅ มีระบบซิงค์อัตโนมัติอยู่แล้วครับ เมื่อพิมพ์ใน Sheet ข้อมูลจะเด้งไปที่เว็บทันที');
+      return;
+    }
+  }
+  ScriptApp.newTrigger('autoSyncOnChange')
+      .forSpreadsheet(SpreadsheetApp.getActive())
+      .onChange()
+      .create();
+  SpreadsheetApp.getUi().alert('🎉 เปิดใช้งานระบบซิงค์อัตโนมัติสำเร็จ! คราวนี้เมื่อพิมพ์ใน Sheet ข้อมูลจะเด้งไปที่เว็บทันทีครับ');
+}
+
+function autoSyncOnChange(e) {
+  try {
+    syncToFirebase();
+  } catch(err) {}
 }
 
 function syncToFirebaseManually() {
