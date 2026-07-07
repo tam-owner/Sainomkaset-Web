@@ -2239,7 +2239,9 @@ async function saveEmployee() {
                 let idx = employees.findIndex(e => e.name === oldNickname);
                 if (idx > -1) employees[idx] = empObj;
             } else {
-                employees.push(empObj);
+                if (!employees.some(e => e.name === empObj.nickname)) {
+                    employees.push(empObj);
+                }
             }
             const countEl = document.getElementById('emp-setup-count');
             if (countEl) countEl.innerText = employees.length;
