@@ -1,4 +1,4 @@
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxCQlUS3NNQTRxqGfpZsliDTAO3oRL6u7sKQJx-OjA5a-8w-FFn9afqpjkWkElx5dQ/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwQGRzyn8iQEwotk_6gCSueeEiYNe91-QM4lqBfgZfVcm-Xehi9741Tfl-nehgd9nA/exec';
 
 window.onerror = function(msg, url, line, col, error) {
     alert("Error: " + msg + "\nLine: " + line + "\nCol: " + col);
@@ -2173,14 +2173,22 @@ function closeEmployeeModal() {
         modal.classList.add('hidden');
     }, 300);
 }
-
+let isSavingEmployee = false;
 async function saveEmployee() {
+    if (isSavingEmployee) return;
+    
     try {
         const oldNickname = document.getElementById('old-nickname').value;
         const oldFullName = document.getElementById('old-fullname').value;
 
         const nickname = document.getElementById('emp-nickname').value.trim();
         if (!nickname) return Swal.fire("กรุณากรอกชื่อเล่น");
+
+        if (!oldNickname && employees.some(e => e.name.toLowerCase() === nickname.toLowerCase())) {
+            return Swal.fire("มีชื่อพนักงานนี้ในระบบแล้ว");
+        }
+        
+        isSavingEmployee = true;
 
     const empObj = {
         name: nickname, // 'name' corresponds to nickname in data structure
@@ -2244,10 +2252,12 @@ async function saveEmployee() {
         Swal.fire("Failed to connect to server. Details: " + e.message);
     } finally {
         hideLoading();
+        isSavingEmployee = false;
     }
     } catch (err) {
         console.error("CRITICAL ERROR IN saveEmployee:", err);
         alert("เกิดข้อผิดพลาดรุนแรง: " + err.message);
+        isSavingEmployee = false;
     }
 }
 

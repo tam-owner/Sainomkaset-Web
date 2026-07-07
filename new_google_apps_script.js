@@ -700,6 +700,13 @@ function handleSaveEmployee(p) {
         break;
       }
     }
+  } else {
+    // Check for duplicate name for new employees
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][0]).trim().toLowerCase() === String(p.nickname || "").trim().toLowerCase()) {
+        return {status: "error", message: "มีชื่อพนักงานนี้ในระบบแล้ว"};
+      }
+    }
   }
 
   var rowData = [
@@ -737,7 +744,8 @@ function handleDeleteEmployee(nickname, fullName) {
       return {status: "success", message: "Deleted successfully"};
     }
   }
-  return {status: "error", message: "Not found"};
+  // If not found in sheet, it's effectively deleted already. Return success to trigger Firebase sync.
+  return {status: "success", message: "Already deleted"};
 }
 
 // ----------------------------------------------------
@@ -1268,11 +1276,14 @@ function handleUpdateEditRequestStatus(id, newStatus) {
       
       // If approved, update the actual log
       if (newStatus === "Approved") {
+        var getD = function(v) { return v instanceof Date ? Utilities.formatDate(v, "Asia/Bangkok", "yyyy-MM-dd") : String(v); };
+        var getT = function(v) { return v instanceof Date ? Utilities.formatDate(v, "Asia/Bangkok", "HH:mm") : String(v); };
+        
         var req = {
           nickname: String(data[i][2]),
-          date: String(data[i][3]),
-          in: String(data[i][6]),
-          out: String(data[i][7]),
+          date: getD(data[i][3]),
+          in: getT(data[i][6]),
+          out: getT(data[i][7]),
           type: "Work",
           actionType: "update"
         };
