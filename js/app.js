@@ -2305,6 +2305,7 @@ async function confirmDeleteEmployee() {
         });
         let json = await res.json();
         if (json.status === "success") {
+            closeEmployeeModal();
             employees = employees.filter(e => e.name !== nickname);
             const countEl = document.getElementById('emp-setup-count');
             if (countEl) countEl.innerText = employees.length;
