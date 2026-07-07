@@ -70,7 +70,7 @@ function doPost(e) {
       p.actualTime = p.shift;
       res = handleProcessData(p);
     } else if (action === "saveEmployee") { res = handleSaveEmployee(p); }
-    else if (action === "deleteEmployee") { res = handleDeleteEmployee(p.oldNickname, p.oldFullName); }
+    else if (action === "deleteEmployee") { res = handleDeleteEmployee(p.nickname, p.fullName); }
     else if (action === "saveDeduction") { res = handleSaveDeduction(p.deduction); }
     else if (action === "deleteDeduction") { res = handleDeleteDeduction(p.id); }
     else if (action === "getEmployeeLogs") { res = handleGetEmployeeLogs(p.nickname, p.month, p.year); }
