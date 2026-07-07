@@ -426,12 +426,6 @@ function populateLoginNames() {
         select.appendChild(opt);
     });
 
-    let adminOpt = document.createElement('option');
-    adminOpt.value = "ADMIN";
-    adminOpt.text = "--- ผู้ดูแลระบบ (Admin) ---";
-    adminOpt.className = "font-bold text-indigo-600";
-    select.appendChild(adminOpt);
-
     if (typeof initCustomSelect === 'function') {
         initCustomSelect(select);
     }
@@ -484,20 +478,6 @@ function handleLogin() {
     
     if (!name || !pin) {
         Swal.fire("กรุณาเลือกชื่อและใส่รหัสผ่าน");
-        return;
-    }
-
-    if (name === "ADMIN") {
-        if (pin === "9999") { // Default Admin PIN
-            isAdmin = true;
-            loggedInEmployee = "ADMIN";
-            sessionStorage.setItem('snk_payroll_user', "ADMIN");
-            document.getElementById('login-pin').value = '';
-            showAdminDashboard();
-        } else {
-            Swal.fire("รหัสผ่านแอดมินไม่ถูกต้อง");
-            document.getElementById('login-pin').value = '';
-        }
         return;
     }
 
