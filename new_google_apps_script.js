@@ -695,7 +695,7 @@ function handleSaveEmployee(p) {
   var foundIdx = -1;
   if (p.oldNickname) {
     for (var i = 1; i < data.length; i++) {
-      if (String(data[i][0]).trim() === p.oldNickname && String(data[i][1] || "").trim() === p.oldFullName) {
+      if (String(data[i][0]).trim() === p.oldNickname) {
         foundIdx = i;
         break;
       }
@@ -739,7 +739,7 @@ function handleDeleteEmployee(nickname, fullName) {
   var sheet = getSheetByNameOrCreateNew("Employees");
   var data = sheet.getDataRange().getValues();
   for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]).trim() === nickname && String(data[i][1] || "").trim() === fullName) {
+    if (String(data[i][0]).trim() === nickname) {
       sheet.deleteRow(i + 1);
       return {status: "success", message: "Deleted successfully"};
     }
