@@ -983,16 +983,16 @@ function setupPeriods() {
         }
 
         let nextMonthIndex = m % 12;
-        let payDateH1 = ` (จ่าย 20 ${mName})`;
-        let payDateH2 = ` (จ่าย 5 ${monthNames[nextMonthIndex]})`;
+        let payDateH1 = `(จ่าย 20 ${mName})`;
+        let payDateH2 = `(จ่าย 5 ${monthNames[nextMonthIndex]})`;
 
         if (isAdmin || !hasSocialSecurity) {
-            availablePeriods.push({ value: `all_${mStr}`, text: `1-${lastDay} ${mName} ${yThai}${payDateH2}` });
+            availablePeriods.push({ value: `all_${mStr}`, text: `1-${lastDay} ${mName} ${yThai}`, payDateStr: payDateH2 });
         }
         
         if (isAdmin || hasSocialSecurity) {
-            availablePeriods.push({ value: `h1_${mStr}`, text: `1-15 ${mName} ${yThai}${payDateH1}` });
-            availablePeriods.push({ value: `h2_${mStr}`, text: `16-${lastDay} ${mName} ${yThai}${payDateH2}` });
+            availablePeriods.push({ value: `h1_${mStr}`, text: `1-15 ${mName} ${yThai}`, payDateStr: payDateH1 });
+            availablePeriods.push({ value: `h2_${mStr}`, text: `16-${lastDay} ${mName} ${yThai}`, payDateStr: payDateH2 });
         }
     });
 
@@ -1003,34 +1003,19 @@ function renderPeriodDropdown() {
     const list = document.getElementById('period-dropdown-list');
     let html = '';
     
-    // Apply business rules for period filtering based on deduction type
-    let filteredPeriods = availablePeriods.filter(p => {
-        if (!isAdmin && loggedInEmployee) {
-            let empDedType = String(loggedInEmployee.deductionType || "").trim();
-            let isTax = (empDedType === "3%" || empDedType === "0.03" || empDedType.includes("3%") || empDedType === "" || empDedType === "None");
-            let isSS = (empDedType === "5%" || empDedType === "0.05" || empDedType.includes("5%"));
-            
-            if (isTax) {
-                // หักภาษีให้แสดงแค่รอบ 1-สิ้นเดือนเท่านั้น
-                return p.value.startsWith('all_');
-            } else if (isSS) {
-                // ประกันสังคมให้แสดง 1-15 และ 1-สิ้นเดือน
-                return p.value.startsWith('h1_') || p.value.startsWith('all_');
-            }
-        }
-        return true;
-    });
-
-    if (filteredPeriods.length === 0) {
+    if (availablePeriods.length === 0) {
         html = '<div class="text-center py-4 text-slate-500 font-bold text-sm">ไม่พบข้อมูลในระบบ</div>';
     } else {
-        filteredPeriods.forEach(p => {
+        availablePeriods.forEach(p => {
             let isSel = (p.value === currentPeriodVal);
             let bg = isSel ? 'bg-indigo-50 border-indigo-200' : 'bg-white border-slate-100';
             let txt = isSel ? 'text-indigo-700 font-bold' : 'text-slate-700 font-semibold';
             
-            html += `<div onclick="selectPeriod('${p.value}', '${p.text}')" class="cursor-pointer ${bg} ${txt} p-4 mb-2 rounded-xl border flex items-center justify-between active:scale-95 transition-all">
-                        <span>${p.text}</span>
+            html += `<div onclick="selectPeriod('${p.value}', '${p.text}')" class="cursor-pointer ${bg} p-4 mb-2 rounded-xl border flex items-center justify-between active:scale-95 transition-all">
+                        <div class="flex items-center gap-2">
+                            <span class="${txt}">${p.text}</span>
+                            ${p.payDateStr ? `<span class="text-[11px] font-medium opacity-60 ${isSel ? 'text-indigo-600' : 'text-slate-400'}">${p.payDateStr}</span>` : ''}
+                        </div>
                         ${isSel ? '<svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' : ''}
                      </div>`;
         });
