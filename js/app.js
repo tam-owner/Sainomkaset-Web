@@ -982,17 +982,17 @@ function setupPeriods() {
             hasSocialSecurity = (empDedType === "5%" || empDedType === "0.05" || empDedType.includes("5%"));
         }
 
+        let nextMonthIndex = m % 12;
+        let payDateH1 = ` (จ่าย 20 ${mName})`;
+        let payDateH2 = ` (จ่าย 5 ${monthNames[nextMonthIndex]})`;
+
         if (isAdmin || !hasSocialSecurity) {
-            availablePeriods.push({ value: `all_${mStr}`, text: `1-${lastDay} ${mName} ${yThai}` });
+            availablePeriods.push({ value: `all_${mStr}`, text: `1-${lastDay} ${mName} ${yThai}${payDateH2}` });
         }
         
         if (isAdmin || hasSocialSecurity) {
-            if (periodsSet.has(`h1_${mStr}`)) {
-                availablePeriods.push({ value: `h1_${mStr}`, text: `1-15 ${mName} ${yThai}` });
-            }
-            if (periodsSet.has(`h2_${mStr}`)) {
-                availablePeriods.push({ value: `h2_${mStr}`, text: `16-${lastDay} ${mName} ${yThai}` });
-            }
+            availablePeriods.push({ value: `h1_${mStr}`, text: `1-15 ${mName} ${yThai}${payDateH1}` });
+            availablePeriods.push({ value: `h2_${mStr}`, text: `16-${lastDay} ${mName} ${yThai}${payDateH2}` });
         }
     });
 
