@@ -1115,7 +1115,7 @@ function generateSalarySummaryHtml(empObj, myRecords) {
     let formatCurrency = (val) => Number(val || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     let periodText = availablePeriods.find(p => p.value === currentPeriodVal)?.text || '';
 
-    let payDateText = "รอบจ่าย";
+    let payDateText = "";
     if (currentPeriodVal) {
         const monthsThai = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
         let parts = currentPeriodVal.split('_');
@@ -1126,9 +1126,9 @@ function generateSalarySummaryHtml(empObj, myRecords) {
                 let mm = parseInt(ym[1]);
                 let nextMonthIndex = mm % 12;
                 if (type === 'h1') {
-                    payDateText = `20 ${monthsThai[mm - 1]}`;
-                } else if (type === 'h2' || type === 'f') {
-                    payDateText = `5 ${monthsThai[nextMonthIndex]}`;
+                    payDateText = ` 20 ${monthsThai[mm - 1]}`;
+                } else if (type === 'h2' || type === 'all' || type === 'f') {
+                    payDateText = ` 5 ${monthsThai[nextMonthIndex]}`;
                 }
             }
         }
@@ -1211,7 +1211,7 @@ function generateSalarySummaryHtml(empObj, myRecords) {
             <div onclick="downloadPayslipPdf('${empObj.name}')" class="bg-[#0fa981] rounded-[20px] p-5 flex justify-between items-center shadow-lg shadow-[#0fa981]/40 mt-4 relative overflow-hidden cursor-pointer active:scale-95 transition-transform duration-200 group">
                 <div class="relative z-10 flex flex-col">
                     <p class="text-[11px] font-black text-emerald-50 uppercase tracking-widest">รายได้สะสมรอบปัจจุบัน</p>
-                    <p class="text-[9.5px] text-yellow-300 font-bold mb-1">*จะได้รับเมื่อถึงรอบจ่าย ${payDateText}*</p>
+                    <p class="text-[9.5px] text-yellow-300 font-bold mb-1">*จะได้รับเมื่อถึงรอบจ่าย${payDateText}*</p>
                     <div class="mt-2 flex items-center gap-1 bg-white/20 px-2 py-1 rounded-full w-max opacity-90 group-hover:opacity-100 transition-opacity">
                         <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                         <span class="text-[10px] font-bold text-white">แตะเพื่อโหลดสลิป</span>
