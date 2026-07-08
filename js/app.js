@@ -976,15 +976,17 @@ function setupPeriods() {
         let yThai = y + 543;
         let lastDay = new Date(y, m, 0).getDate();
         
-        let empType = (!isAdmin && loggedInEmployee && loggedInEmployee.employeeType) ? String(loggedInEmployee.employeeType).toLowerCase() : '';
-        let isPartTime = empType.includes('part');
-        let isFullTime = !isAdmin && !isPartTime;
+        let hasSocialSecurity = false;
+        if (!isAdmin && loggedInEmployee) {
+            let empDedType = String(loggedInEmployee.deductionType || "").trim();
+            hasSocialSecurity = (empDedType === "5%" || empDedType === "0.05" || empDedType.includes("5%"));
+        }
 
-        if (isAdmin || isPartTime) {
+        if (isAdmin || !hasSocialSecurity) {
             availablePeriods.push({ value: `all_${mStr}`, text: `1-${lastDay} ${mName} ${yThai}` });
         }
         
-        if (isAdmin || isFullTime) {
+        if (isAdmin || hasSocialSecurity) {
             if (periodsSet.has(`h1_${mStr}`)) {
                 availablePeriods.push({ value: `h1_${mStr}`, text: `1-15 ${mName} ${yThai}` });
             }
