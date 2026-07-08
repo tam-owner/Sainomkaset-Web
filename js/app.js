@@ -976,12 +976,21 @@ function setupPeriods() {
         let yThai = y + 543;
         let lastDay = new Date(y, m, 0).getDate();
         
-        availablePeriods.push({ value: `all_${mStr}`, text: `1-${lastDay} ${mName} ${yThai}` });
-        if (periodsSet.has(`h1_${mStr}`)) {
-            availablePeriods.push({ value: `h1_${mStr}`, text: `1-15 ${mName} ${yThai}` });
+        let empType = (!isAdmin && loggedInEmployee && loggedInEmployee.employeeType) ? String(loggedInEmployee.employeeType).toLowerCase() : '';
+        let isPartTime = empType.includes('part');
+        let isFullTime = !isAdmin && !isPartTime;
+
+        if (isAdmin || isPartTime) {
+            availablePeriods.push({ value: `all_${mStr}`, text: `1-${lastDay} ${mName} ${yThai}` });
         }
-        if (periodsSet.has(`h2_${mStr}`)) {
-            availablePeriods.push({ value: `h2_${mStr}`, text: `16-${lastDay} ${mName} ${yThai}` });
+        
+        if (isAdmin || isFullTime) {
+            if (periodsSet.has(`h1_${mStr}`)) {
+                availablePeriods.push({ value: `h1_${mStr}`, text: `1-15 ${mName} ${yThai}` });
+            }
+            if (periodsSet.has(`h2_${mStr}`)) {
+                availablePeriods.push({ value: `h2_${mStr}`, text: `16-${lastDay} ${mName} ${yThai}` });
+            }
         }
     });
 
