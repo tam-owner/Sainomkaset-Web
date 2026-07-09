@@ -991,8 +991,12 @@ function setupPeriods() {
         }
         
         if (isAdmin || hasSocialSecurity) {
-            availablePeriods.push({ value: `h2_${mStr}`, text: `16-${lastDay} ${mName} ${yThai}`, payDateStr: payDateH2 });
-            availablePeriods.push({ value: `h1_${mStr}`, text: `1-15 ${mName} ${yThai}`, payDateStr: payDateH1 });
+            if (periodsSet.has(`h2_${mStr}`)) {
+                availablePeriods.push({ value: `h2_${mStr}`, text: `16-${lastDay} ${mName} ${yThai}`, payDateStr: payDateH2 });
+            }
+            if (periodsSet.has(`h1_${mStr}`)) {
+                availablePeriods.push({ value: `h1_${mStr}`, text: `1-15 ${mName} ${yThai}`, payDateStr: payDateH1 });
+            }
         }
     });
 
