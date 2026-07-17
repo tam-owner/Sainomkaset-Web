@@ -1137,7 +1137,11 @@ function generateSalarySummaryHtml(empObj, myRecords) {
     }
 
     let netPay = payBeforeTax - standardDeduct;
-    let formatCurrency = (val) => Number(val || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    let formatCurrency = (val) => {
+        let str = Number(val || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        let parts = str.split('.');
+        return `${parts[0]}<span class="text-[0.65em]">.${parts[1]}</span>`;
+    };
     let periodText = availablePeriods.find(p => p.value === currentPeriodVal)?.text || '';
 
     let payDateText = "";
@@ -1609,7 +1613,11 @@ function renderAdminSummary() {
     let chartDeduct = [];
     
     let html = '';
-    let formatCurrency = (val) => Number(val || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    let formatCurrency = (val) => {
+        let str = Number(val || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        let parts = str.split('.');
+        return `${parts[0]}<span class="text-[0.65em]">.${parts[1]}</span>`;
+    };
     
     Object.values(empStats).forEach(emp => {
         if (emp.totalNormalHours === 0 && emp.totalOTHours === 0 && (!emp.normalRate || emp.normalRate === 0)) return; 
