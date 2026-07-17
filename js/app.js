@@ -1087,8 +1087,8 @@ function generateSalarySummaryHtml(empObj, myRecords) {
     });
 
     let isFullTime = (empObj.employeeType === 'Full Time');
-    let normalPay = isFullTime ? ((empObj.monthlyRate || 0) / 2) : (totalNormalHours * empObj.normalRate);
-    let otPay = totalOTHours * empObj.otRate;
+    let normalPay = Math.round(isFullTime ? ((empObj.monthlyRate || 0) / 2) : (totalNormalHours * empObj.normalRate));
+    let otPay = Math.round(totalOTHours * empObj.otRate);
     let grossPay = normalPay + otPay;
     
     let customDeductTotal = 0;
@@ -1096,7 +1096,7 @@ function generateSalarySummaryHtml(empObj, myRecords) {
     let customDeductHtml = '';
 
     if (isFullTime && totalLateDeductionHrs > 0) {
-        let latePayDeduct = totalLateDeductionHrs * empObj.normalRate;
+        let latePayDeduct = Math.round(totalLateDeductionHrs * empObj.normalRate);
         customDeductTotal += latePayDeduct;
         customDeductHtml += `<div class="flex justify-between items-center text-xs py-1.5 border-b border-dashed border-red-100 last:border-0">
             <span><span class="text-red-500 font-bold">[หักสาย/ขาดงาน]</span> <span class="text-slate-700 font-medium">รวม ${totalLateDeductionHrs} ชม.</span></span>
@@ -1126,10 +1126,10 @@ function generateSalarySummaryHtml(empObj, myRecords) {
     let deductLabel = '';
     let empDedType = String(empObj.deductionType).trim();
     if (empDedType === "3%" || empDedType === "0.03" || empDedType.includes("3%") || empDedType === "" || empDedType === "None") {
-        standardDeduct = payBeforeTax * 0.03;
+        standardDeduct = Math.round(payBeforeTax * 0.03);
         deductLabel = "หัก ณ ที่จ่าย 3%";
     } else if (empDedType === "5%" || empDedType === "0.05" || empDedType.includes("5%")) {
-        standardDeduct = payBeforeTax * 0.05;
+        standardDeduct = Math.round(payBeforeTax * 0.05);
         deductLabel = "ประกันสังคม 5%";
     }
 
@@ -1613,8 +1613,8 @@ function renderAdminSummary() {
         if (emp.totalNormalHours === 0 && emp.totalOTHours === 0 && (!emp.normalRate || emp.normalRate === 0)) return; 
         
         let isFullTime = (emp.employeeType === 'Full Time');
-        let normalPay = isFullTime ? ((emp.monthlyRate || 0) / 2) : (emp.totalNormalHours * emp.normalRate);
-        let otPay = emp.totalOTHours * emp.otRate;
+        let normalPay = Math.round(isFullTime ? ((emp.monthlyRate || 0) / 2) : (emp.totalNormalHours * emp.normalRate));
+        let otPay = Math.round(emp.totalOTHours * emp.otRate);
         let grossPay = normalPay + otPay;
         
         let empDeductions = deductions.filter(d => d.period === currentPeriodVal && d.name === emp.name);
@@ -1623,7 +1623,7 @@ function renderAdminSummary() {
         
         let latePayDeduct = 0;
         if (isFullTime && emp.totalLateDeductionHrs > 0) {
-            latePayDeduct = emp.totalLateDeductionHrs * emp.normalRate;
+            latePayDeduct = Math.round(emp.totalLateDeductionHrs * emp.normalRate);
             customDeductTotal += latePayDeduct;
         }
         
@@ -1638,10 +1638,10 @@ function renderAdminSummary() {
         let deductLabel = '';
         let empDedType = String(emp.deductionType).trim();
         if (empDedType === "3%" || empDedType === "0.03" || empDedType.includes("3%") || empDedType === "" || empDedType === "None") {
-            standardDeduct = payBeforeTax * 0.03;
+            standardDeduct = Math.round(payBeforeTax * 0.03);
             deductLabel = "หักภาษี 3%";
         } else if (empDedType === "5%" || empDedType === "0.05" || empDedType.includes("5%")) {
-            standardDeduct = payBeforeTax * 0.05;
+            standardDeduct = Math.round(payBeforeTax * 0.05);
             deductLabel = "หักประกันสังคม 5%";
         }
 
@@ -2561,10 +2561,11 @@ function calculateMonthlySlips() {
     let monthlyRate = loggedInEmployee.monthlyRate || 0;
     
     monthlySlips.forEach(s => {
-        let normalPay = isFullTime ? (monthlyRate / 2) : (s.regularHours * rate);
-        s.grossPay = normalPay + (s.otHours * otRate);
+        let normalPay = Math.round(isFullTime ? (monthlyRate / 2) : (s.regularHours * rate));
+        let otPay = Math.round(s.otHours * otRate);
+        s.grossPay = normalPay + otPay;
         
-        let latePayDeduct = isFullTime ? (s.lateDeduction * rate) : 0;
+        let latePayDeduct = Math.round(isFullTime ? (s.lateDeduction * rate) : 0);
         s.totalDeductions = latePayDeduct + s.otherDeductions;
         s.netPay = s.grossPay - s.totalDeductions;
         s.rate = rate;
@@ -2693,7 +2694,7 @@ function printSlip(idx) {
                     <tr>
                         <td>ค่าล่วงเวลา OT (เรท ${s.otRate} ฿/ชม.)</td>
                         <td>${s.otHours.toFixed(2)} ชม.</td>
-                        <td>${formatMoney(s.otHours * s.otRate)} ฿</td>
+                        <td>${formatMoney(Math.round(s.otHours * s.otRate))} ฿</td>
                     </tr>
                     <tr class="total-row">
                         <td colspan="2" style="text-align: right;">รวมรายได้ (Gross Pay)</td>
