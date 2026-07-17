@@ -1079,9 +1079,11 @@ function selectPeriod(val, text) {
 function generateSalarySummaryHtml(empObj, myRecords) {
     let totalNormalHours = 0;
     let totalOTHours = 0;
+    let totalLateDeductionHrs = 0;
     myRecords.forEach(r => {
         totalNormalHours += r.regularHours || 0;
         totalOTHours += r.otHours || 0;
+        totalLateDeductionHrs += r.lateDeduction || 0;
     });
 
     let isFullTime = (empObj.employeeType === 'Full Time');
@@ -1092,6 +1094,15 @@ function generateSalarySummaryHtml(empObj, myRecords) {
     let customDeductTotal = 0;
     let customBonusTotal = 0;
     let customDeductHtml = '';
+
+    if (isFullTime && totalLateDeductionHrs > 0) {
+        let latePayDeduct = totalLateDeductionHrs * empObj.normalRate;
+        customDeductTotal += latePayDeduct;
+        customDeductHtml += `<div class="flex justify-between items-center text-xs py-1.5 border-b border-dashed border-red-100 last:border-0">
+            <span><span class="text-red-500 font-bold">[หักสาย/ขาดงาน]</span> <span class="text-slate-700 font-medium">รวม ${totalLateDeductionHrs} ชม.</span></span>
+            <span class="font-black text-red-600">-฿${latePayDeduct.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
+        </div>`;
+    }
 
     let empDeductions = deductions.filter(d => d.period === currentPeriodVal && d.name === empObj.name);
     empDeductions.forEach(d => {
@@ -1567,7 +1578,8 @@ function renderAdminSummary() {
         empStats[e.name] = {
             ...e,
             totalNormalHours: 0,
-            totalOTHours: 0
+            totalOTHours: 0,
+            totalLateDeductionHrs: 0
         };
     });
 
@@ -1581,6 +1593,7 @@ function renderAdminSummary() {
         if (empStats[r.name]) {
             empStats[r.name].totalNormalHours += r.regularHours || 0;
             empStats[r.name].totalOTHours += r.otHours || 0;
+            empStats[r.name].totalLateDeductionHrs += r.lateDeduction || 0;
         }
     });
 
@@ -1607,6 +1620,12 @@ function renderAdminSummary() {
         let empDeductions = deductions.filter(d => d.period === currentPeriodVal && d.name === emp.name);
         let customDeductTotal = 0;
         let customBonusTotal = 0;
+        
+        let latePayDeduct = 0;
+        if (isFullTime && emp.totalLateDeductionHrs > 0) {
+            latePayDeduct = emp.totalLateDeductionHrs * emp.normalRate;
+            customDeductTotal += latePayDeduct;
+        }
         
         empDeductions.forEach(d => {
             if (d.type === 'Bonus') customBonusTotal += d.amount;
@@ -1666,6 +1685,12 @@ function renderAdminSummary() {
                 <div class="flex justify-between text-orange-600">
                     <span>OT (${emp.totalOTHours.toFixed(1)} ชม. x ฿${emp.otRate})</span>
                     <span>฿${otPay.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
+                </div>` : ''}
+                
+                ${latePayDeduct > 0 ? `
+                <div class="flex justify-between text-red-500">
+                    <span>หักสาย/ขาดงาน (${emp.totalLateDeductionHrs.toFixed(1)} ชม.)</span>
+                    <span>-฿${latePayDeduct.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
                 </div>` : ''}
                 
 
@@ -2538,13 +2563,16 @@ function calculateMonthlySlips() {
     monthlySlips.forEach(s => {
         let normalPay = isFullTime ? (monthlyRate / 2) : (s.regularHours * rate);
         s.grossPay = normalPay + (s.otHours * otRate);
-        s.totalDeductions = s.lateDeduction + s.otherDeductions;
+        
+        let latePayDeduct = isFullTime ? (s.lateDeduction * rate) : 0;
+        s.totalDeductions = latePayDeduct + s.otherDeductions;
         s.netPay = s.grossPay - s.totalDeductions;
         s.rate = rate;
         s.otRate = otRate;
         s.normalPay = normalPay;
         s.isFullTime = isFullTime;
         s.monthlyRate = monthlyRate;
+        s.latePayDeduct = latePayDeduct;
         
         // Generate period text
         let payDateText = "";
@@ -2671,11 +2699,12 @@ function printSlip(idx) {
                         <td colspan="2" style="text-align: right;">รวมรายได้ (Gross Pay)</td>
                         <td>${formatMoney(s.grossPay)} ฿</td>
                     </tr>
+                    ${s.latePayDeduct > 0 ? `
                     <tr>
-                        <td>หักสาย/ขาดงาน</td>
+                        <td>หักสาย/ขาดงาน (${s.lateDeduction.toFixed(2)} ชม.)</td>
                         <td>-</td>
-                        <td>-${formatMoney(s.lateDeduction)} ฿</td>
-                    </tr>
+                        <td>-${formatMoney(s.latePayDeduct)} ฿</td>
+                    </tr>` : ''}
                     <tr>
                         <td>หักอื่นๆ</td>
                         <td>-</td>
