@@ -1086,9 +1086,18 @@ function generateSalarySummaryHtml(empObj, myRecords) {
         totalLateDeductionHrs += r.lateDeduction || 0;
     });
 
+    let empDedTypeForRound = String(empObj.deductionType || "").trim();
+    let is5PercentForRound = (empDedTypeForRound === "5%" || empDedTypeForRound === "0.05" || empDedTypeForRound.includes("5%"));
+
     let isFullTime = (empObj.employeeType === 'Full Time');
-    let normalPay = Math.round(isFullTime ? ((empObj.monthlyRate || 0) / 2) : (totalNormalHours * empObj.normalRate));
-    let otPay = Math.round(totalOTHours * empObj.otRate);
+    let normalPay = isFullTime ? ((empObj.monthlyRate || 0) / 2) : (totalNormalHours * empObj.normalRate);
+    let otPay = totalOTHours * empObj.otRate;
+    
+    if (is5PercentForRound) {
+        normalPay = Math.round(normalPay);
+        otPay = Math.round(otPay);
+    }
+    
     let grossPay = normalPay + otPay;
     
     let customDeductTotal = 0;
@@ -1096,7 +1105,9 @@ function generateSalarySummaryHtml(empObj, myRecords) {
     let customDeductHtml = '';
 
     if (isFullTime && totalLateDeductionHrs > 0) {
-        let latePayDeduct = Math.round(totalLateDeductionHrs * empObj.normalRate);
+        let latePayDeduct = totalLateDeductionHrs * empObj.normalRate;
+        if (is5PercentForRound) latePayDeduct = Math.round(latePayDeduct);
+        
         customDeductTotal += latePayDeduct;
         customDeductHtml += `<div class="flex justify-between items-center text-xs py-1.5 border-b border-dashed border-red-100 last:border-0">
             <span><span class="text-red-500 font-bold">[หักสาย]</span> <span class="text-slate-700 font-medium">รวม ${totalLateDeductionHrs} ชม.</span></span>
@@ -1137,7 +1148,8 @@ function generateSalarySummaryHtml(empObj, myRecords) {
     }
 
     let netPay = payBeforeTax - standardDeduct;
-    let formatCurrency = (val) => {
+    let formatCurrency = (val) => Number(val || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    let formatCurrencySmallDecimals = (val) => {
         let str = Number(val || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         let parts = str.split('.');
         return `${parts[0]}<span class="text-[0.65em]">.${parts[1]}</span>`;
@@ -1269,7 +1281,7 @@ function generateSalarySummaryHtml(empObj, myRecords) {
                     </div>` : ''}
                 </div>
                 <div class="text-3xl font-black text-white tracking-tight relative z-10 flex items-baseline">
-                    <span class="text-lg ${isPayDateReached ? 'text-emerald-200' : 'text-slate-400'} mr-1.5 font-bold">฿</span>${formatCurrency(netPay)}
+                    <span class="text-lg ${isPayDateReached ? 'text-emerald-200' : 'text-slate-400'} mr-1.5 font-bold">฿</span>${formatCurrencySmallDecimals(netPay)}
                 </div>
             </div>
         </div>
@@ -1613,7 +1625,8 @@ function renderAdminSummary() {
     let chartDeduct = [];
     
     let html = '';
-    let formatCurrency = (val) => {
+    let formatCurrency = (val) => Number(val || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    let formatCurrencySmallDecimals = (val) => {
         let str = Number(val || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         let parts = str.split('.');
         return `${parts[0]}<span class="text-[0.65em]">.${parts[1]}</span>`;
@@ -1622,9 +1635,18 @@ function renderAdminSummary() {
     Object.values(empStats).forEach(emp => {
         if (emp.totalNormalHours === 0 && emp.totalOTHours === 0 && (!emp.normalRate || emp.normalRate === 0)) return; 
         
+        let empDedTypeForRound = String(emp.deductionType || "").trim();
+        let is5PercentForRound = (empDedTypeForRound === "5%" || empDedTypeForRound === "0.05" || empDedTypeForRound.includes("5%"));
+
         let isFullTime = (emp.employeeType === 'Full Time');
-        let normalPay = Math.round(isFullTime ? ((emp.monthlyRate || 0) / 2) : (emp.totalNormalHours * emp.normalRate));
-        let otPay = Math.round(emp.totalOTHours * emp.otRate);
+        let normalPay = isFullTime ? ((emp.monthlyRate || 0) / 2) : (emp.totalNormalHours * emp.normalRate);
+        let otPay = emp.totalOTHours * emp.otRate;
+        
+        if (is5PercentForRound) {
+            normalPay = Math.round(normalPay);
+            otPay = Math.round(otPay);
+        }
+        
         let grossPay = normalPay + otPay;
         
         let empDeductions = deductions.filter(d => d.period === currentPeriodVal && d.name === emp.name);
@@ -1633,7 +1655,8 @@ function renderAdminSummary() {
         
         let latePayDeduct = 0;
         if (isFullTime && emp.totalLateDeductionHrs > 0) {
-            latePayDeduct = Math.round(emp.totalLateDeductionHrs * emp.normalRate);
+            latePayDeduct = emp.totalLateDeductionHrs * emp.normalRate;
+            if (is5PercentForRound) latePayDeduct = Math.round(latePayDeduct);
             customDeductTotal += latePayDeduct;
         }
         
@@ -1682,7 +1705,7 @@ function renderAdminSummary() {
                 </div>
                 <div class="text-right">
                     <div class="text-[10px] font-bold text-emerald-500/70 uppercase">ยอดสุทธิ</div>
-                    <div class="font-black text-xl text-emerald-600 leading-none">฿${formatCurrency(netPay)}</div>
+                    <div class="font-black text-xl text-emerald-600 leading-none">฿${formatCurrencySmallDecimals(netPay)}</div>
                 </div>
             </div>
             
@@ -2570,12 +2593,23 @@ function calculateMonthlySlips() {
     let isFullTime = (loggedInEmployee.employeeType === 'Full Time');
     let monthlyRate = loggedInEmployee.monthlyRate || 0;
     
+    let empDedTypeForRound = String(loggedInEmployee.deductionType || "").trim();
+    let is5PercentForRound = (empDedTypeForRound === "5%" || empDedTypeForRound === "0.05" || empDedTypeForRound.includes("5%"));
+
     monthlySlips.forEach(s => {
-        let normalPay = Math.round(isFullTime ? (monthlyRate / 2) : (s.regularHours * rate));
-        let otPay = Math.round(s.otHours * otRate);
+        let normalPay = isFullTime ? (monthlyRate / 2) : (s.regularHours * rate);
+        let otPay = s.otHours * otRate;
+        
+        if (is5PercentForRound) {
+            normalPay = Math.round(normalPay);
+            otPay = Math.round(otPay);
+        }
+        
         s.grossPay = normalPay + otPay;
         
-        let latePayDeduct = Math.round(isFullTime ? (s.lateDeduction * rate) : 0);
+        let latePayDeduct = isFullTime ? (s.lateDeduction * rate) : 0;
+        if (is5PercentForRound) latePayDeduct = Math.round(latePayDeduct);
+        
         s.totalDeductions = latePayDeduct + s.otherDeductions;
         s.netPay = s.grossPay - s.totalDeductions;
         s.rate = rate;
