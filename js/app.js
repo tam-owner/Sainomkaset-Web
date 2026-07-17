@@ -1226,7 +1226,7 @@ function generateSalarySummaryHtml(empObj, myRecords) {
                                 ${isFullTime 
                                     ? `<span class="text-xs font-black text-emerald-600 bg-emerald-100/80 px-1.5 py-[1px] rounded-md shadow-sm border border-emerald-200">฿${formatCurrencyNoDecimals(empObj.monthlyRate)} ÷ 2</span>`
                                     : `<span class="text-xs font-black text-emerald-600 bg-emerald-100/80 px-1.5 py-[1px] rounded-md shadow-sm border border-emerald-200">${totalNormalHours.toFixed(1)} ชม.</span>
-                                       <span>× ฿${formatCurrencySmallDecimals(empObj.normalRate)}/ชม.</span>`
+                                       <span>× ฿${formatCurrency(empObj.normalRate)}/ชม.</span>`
                                 }
                             </div>
                         </div>
@@ -1243,7 +1243,7 @@ function generateSalarySummaryHtml(empObj, myRecords) {
                             <span class="text-sm font-bold text-slate-700">ค่าล่วงเวลา (OT)</span>
                             <div class="mt-1 flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
                                 <span class="text-xs font-black text-orange-600 bg-orange-100/80 px-1.5 py-[1px] rounded-md shadow-sm border border-orange-200">${totalOTHours.toFixed(1)} ชม.</span>
-                                <span>× ฿${formatCurrencySmallDecimals(empObj.otRate)}/ชม.</span>
+                                <span>× ฿${formatCurrency(empObj.otRate)}/ชม.</span>
                             </div>
                         </div>
                     </div>
