@@ -1659,7 +1659,7 @@ function renderAdminSummary() {
             
             <div class="space-y-2 text-sm font-semibold text-slate-600">
                 <div class="flex justify-between">
-                    <span class="text-slate-500">${isFullTime ? 'ค่าแรงครึ่งเดือน (รายเดือน ÷ 2)' : \`ค่าจ้างปกติ (\${emp.totalNormalHours.toFixed(1)} ชม. x ฿\${emp.normalRate})\`}</span>
+                    <span class="text-slate-500">${isFullTime ? 'ค่าแรงครึ่งเดือน (รายเดือน ÷ 2)' : 'ค่าจ้างปกติ (' + emp.totalNormalHours.toFixed(1) + ' ชม. x ฿' + emp.normalRate + ')'}</span>
                     <span>฿${normalPay.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
                 </div>
                 ${emp.totalOTHours > 0 ? `
