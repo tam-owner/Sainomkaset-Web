@@ -255,11 +255,19 @@ function processData() {
         let d;
         const dtMatch = timestampStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:\s+(\d{1,2}:\d{2}(?::\d{2})?))?/);
         if (dtMatch) {
-            let day = dtMatch[1].padStart(2, '0');
-            let month = dtMatch[2].padStart(2, '0');
-            let year = dtMatch[3];
-            let time = dtMatch[4] || '00:00:00';
-            d = new Date(`${year}-${month}-${day}T${time}`);
+            let day = parseInt(dtMatch[1], 10);
+            let month = parseInt(dtMatch[2], 10) - 1;
+            let year = parseInt(dtMatch[3], 10);
+            if (year < 100) year += 2000;
+            
+            let h = 0, m = 0, s = 0;
+            if (dtMatch[4]) {
+                let tParts = dtMatch[4].split(':');
+                h = parseInt(tParts[0], 10) || 0;
+                m = parseInt(tParts[1], 10) || 0;
+                s = parseInt(tParts[2], 10) || 0;
+            }
+            d = new Date(year, month, day, h, m, s);
         } else {
             d = new Date(timestampStr);
         }
