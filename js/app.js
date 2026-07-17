@@ -1154,6 +1154,7 @@ function generateSalarySummaryHtml(empObj, myRecords) {
         let parts = str.split('.');
         return `${parts[0]}<span class="text-[0.65em]">.${parts[1]}</span>`;
     };
+    let formatCurrencyNoDecimals = (val) => Number(val || 0).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
     let periodText = availablePeriods.find(p => p.value === currentPeriodVal)?.text || '';
 
     let payDateText = "";
@@ -1208,8 +1209,8 @@ function generateSalarySummaryHtml(empObj, myRecords) {
                     <p class="text-2xl font-black text-slate-800 leading-none drop-shadow-sm">${empObj.name} ${empObj.fullName ? `<span class="text-sm font-semibold text-slate-400 ml-1 tracking-tight">${empObj.fullName}</span>` : ''}</p>
                 </div>
                 <div class="text-right">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">${isFullTime ? 'เรตรายเดือน (วันละ ฿' + formatCurrency(empObj.normalRate * 8) + ')' : 'เรตรายวัน (8 ชม.)'}</p>
-                    <p class="text-lg font-black text-emerald-600 leading-none bg-emerald-50 px-2 py-1 rounded-md">฿${formatCurrency(isFullTime ? empObj.monthlyRate : empObj.dailyRate)}</p>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">${isFullTime ? 'เรตรายเดือน (วันละ ฿' + formatCurrencyNoDecimals(empObj.normalRate * 8) + ')' : 'เรตรายวัน (8 ชม.)'}</p>
+                    <p class="text-lg font-black text-emerald-600 leading-none bg-emerald-50 px-2 py-1 rounded-md">฿${formatCurrencyNoDecimals(isFullTime ? empObj.monthlyRate : empObj.dailyRate)}</p>
                 </div>
             </div>
 
@@ -1223,14 +1224,14 @@ function generateSalarySummaryHtml(empObj, myRecords) {
                             <span class="text-sm font-bold text-slate-700">${isFullTime ? 'ค่าแรงครึ่งเดือน' : 'ค่าแรงปกติ'}</span>
                             <div class="mt-1 flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
                                 ${isFullTime 
-                                    ? `<span class="text-xs font-black text-emerald-600 bg-emerald-100/80 px-1.5 py-[1px] rounded-md shadow-sm border border-emerald-200">฿${formatCurrency(empObj.monthlyRate)} ÷ 2</span>`
+                                    ? `<span class="text-xs font-black text-emerald-600 bg-emerald-100/80 px-1.5 py-[1px] rounded-md shadow-sm border border-emerald-200">฿${formatCurrencyNoDecimals(empObj.monthlyRate)} ÷ 2</span>`
                                     : `<span class="text-xs font-black text-emerald-600 bg-emerald-100/80 px-1.5 py-[1px] rounded-md shadow-sm border border-emerald-200">${totalNormalHours.toFixed(1)} ชม.</span>
-                                       <span>× ฿${formatCurrency(empObj.normalRate)}/ชม.</span>`
+                                       <span>× ฿${formatCurrencySmallDecimals(empObj.normalRate)}/ชม.</span>`
                                 }
                             </div>
                         </div>
                     </div>
-                    <span class="text-lg font-black text-slate-800">฿${formatCurrency(normalPay)}</span>
+                    <span class="text-lg font-black text-slate-800">฿${formatCurrencySmallDecimals(normalPay)}</span>
                 </div>
 
                 <div class="flex justify-between items-center p-3 bg-gradient-to-r from-orange-50 to-white rounded-xl border border-orange-100/50 shadow-sm transition-all hover:shadow-md">
@@ -1242,11 +1243,11 @@ function generateSalarySummaryHtml(empObj, myRecords) {
                             <span class="text-sm font-bold text-slate-700">ค่าล่วงเวลา (OT)</span>
                             <div class="mt-1 flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
                                 <span class="text-xs font-black text-orange-600 bg-orange-100/80 px-1.5 py-[1px] rounded-md shadow-sm border border-orange-200">${totalOTHours.toFixed(1)} ชม.</span>
-                                <span>× ฿${formatCurrency(empObj.otRate)}/ชม.</span>
+                                <span>× ฿${formatCurrencySmallDecimals(empObj.otRate)}/ชม.</span>
                             </div>
                         </div>
                     </div>
-                    <span class="text-lg font-black text-slate-800">฿${formatCurrency(otPay)}</span>
+                    <span class="text-lg font-black text-slate-800">฿${formatCurrencySmallDecimals(otPay)}</span>
                 </div>
             </div>
             
