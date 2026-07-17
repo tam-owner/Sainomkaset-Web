@@ -338,10 +338,15 @@ function syncAttendanceToNewSheet() {
       var r = attendance[i];
       rows.push([r.timestamp, r.name, r.type, r.scheduledTime, r.note]);
     }
+    var maxRows = sheetNew.getMaxRows();
+    if (rows.length > maxRows) {
+      sheetNew.insertRowsAfter(maxRows, rows.length - maxRows + 10);
+    }
     
     sheetNew.getRange(1, 1, rows.length, headers.length).setValues(rows);
   } catch (e) {
-    // Silently fail if there's an issue writing to the sheet
+    // Log error to console so it's not totally silent
+    console.error("syncAttendanceToNewSheet error: " + e.message);
   }
 }
 
