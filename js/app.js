@@ -685,7 +685,7 @@ function updateDashboardAttendanceStatus() {
     let dateString = `วัน${dayNames[currentD.getDay()]} ${currentD.getDate()} ${monthNames[currentD.getMonth()]}`;
 
     if (inTime) {
-        btnInText.className = 'w-full h-full flex flex-col justify-start';
+        btnInText.className = 'w-full block';
         btnInText.innerHTML = `
         <div class="flex flex-col w-full text-left gap-1.5">
             <div class="flex items-center justify-between">
@@ -710,7 +710,7 @@ function updateDashboardAttendanceStatus() {
             </div>
         </div>
         `;
-        btnIn.className = 'bg-slate-800/90 text-white p-2.5 rounded-xl border border-emerald-500/20 flex flex-col transition-all cursor-default shadow-sm w-full';
+        btnIn.className = 'bg-slate-800/90 text-white p-2.5 rounded-xl border border-emerald-500/20 block transition-all cursor-default shadow-sm w-full';
         iconIn.className = 'hidden';
         iconIn.innerHTML = '';
     } else {
@@ -744,7 +744,7 @@ function updateDashboardAttendanceStatus() {
             </div>`;
         }
 
-        btnOutText.className = "w-full h-full flex flex-col justify-start";
+        btnOutText.className = "w-full block";
         btnOutText.innerHTML = `
         <div class="flex flex-col w-full text-left gap-1.5">
             <div class="flex items-center justify-between">
@@ -769,7 +769,7 @@ function updateDashboardAttendanceStatus() {
             ${hrsHtml}
         </div>
         `;
-        btnOut.className = 'bg-slate-800/90 text-white p-2.5 rounded-xl border border-rose-500/20 flex flex-col transition-all cursor-default shadow-sm w-full';
+        btnOut.className = 'bg-slate-800/90 text-white p-2.5 rounded-xl border border-rose-500/20 block transition-all cursor-default shadow-sm w-full';
         iconOut.className = 'hidden';
         iconOut.innerHTML = '';
     } else {
