@@ -687,7 +687,7 @@ function updateDashboardAttendanceStatus() {
     if (inTime) {
         btnInText.className = 'w-full h-full flex flex-col justify-start';
         btnInText.innerHTML = `
-        <div class="flex flex-col w-full text-left">
+        <div class="flex flex-col w-full h-full text-left justify-between">
             <div class="flex items-center justify-between mb-1">
                 <div class="flex items-center gap-1.5">
                     <span class="relative flex h-2 w-2">
@@ -713,13 +713,14 @@ function updateDashboardAttendanceStatus() {
             </div>
         </div>
         `;
-        btnIn.className = 'bg-slate-800/90 text-white p-1.5 rounded-xl border border-emerald-500/20 flex flex-col justify-start items-stretch transition-all cursor-default shadow-sm w-full h-full';
+        btnIn.className = 'bg-slate-800/90 text-white p-2 rounded-xl border border-emerald-500/20 flex flex-col justify-between items-stretch transition-all cursor-default shadow-sm w-full h-full';
         iconIn.className = 'hidden';
         iconIn.innerHTML = '';
     } else {
-        btnInText.className = 'flex-1 text-center font-bold tracking-wide text-sm';
+        btnInText.className = 'flex-1 text-center font-bold tracking-wide text-sm flex items-center justify-center';
         btnInText.innerHTML = `<span class="font-bold tracking-wide text-[12px]">เข้างาน (IN)</span>`;
-        btnIn.className = 'bg-slate-800 text-slate-300 py-2 px-3 flex flex-row items-center justify-center gap-1.5 transition-all duration-200 active:scale-95 group rounded-lg hover:bg-slate-700 shadow-sm border border-slate-700/50 w-full h-full';
+        btnIn.className = 'bg-slate-800 text-slate-300 py-3 px-3 flex flex-row items-center justify-center gap-1.5 transition-all duration-200 active:scale-95 group rounded-lg hover:bg-slate-700 shadow-sm border border-slate-700/50 w-full h-full';
+
         iconIn.className = 'w-4 h-4 text-blue-400 group-hover:text-blue-300 transition-colors duration-200 shrink-0';
         iconIn.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>';
     }
@@ -748,7 +749,7 @@ function updateDashboardAttendanceStatus() {
 
         btnOutText.className = "w-full h-full flex flex-col justify-start";
         btnOutText.innerHTML = `
-        <div class="flex flex-col w-full text-left">
+        <div class="flex flex-col w-full h-full text-left justify-between">
             <div class="flex items-center justify-between mb-1">
                 <div class="flex items-center gap-1.5">
                     <span class="relative flex h-2 w-2">
@@ -771,13 +772,13 @@ function updateDashboardAttendanceStatus() {
             ${hrsHtml}
         </div>
         `;
-        btnOut.className = 'bg-slate-800/90 text-white p-1.5 rounded-xl border border-rose-500/20 flex flex-col justify-start items-stretch transition-all cursor-default shadow-sm w-full h-full';
+        btnOut.className = 'bg-slate-800/90 text-white p-2 rounded-xl border border-rose-500/20 flex flex-col justify-between items-stretch transition-all cursor-default shadow-sm w-full h-full';
         iconOut.className = 'hidden';
         iconOut.innerHTML = '';
     } else {
-        btnOutText.className = 'flex-1 text-center font-bold tracking-wide text-sm';
+        btnOutText.className = 'flex-1 text-center font-bold tracking-wide text-sm flex items-center justify-center';
         btnOutText.innerHTML = `<span class="font-bold tracking-wide text-[12px]">ออกงาน (OUT)</span>`;
-        btnOut.className = 'bg-slate-800 text-slate-300 py-2 px-3 flex flex-row items-center justify-center gap-1.5 transition-all duration-200 active:scale-95 group rounded-lg hover:bg-slate-700 shadow-sm border border-slate-700/50 w-full h-full';
+        btnOut.className = 'bg-slate-800 text-slate-300 py-3 px-3 flex flex-row items-center justify-center gap-1.5 transition-all duration-200 active:scale-95 group rounded-lg hover:bg-slate-700 shadow-sm border border-slate-700/50 w-full h-full';
 
         iconOut.className = 'w-4 h-4 text-rose-400 group-hover:text-rose-300 transition-colors duration-200 shrink-0';
         iconOut.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>';
