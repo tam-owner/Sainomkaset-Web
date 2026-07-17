@@ -1190,7 +1190,10 @@ function generateSalarySummaryHtml(empObj, myRecords) {
                         </div>
                         <div class="flex flex-col">
                             <span class="text-sm font-bold text-slate-700">ค่าแรงปกติ</span>
-                            <span class="text-[11px] text-slate-500 font-medium">${totalNormalHours.toFixed(1)} ชม. × ฿${formatCurrency(empObj.normalRate)}/ชม.</span>
+                            <div class="mt-1 flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
+                                <span class="text-sm font-black text-emerald-600 bg-emerald-100/80 px-2 py-0.5 rounded-lg shadow-sm border border-emerald-200">${totalNormalHours.toFixed(1)} ชม.</span>
+                                <span>× ฿${formatCurrency(empObj.normalRate)}/ชม.</span>
+                            </div>
                         </div>
                     </div>
                     <span class="text-lg font-black text-slate-800">฿${formatCurrency(normalPay)}</span>
@@ -1203,7 +1206,10 @@ function generateSalarySummaryHtml(empObj, myRecords) {
                         </div>
                         <div class="flex flex-col">
                             <span class="text-sm font-bold text-slate-700">ค่าล่วงเวลา (OT)</span>
-                            <span class="text-[11px] text-slate-500 font-medium">${totalOTHours.toFixed(1)} ชม. × ฿${formatCurrency(empObj.otRate)}/ชม.</span>
+                            <div class="mt-1 flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
+                                <span class="text-sm font-black text-orange-600 bg-orange-100/80 px-2 py-0.5 rounded-lg shadow-sm border border-orange-200">${totalOTHours.toFixed(1)} ชม.</span>
+                                <span>× ฿${formatCurrency(empObj.otRate)}/ชม.</span>
+                            </div>
                         </div>
                     </div>
                     <span class="text-lg font-black text-slate-800">฿${formatCurrency(otPay)}</span>
