@@ -1124,13 +1124,16 @@ function generateSalarySummaryHtml(empObj, myRecords) {
     let payBeforeTax = grossPay + customBonusTotal - customDeductTotal;
     let standardDeduct = 0;
     let deductLabel = '';
+    let beforeDeductLabel = 'รายได้ก่อนหัก';
     let empDedType = String(empObj.deductionType).trim();
     if (empDedType === "3%" || empDedType === "0.03" || empDedType.includes("3%") || empDedType === "" || empDedType === "None") {
         standardDeduct = Math.round(payBeforeTax * 0.03);
         deductLabel = "หัก ณ ที่จ่าย 3%";
+        beforeDeductLabel = "รายได้ก่อนหักภาษี";
     } else if (empDedType === "5%" || empDedType === "0.05" || empDedType.includes("5%")) {
         standardDeduct = Math.round(payBeforeTax * 0.05);
         deductLabel = "ประกันสังคม 5%";
+        beforeDeductLabel = "รายได้ก่อนหักประกันสังคม";
     }
 
     let netPay = payBeforeTax - standardDeduct;
@@ -1241,7 +1244,7 @@ function generateSalarySummaryHtml(empObj, myRecords) {
             ` : ''}
             
             <div class="flex justify-between items-center px-2 mt-4 mb-2">
-                <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">รายได้ก่อนหัก</span>
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">${beforeDeductLabel}</span>
                 <span class="text-sm font-black text-slate-700">฿${formatCurrency(payBeforeTax)}</span>
             </div>
 
