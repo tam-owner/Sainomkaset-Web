@@ -1099,7 +1099,7 @@ function generateSalarySummaryHtml(empObj, myRecords) {
         let latePayDeduct = Math.round(totalLateDeductionHrs * empObj.normalRate);
         customDeductTotal += latePayDeduct;
         customDeductHtml += `<div class="flex justify-between items-center text-xs py-1.5 border-b border-dashed border-red-100 last:border-0">
-            <span><span class="text-red-500 font-bold">[หักสาย/ขาดงาน]</span> <span class="text-slate-700 font-medium">รวม ${totalLateDeductionHrs} ชม.</span></span>
+            <span><span class="text-red-500 font-bold">[หักสาย]</span> <span class="text-slate-700 font-medium">รวม ${totalLateDeductionHrs} ชม.</span></span>
             <span class="font-black text-red-600">-฿${latePayDeduct.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
         </div>`;
     }
@@ -1189,7 +1189,7 @@ function generateSalarySummaryHtml(empObj, myRecords) {
                     <p class="text-2xl font-black text-slate-800 leading-none drop-shadow-sm">${empObj.name} ${empObj.fullName ? `<span class="text-sm font-semibold text-slate-400 ml-1 tracking-tight">${empObj.fullName}</span>` : ''}</p>
                 </div>
                 <div class="text-right">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">${isFullTime ? 'เรตรายเดือน' : 'เรตรายวัน (8 ชม.)'}</p>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">${isFullTime ? 'เรตรายเดือน (วันละ ฿' + formatCurrency(empObj.normalRate * 8) + ')' : 'เรตรายวัน (8 ชม.)'}</p>
                     <p class="text-lg font-black text-emerald-600 leading-none bg-emerald-50 px-2 py-1 rounded-md">฿${formatCurrency(isFullTime ? empObj.monthlyRate : empObj.dailyRate)}</p>
                 </div>
             </div>
@@ -1241,7 +1241,7 @@ function generateSalarySummaryHtml(empObj, myRecords) {
             ` : ''}
             
             <div class="flex justify-between items-center px-2 mt-4 mb-2">
-                <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">รายได้ก่อนหักภาษี</span>
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">รายได้ก่อนหัก</span>
                 <span class="text-sm font-black text-slate-700">฿${formatCurrency(payBeforeTax)}</span>
             </div>
 
@@ -1689,7 +1689,7 @@ function renderAdminSummary() {
                 
                 ${latePayDeduct > 0 ? `
                 <div class="flex justify-between text-red-500">
-                    <span>หักสาย/ขาดงาน (${emp.totalLateDeductionHrs.toFixed(1)} ชม.)</span>
+                    <span>หักสาย (${emp.totalLateDeductionHrs.toFixed(1)} ชม.)</span>
                     <span>-฿${latePayDeduct.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
                 </div>` : ''}
                 
@@ -2702,7 +2702,7 @@ function printSlip(idx) {
                     </tr>
                     ${s.latePayDeduct > 0 ? `
                     <tr>
-                        <td>หักสาย/ขาดงาน (${s.lateDeduction.toFixed(2)} ชม.)</td>
+                        <td>หักสาย (${s.lateDeduction.toFixed(2)} ชม.)</td>
                         <td>-</td>
                         <td>-${formatMoney(s.latePayDeduct)} ฿</td>
                     </tr>` : ''}
