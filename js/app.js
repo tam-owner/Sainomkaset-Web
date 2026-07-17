@@ -1084,7 +1084,8 @@ function generateSalarySummaryHtml(empObj, myRecords) {
         totalOTHours += r.otHours || 0;
     });
 
-    let normalPay = totalNormalHours * empObj.normalRate;
+    let isFullTime = (empObj.employeeType === 'Full Time');
+    let normalPay = isFullTime ? ((empObj.monthlyRate || 0) / 2) : (totalNormalHours * empObj.normalRate);
     let otPay = totalOTHours * empObj.otRate;
     let grossPay = normalPay + otPay;
     
@@ -1177,8 +1178,8 @@ function generateSalarySummaryHtml(empObj, myRecords) {
                     <p class="text-2xl font-black text-slate-800 leading-none drop-shadow-sm">${empObj.name} ${empObj.fullName ? `<span class="text-sm font-semibold text-slate-400 ml-1 tracking-tight">${empObj.fullName}</span>` : ''}</p>
                 </div>
                 <div class="text-right">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">เรตรายวัน (8 ชม.)</p>
-                    <p class="text-lg font-black text-emerald-600 leading-none bg-emerald-50 px-2 py-1 rounded-md">฿${formatCurrency(empObj.dailyRate)}</p>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">${isFullTime ? 'เรตรายเดือน' : 'เรตรายวัน (8 ชม.)'}</p>
+                    <p class="text-lg font-black text-emerald-600 leading-none bg-emerald-50 px-2 py-1 rounded-md">฿${formatCurrency(isFullTime ? empObj.monthlyRate : empObj.dailyRate)}</p>
                 </div>
             </div>
 
@@ -1189,10 +1190,13 @@ function generateSalarySummaryHtml(empObj, myRecords) {
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         </div>
                         <div class="flex flex-col">
-                            <span class="text-sm font-bold text-slate-700">ค่าแรงปกติ</span>
+                            <span class="text-sm font-bold text-slate-700">${isFullTime ? 'ค่าแรงครึ่งเดือน' : 'ค่าแรงปกติ'}</span>
                             <div class="mt-1 flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
-                                <span class="text-xs font-black text-emerald-600 bg-emerald-100/80 px-1.5 py-[1px] rounded-md shadow-sm border border-emerald-200">${totalNormalHours.toFixed(1)} ชม.</span>
-                                <span>× ฿${formatCurrency(empObj.normalRate)}/ชม.</span>
+                                ${isFullTime 
+                                    ? `<span class="text-xs font-black text-emerald-600 bg-emerald-100/80 px-1.5 py-[1px] rounded-md shadow-sm border border-emerald-200">฿${formatCurrency(empObj.monthlyRate)} ÷ 2</span>`
+                                    : `<span class="text-xs font-black text-emerald-600 bg-emerald-100/80 px-1.5 py-[1px] rounded-md shadow-sm border border-emerald-200">${totalNormalHours.toFixed(1)} ชม.</span>
+                                       <span>× ฿${formatCurrency(empObj.normalRate)}/ชม.</span>`
+                                }
                             </div>
                         </div>
                     </div>
@@ -1595,7 +1599,8 @@ function renderAdminSummary() {
     Object.values(empStats).forEach(emp => {
         if (emp.totalNormalHours === 0 && emp.totalOTHours === 0 && (!emp.normalRate || emp.normalRate === 0)) return; 
         
-        let normalPay = emp.totalNormalHours * emp.normalRate;
+        let isFullTime = (emp.employeeType === 'Full Time');
+        let normalPay = isFullTime ? ((emp.monthlyRate || 0) / 2) : (emp.totalNormalHours * emp.normalRate);
         let otPay = emp.totalOTHours * emp.otRate;
         let grossPay = normalPay + otPay;
         
@@ -1654,7 +1659,7 @@ function renderAdminSummary() {
             
             <div class="space-y-2 text-sm font-semibold text-slate-600">
                 <div class="flex justify-between">
-                    <span class="text-slate-500">ค่าจ้างปกติ (${emp.totalNormalHours.toFixed(1)} ชม. x ฿${emp.normalRate})</span>
+                    <span class="text-slate-500">${isFullTime ? 'ค่าแรงครึ่งเดือน (รายเดือน ÷ 2)' : \`ค่าจ้างปกติ (\${emp.totalNormalHours.toFixed(1)} ชม. x ฿\${emp.normalRate})\`}</span>
                     <span>฿${normalPay.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
                 </div>
                 ${emp.totalOTHours > 0 ? `
@@ -2527,12 +2532,19 @@ function calculateMonthlySlips() {
     const monthsThai = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
     const monthsThaiFull = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
     
+    let isFullTime = (loggedInEmployee.employeeType === 'Full Time');
+    let monthlyRate = loggedInEmployee.monthlyRate || 0;
+    
     monthlySlips.forEach(s => {
-        s.grossPay = (s.regularHours * rate) + (s.otHours * otRate);
+        let normalPay = isFullTime ? (monthlyRate / 2) : (s.regularHours * rate);
+        s.grossPay = normalPay + (s.otHours * otRate);
         s.totalDeductions = s.lateDeduction + s.otherDeductions;
         s.netPay = s.grossPay - s.totalDeductions;
         s.rate = rate;
         s.otRate = otRate;
+        s.normalPay = normalPay;
+        s.isFullTime = isFullTime;
+        s.monthlyRate = monthlyRate;
         
         // Generate period text
         let payDateText = "";
@@ -2646,9 +2658,9 @@ function printSlip(idx) {
                 </thead>
                 <tbody>
                     <tr>
-                        <td>ค่าจ้างปกติ (เรท ${s.rate} ฿/ชม.)</td>
-                        <td>${s.regularHours.toFixed(2)} ชม.</td>
-                        <td>${formatMoney(s.regularHours * s.rate)} ฿</td>
+                        <td>${s.isFullTime ? 'ค่าแรงครึ่งเดือน (รายเดือน ÷ 2)' : `ค่าจ้างปกติ (เรท ${s.rate} ฿/ชม.)`}</td>
+                        <td>${s.isFullTime ? '-' : `${s.regularHours.toFixed(2)} ชม.`}</td>
+                        <td>${formatMoney(s.normalPay)} ฿</td>
                     </tr>
                     <tr>
                         <td>ค่าล่วงเวลา OT (เรท ${s.otRate} ฿/ชม.)</td>
