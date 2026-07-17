@@ -240,6 +240,28 @@ function isDateValid(dateStr) {
 
 function getMergedAttendanceData() {
   var result = [];
+  var seen = {}; // For deduplication
+  
+  function addRow(row) {
+    if (!row[0] || row[0] == "") return;
+    if (!isDateValid(row[0])) return;
+    
+    var timestamp = String(row[0]).trim();
+    var name = String(row[1]).trim();
+    var type = String(row[2]).trim();
+    var key = timestamp + "_" + name + "_" + type;
+    
+    if (!seen[key]) {
+      seen[key] = true;
+      result.push({
+        timestamp: timestamp,
+        name: name,
+        type: type, 
+        scheduledTime: String(row[3]).trim(), 
+        note: String(row[4] || "").trim()
+      });
+    }
+  }
 
   // 1. Read Old Sheet
   try {
@@ -259,21 +281,22 @@ function getMergedAttendanceData() {
     if (sheetOld) {
       var dataOld = sheetOld.getDataRange().getDisplayValues();
       for (var i = 1; i < dataOld.length; i++) {
-        var row = dataOld[i];
-        if (!row[0] || row[0] == "") continue;
-        if (!isDateValid(row[0])) continue;
-        result.push({
-          timestamp: row[0],
-          name: String(row[1]).trim(),
-          type: String(row[2]).trim(), 
-          scheduledTime: String(row[3]).trim(), 
-          note: String(row[4] || "").trim()
-        });
+        addRow(dataOld[i]);
       }
     }
   } catch (e) {}
 
-
+  // 2. Read New Sheet (Attendance)
+  try {
+    var ssNew = SpreadsheetApp.getActiveSpreadsheet();
+    var sheetNew = ssNew.getSheetByName("Attendance");
+    if (sheetNew) {
+      var dataNew = sheetNew.getDataRange().getDisplayValues();
+      for (var i = 1; i < dataNew.length; i++) {
+        addRow(dataNew[i]);
+      }
+    }
+  } catch (e) {}
 
   return result;
 }
