@@ -744,6 +744,8 @@ function updateDashboardAttendanceStatus() {
             </div>`;
         }
 
+        btnOutText.className = "w-full h-full flex flex-col justify-start";
+        btnOutText.innerHTML = `
         <div class="flex flex-col w-full text-left gap-1.5">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-1.5">
