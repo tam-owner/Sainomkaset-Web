@@ -699,13 +699,13 @@ function updateDashboardAttendanceStatus() {
                 <span class="text-[9px] text-slate-400 font-medium tracking-wide">${dateString}</span>
             </div>
             <div class="bg-slate-900/40 rounded-lg border border-slate-700/50 p-1.5 w-full flex flex-col gap-0.5">
-                <div class="flex items-center justify-between">
-                    <span class="text-slate-500 text-[9px]">เวลาตาราง</span>
+                <div class="flex items-center justify-start gap-2">
                     <span class="text-emerald-400 text-xs font-bold tracking-wider">${inSched}</span>
+                    <span class="text-slate-500 text-[9px]">เวลาตาราง</span>
                 </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-slate-500 text-[9px]">เวลาจริง</span>
+                <div class="flex items-center justify-start gap-2">
                     <span class="text-white text-xs font-bold tracking-wider">${inTime}</span>
+                    <span class="text-slate-500 text-[9px]">เวลาจริง</span>
                 </div>
             </div>
         </div>
@@ -758,13 +758,13 @@ function updateDashboardAttendanceStatus() {
                 <span class="text-[9px] text-slate-400 font-medium tracking-wide">${dateString}</span>
             </div>
             <div class="bg-slate-900/40 rounded-lg border border-slate-700/50 p-1.5 w-full flex flex-col gap-0.5">
-                <div class="flex items-center justify-between">
-                    <span class="text-slate-500 text-[9px]">เวลาตาราง</span>
+                <div class="flex items-center justify-start gap-2">
                     <span class="text-rose-400 text-xs font-bold tracking-wider">${outSched}</span>
+                    <span class="text-slate-500 text-[9px]">เวลาตาราง</span>
                 </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-slate-500 text-[9px]">เวลาจริง</span>
+                <div class="flex items-center justify-start gap-2">
                     <span class="text-white text-xs font-bold tracking-wider">${outTime}</span>
+                    <span class="text-slate-500 text-[9px]">เวลาจริง</span>
                 </div>
             </div>
             ${hrsHtml}
