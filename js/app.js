@@ -1010,33 +1010,41 @@ function renderPeriodDropdown() {
     } else {
         availablePeriods.forEach(p => {
             let isSel = (p.value === currentPeriodVal);
-            let bg = isSel ? 'bg-indigo-50 border-indigo-200' : 'bg-white border-slate-100';
-            let txt = isSel ? 'text-indigo-700 font-bold' : 'text-slate-700 font-semibold';
+            let bg = isSel ? 'bg-indigo-50 border-indigo-200' : 'bg-white border-slate-100 hover:bg-slate-50';
+            let txt = isSel ? 'text-indigo-700 font-bold' : 'text-slate-700 font-bold';
             
             let periodTypeLabel = '';
             let periodTypeClass = '';
-            if (p.value.startsWith('full_')) {
+            if (p.value.startsWith('all_')) {
                 periodTypeLabel = 'หักภาษี';
-                periodTypeClass = 'bg-amber-50 text-amber-600 border-amber-200';
+                periodTypeClass = 'bg-amber-100 text-amber-700 border-amber-200 shadow-sm';
             } else {
                 periodTypeLabel = 'ประกันสังคม';
-                periodTypeClass = 'bg-blue-50 text-blue-600 border-blue-200';
+                periodTypeClass = 'bg-blue-100 text-blue-700 border-blue-200 shadow-sm';
             }
             
             let payDateHtml = '';
             if (p.payDateStr) {
-                payDateHtml = `<span class="text-[12px] font-bold mt-1 inline-block ${isSel ? 'text-indigo-600 bg-indigo-100 border-indigo-200' : 'text-emerald-700 bg-emerald-50 border-emerald-200'} px-2 py-0.5 rounded-md border">${p.payDateStr}</span>`;
+                let dateColor = isSel ? 'bg-indigo-600 text-white shadow-md' : 'bg-emerald-500 text-white shadow-md';
+                let cleanPayStr = p.payDateStr.replace('(', '').replace(')', '');
+                payDateHtml = `
+                    <div class="flex items-center mt-2">
+                        <span class="text-[12px] font-bold px-3 py-1 rounded-full flex items-center gap-1.5 ${dateColor}">
+                            <svg class="w-3.5 h-3.5 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            ${cleanPayStr}
+                        </span>
+                    </div>`;
             }
             
-            html += `<div onclick="selectPeriod('${p.value}', '${p.text}')" class="cursor-pointer ${bg} p-4 mb-2 rounded-xl border flex items-center justify-between active:scale-95 transition-all">
-                        <div class="flex flex-col">
-                            <div class="flex items-center gap-2">
-                                <span class="${txt} text-[15px]">${p.text}</span>
-                                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded border ${periodTypeClass}">${periodTypeLabel}</span>
-                            </div>
-                            ${payDateHtml}
+            html += `<div onclick="selectPeriod('${p.value}', '${p.text}')" class="cursor-pointer ${bg} p-4 mb-3 rounded-[16px] border flex flex-col active:scale-[0.98] transition-all relative overflow-hidden">
+                        <div class="flex justify-between items-center">
+                            <span class="${txt} text-[16px] tracking-tight">${p.text}</span>
+                            <span class="text-[10px] font-bold px-2.5 py-1 rounded-lg border ${periodTypeClass} whitespace-nowrap">${periodTypeLabel}</span>
                         </div>
-                        ${isSel ? '<svg class="w-5 h-5 text-indigo-600 shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' : ''}
+                        <div class="flex justify-between items-end">
+                            ${payDateHtml}
+                            ${isSel ? '<div class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0 mb-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg></div>' : '<div></div>'}
+                        </div>
                      </div>`;
         });
     }
