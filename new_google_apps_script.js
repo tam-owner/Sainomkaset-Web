@@ -223,7 +223,7 @@ function isDateValid(dateStr) {
   if (!dateStr) return false;
   var str = String(dateStr).trim();
   var d = new Date(str);
-  var dtMatch = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+  var dtMatch = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
   if (dtMatch) {
     var p1 = parseInt(dtMatch[1], 10);
     var p2 = parseInt(dtMatch[2], 10);
@@ -231,6 +231,9 @@ function isDateValid(dateStr) {
     if (p3 > 1000) { 
       if (p1 > 31) { d = new Date(p1, p2 - 1, p3); } 
       else { d = new Date(p3, p2 - 1, p1); }
+    } else if (p3 < 100) {
+      if (p1 > 31) { d = new Date(p1, p2 - 1, p3 + 2000); } 
+      else { d = new Date(p3 + 2000, p2 - 1, p1); }
     }
   }
   if (isNaN(d.getTime())) return true; // Let it pass if unparseable
@@ -320,10 +323,11 @@ function syncAttendanceToNewSheet() {
     // Parse date for sorting
     function parseDate(str) {
       var d = new Date(str);
-      var m = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+      var m = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
       if (m) {
         var p1 = parseInt(m[1], 10), p2 = parseInt(m[2], 10), p3 = parseInt(m[3], 10);
-        if (p3 > 1000) d = (p1 > 31) ? new Date(p1, p2 - 1, p3) : new Date(p3, p2 - 1, p1);
+        if (p3 > 1000) { d = (p1 > 31) ? new Date(p1, p2 - 1, p3) : new Date(p3, p2 - 1, p1); }
+        else if (p3 < 100) { d = (p1 > 31) ? new Date(p1, p2 - 1, p3 + 2000) : new Date(p3 + 2000, p2 - 1, p1); }
       }
       return isNaN(d.getTime()) ? 0 : d.getTime();
     }

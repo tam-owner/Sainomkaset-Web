@@ -257,7 +257,7 @@ function processData() {
         
         let timestampStr = String(r.timestamp).trim();
         let d;
-        const dtMatch = timestampStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:\s+(\d{1,2}:\d{2}(?::\d{2})?))?/);
+        const dtMatch = timestampStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})(?:\s+(\d{1,2}:\d{2}(?::\d{2})?))?/);
         if (dtMatch) {
             let day = parseInt(dtMatch[1], 10);
             let month = parseInt(dtMatch[2], 10) - 1;
