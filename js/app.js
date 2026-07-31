@@ -103,11 +103,13 @@ function initData() {
                     }
                 }
             } else {
+                alert("เกิดข้อผิดพลาดจากเซิร์ฟเวอร์: " + JSON.stringify(jsonRes).substring(0, 100));
                 throw new Error("Invalid response");
             }
         })
         .catch(error => {
             console.error("GAS fetch error", error);
+            alert("ไม่สามารถดึงข้อมูลได้: " + error.message + "\n(เช็คอินเทอร์เน็ตหรือรอสักครู่)");
             const cachedStr = localStorage.getItem('snk_payroll_data');
             if (cachedStr && isInitialLoad) {
                 try {
@@ -118,7 +120,10 @@ function initData() {
                 } catch(e){}
             }
             if (isInitialLoad) {
-
+                hideLoading();
+                if (!cachedStr) showView('view-login', false);
+            }
+        });
 }
 
 function applyInitData(data, isSilent = false) {
