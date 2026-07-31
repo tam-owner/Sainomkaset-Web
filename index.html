@@ -13,7 +13,7 @@
     <title>Sainom Kaset - Payroll & Management</title>
     <!-- Auto Cache Clear Script -->
     <script>
-        const APP_VERSION = "20260731_106";
+        const APP_VERSION = "20260731_107";
         const currentVersion = localStorage.getItem('APP_VERSION');
         if (currentVersion !== APP_VERSION) {
             console.log("New version detected, clearing cache...");
@@ -959,7 +959,9 @@
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">ประเภท</label>
                     <select id="deduction-type" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm font-semibold focus:border-indigo-500 outline-none">
-                        <option value="Deduction">หักเงิน</option>
+                        <option value="Deduction">หักเงิน (อื่นๆ)</option>
+                        <option value="Damage">หักทำของเสีย/หาย</option>
+                        <option value="Advance">เบิกเงินล่วงหน้า</option>
                         <option value="Bonus">บวกเงิน</option>
                     </select>
                 </div>
@@ -1091,10 +1093,10 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <!-- Add Firebase products that you want to use -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-    <script src="js/firebase-init.js?v=20260731_106"></script>
+    <script src="js/firebase-init.js?v=20260731_107"></script>
 
     <script src="js/customSelect.js"></script>
-    <script src="js/app.js?v=20260731_106"></script>
+    <script src="js/app.js?v=20260731_107"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -1137,7 +1139,7 @@
         ล้างแคช
     </button>
     <div id="app-version-display" class="fixed bottom-2 right-2 text-[10px] text-slate-400 font-medium z-[9999] pointer-events-none opacity-50">
-        v2.2.106 (Firebase)
+        v2.2.107 (Firebase)
     </div>
 </body>
 </html>

@@ -1675,6 +1675,7 @@ function renderAdminSummary() {
         let empDeductions = deductions.filter(d => d.period === currentPeriodVal && d.name === emp.name);
         let customDeductTotal = 0;
         let customBonusTotal = 0;
+        let customAdvanceTotal = 0;
         
         let latePayDeduct = 0;
         if (isFullTime && emp.totalLateDeductionHrs > 0) {
@@ -1685,7 +1686,8 @@ function renderAdminSummary() {
         
         empDeductions.forEach(d => {
             if (d.type === 'Bonus') customBonusTotal += d.amount;
-            else customDeductTotal += d.amount;
+            else if (d.type === 'Advance') customAdvanceTotal += d.amount;
+            else customDeductTotal += d.amount; // Damage and Deduction are deducted before tax
         });
 
         let payBeforeTax = grossPay + customBonusTotal - customDeductTotal;
@@ -1701,7 +1703,7 @@ function renderAdminSummary() {
             deductLabel = "หักประกันสังคม 5%";
         }
 
-        let netPay = payBeforeTax - standardDeduct;
+        let netPay = payBeforeTax - standardDeduct - customAdvanceTotal;
         if (netPay === 0) return;
 
         activeEmployeesCount++;
@@ -2562,8 +2564,8 @@ function calculateMonthlySlips() {
     if (typeof deductions !== 'undefined') {
         const myDeductions = deductions.filter(d => d.name === loggedInEmployee.name);
         myDeductions.forEach(d => {
-            // d.period looks like "2026-06-1" or "2026-06-2" or "2026-06"
-            let parts = d.period.split('-');
+            let rawPeriod = d.period.includes('_') ? d.period.split('_')[1] : d.period;
+            let parts = rawPeriod.split('-');
             if (parts.length >= 2) {
                 let yyyy = parseInt(parts[0]);
                 let mm = parseInt(parts[1]);
@@ -2597,10 +2599,15 @@ function calculateMonthlySlips() {
                         regularHours: 0,
                         otHours: 0,
                         lateDeduction: 0,
-                        otherDeductions: 0
+                        otherDeductions: 0,
+                        bonus: 0,
+                        advance: 0
                     };
                 }
-                slipsMap[key].otherDeductions += d.amount;
+                
+                if (d.type === 'Bonus') slipsMap[key].bonus += d.amount;
+                else if (d.type === 'Advance') slipsMap[key].advance += d.amount;
+                else slipsMap[key].otherDeductions += d.amount;
             }
         });
     }
@@ -2628,19 +2635,29 @@ function calculateMonthlySlips() {
             otPay = Math.round(otPay);
         }
         
-        s.grossPay = normalPay + otPay;
+        s.grossPay = normalPay + otPay + s.bonus;
         
         let latePayDeduct = isFullTime ? (s.lateDeduction * rate) : 0;
         if (is5PercentForRound) latePayDeduct = Math.round(latePayDeduct);
         
-        s.totalDeductions = latePayDeduct + s.otherDeductions;
-        s.netPay = s.grossPay - s.totalDeductions;
+        // standard deduct (tax/ss)
+        let payBeforeTax = s.grossPay - latePayDeduct - s.otherDeductions;
+        let standardDeduct = 0;
+        if (empDedTypeForRound === "3%" || empDedTypeForRound === "0.03" || empDedTypeForRound.includes("3%") || empDedTypeForRound === "" || empDedTypeForRound === "None") {
+            standardDeduct = Math.round(payBeforeTax * 0.03);
+        } else if (empDedTypeForRound === "5%" || empDedTypeForRound === "0.05" || empDedTypeForRound.includes("5%")) {
+            standardDeduct = Math.round(payBeforeTax * 0.05);
+        }
+        
+        s.totalDeductions = latePayDeduct + s.otherDeductions + standardDeduct + s.advance;
+        s.netPay = payBeforeTax - standardDeduct - s.advance;
         s.rate = rate;
         s.otRate = otRate;
         s.normalPay = normalPay;
         s.isFullTime = isFullTime;
         s.monthlyRate = monthlyRate;
         s.latePayDeduct = latePayDeduct;
+        s.standardDeduct = standardDeduct;
         
         // Generate period text
         let payDateText = "";
@@ -2763,6 +2780,12 @@ function printSlip(idx) {
                         <td>${s.otHours.toFixed(2)} ชม.</td>
                         <td>${formatMoney(Math.round(s.otHours * s.otRate))} ฿</td>
                     </tr>
+                    ${s.bonus > 0 ? `
+                    <tr>
+                        <td>โบนัส/บวกเงินเพิ่ม (Bonus)</td>
+                        <td>-</td>
+                        <td>${formatMoney(s.bonus)} ฿</td>
+                    </tr>` : ''}
                     <tr class="total-row">
                         <td colspan="2" style="text-align: right;">รวมรายได้ (Gross Pay)</td>
                         <td>${formatMoney(s.grossPay)} ฿</td>
@@ -2773,11 +2796,24 @@ function printSlip(idx) {
                         <td>-</td>
                         <td>-${formatMoney(s.latePayDeduct)} ฿</td>
                     </tr>` : ''}
+                    ${s.otherDeductions > 0 ? `
                     <tr>
-                        <td>หักอื่นๆ</td>
+                        <td>หักอื่นๆ / ทำของเสียหาย</td>
                         <td>-</td>
                         <td>-${formatMoney(s.otherDeductions)} ฿</td>
-                    </tr>
+                    </tr>` : ''}
+                    ${s.standardDeduct > 0 ? `
+                    <tr>
+                        <td>หักภาษี / หักประกันสังคม</td>
+                        <td>-</td>
+                        <td>-${formatMoney(s.standardDeduct)} ฿</td>
+                    </tr>` : ''}
+                    ${s.advance > 0 ? `
+                    <tr>
+                        <td>หักเงินเบิกล่วงหน้า (Advance)</td>
+                        <td>-</td>
+                        <td>-${formatMoney(s.advance)} ฿</td>
+                    </tr>` : ''}
                     <tr class="total-row">
                         <td colspan="2" style="text-align: right;">รวมรายการหัก (Total Deductions)</td>
                         <td style="color: #dc2626;">-${formatMoney(s.totalDeductions)} ฿</td>
