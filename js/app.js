@@ -374,10 +374,25 @@ function processData() {
                         if (actMins - schMins > 0) {
                             let lateMins = actMins - schMins;
                             let threshold = (rec.scheduledIn === '11:30') ? 10 : 30;
-                            if (lateMins > threshold) {
+                            
+                            // Normal shifts: 15-29 mins late, no penalty but deduct actual time
+                            // 11.30 shift: > 10 mins late triggers penalty
+                            
+                            if (lateMins >= 15 || (rec.scheduledIn === '11:30' && lateMins > 10)) {
                                 rec.isLate = true;
                                 rec.lateMins = lateMins;
-                                rec.lateDeduction = 1.0 + Math.floor(lateMins / 15) * 0.25;
+                                
+                                // Actual time deduction: 0.25 hrs per 15 mins
+                                let actualTimeDeduct = Math.floor(lateMins / 15) * 0.25;
+                                
+                                // Penalty
+                                let penalty = 0;
+                                if (lateMins > threshold) {
+                                    penalty = 1.0;
+                                }
+                                
+                                // Total deduction
+                                rec.lateDeduction = penalty + actualTimeDeduct;
                                 rec.regularHours -= rec.lateDeduction;
                                 if (rec.regularHours < 0) rec.regularHours = 0;
                             }
