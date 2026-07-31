@@ -13,7 +13,7 @@
     <title>Sainom Kaset - Payroll & Management</title>
     <!-- Auto Cache Clear Script -->
     <script>
-        const APP_VERSION = "20260731_108";
+        const APP_VERSION = "20260801_109";
         const currentVersion = localStorage.getItem('APP_VERSION');
         if (currentVersion !== APP_VERSION) {
             console.log("New version detected, clearing cache...");
@@ -513,19 +513,111 @@
         </div>
     </div>
 
-    <div id="view-qa" class="hidden px-4">
+    <div id="view-qa" class="hidden px-4 pb-10">
         <div class="mb-6 mt-2 flex items-center gap-3">
             <button onclick="showView('view-dashboard')" class="p-2 bg-white rounded-full shadow-sm border border-slate-200 text-slate-600 active:scale-95 shrink-0">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
             </button>
-            <h1 class="text-xl font-bold text-slate-800">Q&A</h1>
+            <h1 class="text-xl font-bold text-slate-800">Q&A คำถามที่พบบ่อย</h1>
         </div>
-        <div class="bg-white rounded-[24px] p-6 shadow-sm border border-slate-200 text-center flex flex-col items-center gap-3">
-            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-400">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+
+        <div class="space-y-4">
+            <!-- หมวดเงินเดือน -->
+            <div>
+                <h2 class="text-sm font-bold text-slate-500 mb-2 px-2 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    หมวดเงินเดือน & รายได้
+                </h2>
+                
+                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div class="qa-item border-b border-slate-100 last:border-0">
+                        <button class="w-full px-4 py-4 flex items-center justify-between text-left focus:outline-none bg-white hover:bg-slate-50 transition-colors" onclick="toggleQA(this)">
+                            <span class="font-bold text-slate-700 text-sm">การจ่ายเงินเดือน จ่ายวันไหนบ้าง?</span>
+                            <svg class="w-5 h-5 text-slate-400 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="qa-content hidden px-4 pb-4 text-sm text-slate-600">
+                            <div class="bg-slate-50 rounded-xl p-3 mt-1 space-y-2 leading-relaxed">
+                                <p><strong>พนักงาน Part-time และ พนักงานรายวัน:</strong></p>
+                                <ul class="list-disc pl-5 space-y-1">
+                                    <li>จะมีการจ่ายเงินเดือน <strong>ทุกวันที่ 5 ของเดือนถัดไป</strong> (จ่ายรอบเดียว)</li>
+                                    <li>โดยคิดยอดการทำงานตั้งแต่วันที่ 1 ถึงสิ้นเดือนของเดือนที่ผ่านมา</li>
+                                </ul>
+                                <p class="mt-2"><strong>พนักงานประจำ (Full-time):</strong></p>
+                                <ul class="list-disc pl-5 space-y-1">
+                                    <li>จะมีการจ่ายเงินเดือนแบ่งเป็น <strong>2 รอบต่อเดือน</strong></li>
+                                    <li><strong>รอบที่ 1:</strong> ตัดรอบทำงานวันที่ 1-15 <br><span class="text-emerald-600 font-semibold">👉 จ่ายเงินทุกวันที่ 20 ของเดือนนั้นๆ</span></li>
+                                    <li><strong>รอบที่ 2:</strong> ตัดรอบทำงานวันที่ 16-สิ้นเดือน <br><span class="text-emerald-600 font-semibold">👉 จ่ายเงินทุกวันที่ 5 ของเดือนถัดไป</span></li>
+                                </ul>
+                                <div class="text-[11px] text-orange-600 bg-orange-50 p-2 rounded-lg mt-2 font-medium">
+                                    *หมายเหตุ: หากวันจ่ายเงินเดือนตรงกับวันหยุดนักขัตฤกษ์หรือเสาร์-อาทิตย์ อาจมีการเลื่อนวันจ่ายเข้าให้เร็วขึ้น (ตามประกาศของร้าน)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="qa-item border-b border-slate-100 last:border-0">
+                        <button class="w-full px-4 py-4 flex items-center justify-between text-left focus:outline-none bg-white hover:bg-slate-50 transition-colors" onclick="toggleQA(this)">
+                            <span class="font-bold text-slate-700 text-sm">หักสาย/ทำของเสีย คิดเงินยังไง?</span>
+                            <svg class="w-5 h-5 text-slate-400 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="qa-content hidden px-4 pb-4 text-sm text-slate-600">
+                            <div class="bg-slate-50 rounded-xl p-3 mt-1 space-y-3 leading-relaxed">
+                                <div>
+                                    <p class="font-bold text-slate-700">📌 การหักมาสาย:</p>
+                                    <ul class="list-disc pl-5 space-y-1 mt-1">
+                                        <li>ระบบจะเทียบเวลาเข้างานจริงของคุณ กับ <strong>เวลาตารางงาน</strong></li>
+                                        <li>มีช่วงเวลาผ่อนผัน (Grace Period) ให้ <strong>15 นาที</strong></li>
+                                        <li>หากสายไม่เกิน 15 นาที <strong>จะไม่ถูกหักเงิน</strong></li>
+                                        <li>แต่หากสาย <strong>เกิน 15 นาทีขึ้นไป</strong> ระบบจะคิดคำนวณเวลาที่สายทั้งหมดตั้งแต่นาทีแรก (ไม่มีการยกเว้น 15 นาทีแรก)</li>
+                                        <li>จำนวนเงินที่หัก = (จำนวนนาทีที่สาย / 60) × อัตราค่าแรงต่อชั่วโมง</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-700">📌 การหักทำของเสียหาย:</p>
+                                    <ul class="list-disc pl-5 space-y-1 mt-1">
+                                        <li>จะเป็นการเพิ่มรายการหักในระบบโดยแอดมิน</li>
+                                        <li>ยอดนี้จะนำไปหักลบออกจากค่าแรง <strong>ก่อน</strong> นำไปคิดฐานภาษี (3%) และประกันสังคม (5%) ซึ่งทำให้ฐานการคำนวณลดลงตามไปด้วย</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <h2 class="font-bold text-slate-700">กำลังพัฒนาระบบ</h2>
-            <p class="text-sm text-slate-500">ถาม-ตอบข้อสงสัยในการทำงานต่างๆ</p>
+
+            <!-- หมวดการทำงาน -->
+            <div>
+                <h2 class="text-sm font-bold text-slate-500 mb-2 px-2 flex items-center gap-2 mt-4">
+                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    หมวดการบันทึกเวลา
+                </h2>
+                
+                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div class="qa-item border-b border-slate-100 last:border-0">
+                        <button class="w-full px-4 py-4 flex items-center justify-between text-left focus:outline-none bg-white hover:bg-slate-50 transition-colors" onclick="toggleQA(this)">
+                            <span class="font-bold text-slate-700 text-sm">ลืมบันทึกเข้า-ออกงาน ต้องทำยังไง?</span>
+                            <svg class="w-5 h-5 text-slate-400 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="qa-content hidden px-4 pb-4 text-sm text-slate-600">
+                            <div class="bg-slate-50 rounded-xl p-3 mt-1 space-y-2 leading-relaxed">
+                                <p>หากลืมสแกนเวลาเข้า หรือ ลืมกดออกงาน สามารถยื่นคำขอแก้ไขได้ด้วยตัวเองตามขั้นตอนนี้:</p>
+                                <ol class="list-decimal pl-5 space-y-2 mt-2">
+                                    <li>กลับไปที่หน้าหลัก แล้วเข้าเมนู <strong class="text-indigo-600">"ประวัติ & สลิป"</strong> (ไอคอนสีเขียว)</li>
+                                    <li>เลื่อนลงไปด้านล่างตรงส่วน <strong>"ประวัติการทำงาน"</strong></li>
+                                    <li>ค้นหาวันที่ที่ลืมลงเวลา แล้วกดที่ <strong>ไอคอน ✏️ (ดินสอ)</strong> ด้านขวาของรายการนั้นๆ</li>
+                                    <li>ระบุเวลาที่ถูกต้องลงไป และ <strong class="text-red-500">ที่สำคัญมาก: ต้องพิมพ์ระบุเหตุผลด้วย</strong> (เช่น ลืมเอามือถือมา, รีบกลับบ้านจนลืมกด ฯลฯ)</li>
+                                    <li>เมื่อกดยืนยันแล้ว คำขอจะขึ้นสถานะ <strong>"รออนุมัติ"</strong></li>
+                                    <li>เมื่อแอดมินหรือผู้จัดการเข้ามาตรวจสอบและกด <strong>"อนุมัติ"</strong> ระบบจะปรับปรุงเวลาและคำนวณเงินเดือนให้ใหม่ทันที</li>
+                                </ol>
+                                <div class="text-[11px] text-slate-500 bg-slate-100 p-2 rounded-lg mt-2 italic">
+                                    * หากในประวัติการทำงานของคุณไม่มีรายการของวันนั้นเลย (เพราะไม่ได้กดทั้งเข้าและออก) ให้แจ้งแอดมินเพื่อเพิ่มรายการของวันนั้นให้ก่อน ถึงจะกดแก้ไขได้
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
         </div>
     </div>
 
@@ -1093,10 +1185,10 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <!-- Add Firebase products that you want to use -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-    <script src="js/firebase-init.js?v=20260731_108"></script>
+    <script src="js/firebase-init.js?v=20260801_109"></script>
 
     <script src="js/customSelect.js"></script>
-    <script src="js/app.js?v=20260731_108"></script>
+    <script src="js/app.js?v=20260801_109"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -1139,7 +1231,7 @@
         ล้างแคช
     </button>
     <div id="app-version-display" class="fixed bottom-2 right-2 text-[10px] text-slate-400 font-medium z-[9999] pointer-events-none opacity-50">
-        v2.2.108 (Firebase)
+        v2.2.109 (Firebase)
     </div>
 </body>
 </html>

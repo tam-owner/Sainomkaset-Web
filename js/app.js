@@ -4300,3 +4300,16 @@ function handleSecretIPUpdate() {
         }, 1500);
     }
 }
+
+function toggleQA(btn) {
+    const content = btn.nextElementSibling;
+    const icon = btn.querySelector('svg');
+    
+    if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        icon.style.transform = 'rotate(180deg)';
+    } else {
+        content.classList.add('hidden');
+        icon.style.transform = 'rotate(0deg)';
+    }
+}
