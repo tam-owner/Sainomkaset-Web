@@ -610,12 +610,29 @@
             const html = `<div class="space-y-4 text-left"><div class="pt-1"><span class="text-slate-400 text-xs block mb-1">หมายเหตุ:</span><p class="font-semibold text-slate-800 bg-slate-50 p-3 rounded-xl border border-slate-100 break-words italic">"${pendingEntry.remark}"</p></div><div class="flex justify-between border-b pb-2"><span>พนักงาน:</span><span class="font-bold text-slate-900">${pendingEntry.name}</span></div><div class="flex justify-between border-b pb-2"><span>สถานะ:</span><span class="font-bold ${pendingEntry.mode==='in'?'text-blue-600':'text-red-600'}">${pendingEntry.mode==='in'?'เข้างาน (IN)':'ออกงาน (OUT)'}</span></div><div class="flex justify-between border-b pb-2"><span>เวลาตาราง:</span><span class="text-xl font-bold text-slate-950">${pendingEntry.actualTime}</span></div><div class="flex justify-between border-b pb-2"><span>เวลาบันทึก:</span><span class="font-bold text-slate-700">${pendingEntry.fullDateTime}</span></div></div>`;
             showAlert("ยืนยันข้อมูลอีกครั้ง", html, true, false);
         }
-        function executeSave() {
+        async function executeSave() {
             const btn = document.getElementById('btn-confirm-final'); btn.disabled = true; btn.innerText = "กำลังบันทึก...";
             if (typeof google !== 'undefined' && google.script && google.script.run && google.script.run.processData) {
                 google.script.run.withSuccessHandler(function(res) { if(res && res.status === "success") { historyData.unshift(pendingEntry); localStorage.setItem('att_v27_final', JSON.stringify(historyData.slice(0, 50))); renderHistory(); showAlert("บันทึกสำเร็จเรียบร้อย!", "", false, true); } else alert("Error: " + (res?res.message:"Unknown")); btn.innerText = "ยืนยันบันทึก"; btn.disabled = false; }).processData(pendingEntry);
             } else {
-                setTimeout(function() { historyData.unshift(pendingEntry); localStorage.setItem('att_v27_final', JSON.stringify(historyData.slice(0, 50))); renderHistory(); showAlert("บันทึกสำเร็จเรียบร้อย!", "", false, true); btn.innerText = "ยืนยันบันทึก"; btn.disabled = false; }, 800);
+                try {
+                    const res = await fetch(PAYROLL_WEB_APP_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'processData', payload: pendingEntry })
+                    });
+                    const jsonRes = await res.json();
+                    if (jsonRes && jsonRes.status === "success") {
+                        historyData.unshift(pendingEntry); 
+                        localStorage.setItem('att_v27_final', JSON.stringify(historyData.slice(0, 50))); 
+                        renderHistory(); 
+                        showAlert("บันทึกสำเร็จเรียบร้อย!", "", false, true);
+                    } else {
+                        alert("Error: " + (jsonRes ? jsonRes.message : "Unknown"));
+                    }
+                } catch (e) {
+                    alert("Network error. ไม่สามารถส่งข้อมูลได้ กรุณาลองใหม่");
+                }
+                btn.innerText = "ยืนยันบันทึก"; btn.disabled = false;
             }
         }
         function renderHistory() {
@@ -628,9 +645,31 @@
         function renderAdminView() {
             let html = '<div class="text-left space-y-4 max-h-[300px] overflow-y-auto custom-scroll">'; let sortedUsers = userList.sort();
             for(let i=0; i<sortedUsers.length; i++) { html += `<div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100"><span>${sortedUsers[i]}</span><button onclick="deleteUser('${sortedUsers[i]}')" class="text-red-500 font-bold p-2 hover:bg-white rounded-xl transition">ลบ</button></div>`; }
-            html += '</div>'; showAlert("จัดการพนักงาน", html, false, false);
+            html += '</div>'; 
+            html += '<div class="mt-4"><button onclick="syncLocalHistoryToCloud()" class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl shadow-md active:scale-95 transition">ซิงค์ข้อมูลตกหล่น (ออฟไลน์) ขึ้นเซิร์ฟเวอร์</button></div>';
+            showAlert("จัดการพนักงาน", html, false, false);
         }
         function deleteUser(n) { if(confirm(`ลบ ${n}?`)) { userList = userList.filter(function(u) { return u!==n; }); localStorage.setItem('att_saved_users', JSON.stringify(userList)); renderDatalist(); renderAdminView(); } }
+        async function syncLocalHistoryToCloud() {
+            if(!confirm("ต้องการซิงค์ข้อมูลล่าสุดที่ตกหล่นขึ้นเซิร์ฟเวอร์หรือไม่? (ข้อมูลจะถูกบันทึกใหม่ทั้งหมด)")) return;
+            const btn = document.querySelector('button[onclick="syncLocalHistoryToCloud()"]');
+            btn.innerText = "กำลังซิงค์... (ห้ามปิดหน้าจอ)"; btn.disabled = true;
+            try {
+                let successCount = 0;
+                for(let i = historyData.length - 1; i >= 0; i--) {
+                    const entry = historyData[i];
+                    await fetch(PAYROLL_WEB_APP_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'processData', payload: entry })
+                    });
+                    successCount++;
+                }
+                alert(`ซิงค์ข้อมูลสำเร็จ ${successCount} รายการ!`);
+            } catch(e) {
+                alert("เกิดข้อผิดพลาด: " + e.message);
+            }
+            btn.innerText = "ซิงค์ข้อมูลตกหล่น (ออฟไลน์) ขึ้นเซิร์ฟเวอร์"; btn.disabled = false;
+        }
         renderHistory();
 
         // 🔄 ระบบ Auto-Sync สแกนเช็ค Google Sheets ทุกๆ 1 วินาที (Real-time)
