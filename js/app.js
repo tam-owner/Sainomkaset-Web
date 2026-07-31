@@ -1025,7 +1025,8 @@ function renderPeriodDropdown() {
             
             let payDateHtml = '';
             if (p.payDateStr) {
-                let dateColor = isSel ? 'bg-indigo-600 text-white shadow-md' : 'bg-emerald-500 text-white shadow-md';
+                let isPay5 = p.payDateStr.includes(' 5 ');
+                let dateColor = isPay5 ? 'bg-indigo-600 text-white shadow-md' : 'bg-emerald-500 text-white shadow-md';
                 let cleanPayStr = p.payDateStr.replace('(', '').replace(')', '');
                 payDateHtml = `
                     <div class="flex items-center mt-2">
