@@ -526,6 +526,7 @@ function showLoading(text) {
         document.getElementById('loading-text').innerText = text;
         overlay.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-[-20px]');
         overlay.classList.add('opacity-100', 'translate-y-0');
+        document.body.style.overflow = 'hidden';
     }
 }
 
@@ -534,6 +535,7 @@ function hideLoading() {
     if (overlay) {
         overlay.classList.remove('opacity-100', 'translate-y-0');
         overlay.classList.add('opacity-0', 'pointer-events-none', 'translate-y-[-20px]');
+        document.body.style.overflow = '';
     }
     const skeleton = document.getElementById('skeleton-view');
     if (skeleton && !skeleton.classList.contains('hidden')) {
@@ -1725,7 +1727,7 @@ function renderAdminSummary() {
             <div class="mt-3 pt-3 border-t border-dashed border-slate-200">
                 <div class="flex justify-between items-center mb-2">
                     <span class="text-[11px] font-bold text-slate-500 uppercase">รายการหักอื่นๆ</span>
-                    <button onclick="openDeductionModal('${emp.name}')" class="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded active:scale-95 transition">+ เพิ่มรายการหัก</button>
+                    <button onclick="openDeductionModal('${emp.name}')" class="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded active:scale-95 transition">+ เพิ่มรายการหัก/บวก</button>
                 </div>
                 ${empDeductions.length > 0 ? `<div class="space-y-1">
                     ${empDeductions.map(d => `
@@ -1821,9 +1823,9 @@ function closeDeductionModal() {
     const overlay = document.getElementById('deduction-modal');
     const box = document.getElementById('deduction-modal-box');
     box.classList.add('scale-95');
+    overlay.classList.add('opacity-0', 'pointer-events-none');
     setTimeout(() => {
-        overlay.classList.add('opacity-0', 'pointer-events-none');
-        hideLoading();
+        overlay.classList.add('hidden');
     }, 300);
 }
 
