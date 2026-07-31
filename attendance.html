@@ -60,21 +60,21 @@
         </div>
     </div>
 
-    <div id="wifi-block-overlay" class="modal-overlay" style="display: flex; z-index: 9999; background: rgba(15, 23, 42, 0.95);">
+    <div id="location-block-overlay" class="modal-overlay" style="display: flex; z-index: 9999; background: rgba(15, 23, 42, 0.95);">
         <div class="modal-card shadow-2xl space-y-4 text-center">
-            <div id="wifi-icon" class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-2">
+            <div id="location-icon" class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-2">
                 <svg class="w-8 h-8 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
             </div>
-            <h3 id="wifi-title" class="text-2xl font-bold tracking-tight text-slate-950">กำลังตรวจสอบระบบ...</h3>
-            <p id="wifi-desc" class="text-sm text-slate-600 font-medium">รอสักครู่ ระบบกำลังตรวจสอบการเชื่อมต่อ Wi-Fi</p>
-            <div id="wifi-admin-area" class="hidden space-y-3 pt-2 pb-2">
-                <input type="password" id="wifi-admin-pass" class="input-modern py-3 text-sm" placeholder="รหัสผู้ดูแลเพื่ออัปเดต IP" maxlength="5">
-                <p id="wifi-admin-error" class="text-[11px] font-bold text-red-500 hidden text-center italic">✘ รหัสผ่านไม่ถูกต้อง</p>
-                <button id="wifi-admin-submit" onclick="submitWifiAdmin()" class="w-full py-3 bg-slate-800 text-white rounded-xl font-bold active:scale-95 transition shadow-sm text-sm">อัปเดต IP</button>
+            <h3 id="location-title" class="text-2xl font-bold tracking-tight text-slate-950">กำลังตรวจสอบพิกัด GPS...</h3>
+            <p id="location-desc" class="text-sm text-slate-600 font-medium">รอสักครู่ ระบบกำลังตรวจสอบตำแหน่งของคุณ</p>
+            <div id="location-admin-area" class="hidden space-y-3 pt-2 pb-2">
+                <input type="password" id="location-admin-pass" class="input-modern py-3 text-sm" placeholder="รหัสผู้ดูแลเพื่ออัปเดตพิกัด" maxlength="5">
+                <p id="location-admin-error" class="text-[11px] font-bold text-red-500 hidden text-center italic">✘ รหัสผ่านไม่ถูกต้อง</p>
+                <button id="location-admin-submit" onclick="submitLocationAdmin()" class="w-full py-3 bg-slate-800 text-white rounded-xl font-bold active:scale-95 transition shadow-sm text-sm">อัปเดตพิกัดร้าน</button>
             </div>
             <div class="flex flex-col gap-2 mt-2 w-full">
-                <button id="wifi-retry-btn" onclick="checkWifiRestriction()" class="hidden w-full py-4 bg-slate-800 text-white rounded-2xl font-bold active:scale-95 transition shadow-md">ลองอีกครั้ง</button>
-                <button id="wifi-admin-toggle-btn" onclick="toggleWifiAdmin()" class="hidden w-full py-3 bg-slate-100 text-slate-600 rounded-2xl font-bold active:scale-95 transition text-sm">อัปเดต IP (Admin)</button>
+                <button id="location-retry-btn" onclick="checkLocationRestriction()" class="hidden w-full py-4 bg-slate-800 text-white rounded-2xl font-bold active:scale-95 transition shadow-md">ลองอีกครั้ง</button>
+                <button id="location-admin-toggle-btn" onclick="toggleLocationAdmin()" class="hidden w-full py-3 bg-slate-100 text-slate-600 rounded-2xl font-bold active:scale-95 transition text-sm">อัปเดตพิกัดร้าน (Admin)</button>
             </div>
         </div>
     </div>
@@ -199,15 +199,25 @@
 
     <script>
         const PAYROLL_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwtXLJR8ghHYfkcOdHDEuWacdGLzRNTxlUxPgzLTrOBQYPCbCV2XwqqQriz_mJudw/exec';
-        async function checkWifiRestriction() {
+        // Haversine formula
+        function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // Radius of the earth in m
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+        }
+
+        async function checkLocationRestriction() {
             // Set loading state
-            document.getElementById('wifi-icon').innerHTML = '<svg class="w-8 h-8 animate-spin text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>';
-            document.getElementById('wifi-icon').className = 'w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2';
-            document.getElementById('wifi-title').innerText = 'กำลังตรวจสอบระบบ...';
-            document.getElementById('wifi-desc').innerText = 'รอสักครู่ ระบบกำลังตรวจสอบการเชื่อมต่อ Wi-Fi';
-            document.getElementById('wifi-retry-btn').classList.add('hidden');
-            document.getElementById('wifi-admin-toggle-btn').classList.add('hidden');
-            document.getElementById('wifi-admin-area').classList.add('hidden');
+            document.getElementById('location-icon').innerHTML = '<svg class="w-8 h-8 animate-spin text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>';
+            document.getElementById('location-icon').className = 'w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2';
+            document.getElementById('location-title').innerText = 'กำลังตรวจสอบพิกัด GPS...';
+            document.getElementById('location-desc').innerText = 'รอสักครู่ ระบบกำลังตรวจสอบตำแหน่งของคุณ';
+            document.getElementById('location-retry-btn').classList.add('hidden');
+            document.getElementById('location-admin-toggle-btn').classList.add('hidden');
+            document.getElementById('location-admin-area').classList.add('hidden');
             
             try {
                 const prRes = await fetch(PAYROLL_WEB_APP_URL, {
@@ -216,75 +226,101 @@
                     headers: { "Content-Type": "text/plain;charset=utf-8" }
                 });
                 const prData = await prRes.json();
-                const shopIP = prData.data && prData.data.settings ? prData.data.settings['ShopIP'] : null;
+                const shopLat = prData.data && prData.data.settings ? parseFloat(prData.data.settings['ShopLat']) : null;
+                const shopLng = prData.data && prData.data.settings ? parseFloat(prData.data.settings['ShopLng']) : null;
                 
-                if (shopIP) {
-                    const ipRes = await fetch('https://api.ipify.org?format=json');
-                    const ipData = await ipRes.json();
-                    
-                    if (ipData.ip !== shopIP) {
-                        // Show error state
-                        document.getElementById('wifi-icon').innerHTML = '<svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>';
-                        document.getElementById('wifi-icon').className = 'w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-2';
-                        document.getElementById('wifi-title').innerText = 'เชื่อมต่อ Wi-Fi ผิดพลาด';
-                        document.getElementById('wifi-desc').innerText = 'กรุณาเชื่อมต่อ Wi-Fi ของร้านเพื่อใช้งานระบบบันทึกเวลา';
-                        document.getElementById('wifi-retry-btn').classList.remove('hidden');
-                        document.getElementById('wifi-admin-toggle-btn').classList.remove('hidden');
-                        document.getElementById('wifi-block-overlay').style.display = 'flex';
-                        currentFailedIP = ipData.ip;
-                        return; // Blocked
+                if (shopLat && shopLng) {
+                    if (!navigator.geolocation) {
+                        throw new Error("Geolocation is not supported by your browser");
                     }
+                    
+                    navigator.geolocation.getCurrentPosition((position) => {
+                        const currentLat = position.coords.latitude;
+                        const currentLng = position.coords.longitude;
+                        const distance = getDistanceFromLatLonInMeters(shopLat, shopLng, currentLat, currentLng);
+                        
+                        if (distance > 100) { // 100 meters radius
+                            document.getElementById('location-icon').innerHTML = '<svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>';
+                            document.getElementById('location-icon').className = 'w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-2';
+                            document.getElementById('location-title').innerText = 'อยู่นอกพื้นที่ร้าน';
+                            document.getElementById('location-desc').innerText = `พิกัดของคุณอยู่ห่างจากร้าน ${Math.round(distance)} เมตร (จำกัด 100 ม.) กรุณาเข้าใกล้บริเวณร้าน`;
+                            document.getElementById('location-retry-btn').classList.remove('hidden');
+                            document.getElementById('location-admin-toggle-btn').classList.remove('hidden');
+                            document.getElementById('location-block-overlay').style.display = 'flex';
+                            return; // Blocked
+                        }
+                        // Pass (Within radius)
+                        document.getElementById('location-block-overlay').style.display = 'none';
+                    }, (error) => {
+                        console.error("GPS Error", error);
+                        document.getElementById('location-icon').innerHTML = '<svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>';
+                        document.getElementById('location-icon').className = 'w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-2';
+                        document.getElementById('location-title').innerText = 'ไม่พบพิกัดของคุณ';
+                        document.getElementById('location-desc').innerText = 'กรุณาเปิด GPS และอนุญาตการเข้าถึง Location ในเบราว์เซอร์';
+                        document.getElementById('location-retry-btn').classList.remove('hidden');
+                        document.getElementById('location-admin-toggle-btn').classList.remove('hidden');
+                        document.getElementById('location-block-overlay').style.display = 'flex';
+                    }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+                } else {
+                    // Pass (No ShopLat/ShopLng set)
+                    document.getElementById('location-block-overlay').style.display = 'none';
                 }
-                // Pass (No ShopIP or IP matches)
-                document.getElementById('wifi-block-overlay').style.display = 'none';
             } catch (e) {
-                console.error("WiFi Check Error", e);
-                // On error fetching IP or data, DO NOT allow pass. Show error and block.
-                document.getElementById('wifi-icon').innerHTML = '<svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>';
-                document.getElementById('wifi-icon').className = 'w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-2';
-                document.getElementById('wifi-title').innerText = 'ตรวจสอบ IP ไม่สำเร็จ';
-                document.getElementById('wifi-desc').innerText = 'ไม่สามารถดึงข้อมูล IP ของคุณได้ กรุณาปิดตัวบล็อกโฆษณา หรือรีเฟรชลองใหม่';
-                document.getElementById('wifi-retry-btn').classList.remove('hidden');
-                document.getElementById('wifi-block-overlay').style.display = 'flex';
+                console.error("Location Check Error", e);
+                document.getElementById('location-icon').innerHTML = '<svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>';
+                document.getElementById('location-icon').className = 'w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-2';
+                document.getElementById('location-title').innerText = 'การตรวจสอบผิดพลาด';
+                document.getElementById('location-desc').innerText = 'ไม่สามารถดึงข้อมูลตั้งค่าพิกัดได้ กรุณาลองใหม่';
+                document.getElementById('location-retry-btn').classList.remove('hidden');
+                document.getElementById('location-block-overlay').style.display = 'flex';
             }
         }
-        checkWifiRestriction();
+        checkLocationRestriction();
 
-        let currentFailedIP = null;
-        async function submitWifiAdmin() {
-            const pass = document.getElementById('wifi-admin-pass').value;
+        async function submitLocationAdmin() {
+            const pass = document.getElementById('location-admin-pass').value;
             const n = new Date();
             const otp = (String(n.getDate()).padStart(2, '0') + String(n.getMonth() + 1).padStart(2, '0')).split('').reverse().join('');
             if (pass !== "34531" && pass !== otp) {
-                document.getElementById('wifi-admin-error').classList.remove('hidden');
+                document.getElementById('location-admin-error').classList.remove('hidden');
                 return;
             }
-            if (!currentFailedIP) return;
-            const btn = document.getElementById('wifi-admin-submit');
-            btn.innerText = "กำลังบันทึก...";
-            try {
-                const res = await fetch(PAYROLL_WEB_APP_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: "saveSetting", key: "ShopIP", value: currentFailedIP })
-                });
-                const data = await res.json();
-                if(data.status === 'success') {
-                    alert('อัปเดต IP ของร้านเรียบร้อยแล้ว');
-                    checkWifiRestriction();
-                } else alert('Error updating IP');
-            } catch(e) { alert('Connection error'); }
-            btn.innerText = "อัปเดต IP";
+            const btn = document.getElementById('location-admin-submit');
+            btn.innerText = "กำลังหาตำแหน่ง...";
+            
+            if (!navigator.geolocation) {
+                alert('เบราว์เซอร์ไม่รองรับ GPS');
+                btn.innerText = "อัปเดตพิกัดร้าน";
+                return;
+            }
+            
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const currentLat = position.coords.latitude;
+                const currentLng = position.coords.longitude;
+                btn.innerText = "กำลังบันทึก...";
+                try {
+                    await fetch(PAYROLL_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: "saveSetting", key: "ShopLat", value: currentLat }) });
+                    await fetch(PAYROLL_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: "saveSetting", key: "ShopLng", value: currentLng }) });
+                    alert(`อัปเดตพิกัดร้านเรียบร้อยแล้ว\nLat: ${currentLat}\nLng: ${currentLng}`);
+                    checkLocationRestriction();
+                } catch(e) { alert('Connection error'); }
+                btn.innerText = "อัปเดตพิกัดร้าน";
+            }, (error) => {
+                alert('ไม่สามารถหาตำแหน่งได้ กรุณาอนุญาต GPS');
+                btn.innerText = "อัปเดตพิกัดร้าน";
+            }, { enableHighAccuracy: true });
         }
-        function toggleWifiAdmin() {
-            const area = document.getElementById('wifi-admin-area');
+        
+        function toggleLocationAdmin() {
+            const area = document.getElementById('location-admin-area');
             if(area.classList.contains('hidden')) {
                 area.classList.remove('hidden');
-                document.getElementById('wifi-admin-toggle-btn').innerText = 'ยกเลิก';
+                document.getElementById('location-admin-toggle-btn').innerText = 'ยกเลิก';
             } else {
                 area.classList.add('hidden');
-                document.getElementById('wifi-admin-pass').value = '';
-                document.getElementById('wifi-admin-error').classList.add('hidden');
-                document.getElementById('wifi-admin-toggle-btn').innerText = 'อัปเดต IP (Admin)';
+                document.getElementById('location-admin-pass').value = '';
+                document.getElementById('location-admin-error').classList.add('hidden');
+                document.getElementById('location-admin-toggle-btn').innerText = 'อัปเดตพิกัดร้าน (Admin)';
             }
         }
 
