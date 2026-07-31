@@ -44,14 +44,72 @@ document.addEventListener('DOMContentLoaded', () => {
 let isInitialLoad = true;
 
 function initData() {
-    showLoading("กำลังเชื่อมต่อฐานข้อมูล Real-time...");
-
+    showLoading("กำลังโหลดข้อมูลจากเซิร์ฟเวอร์...");
     let isConnected = false;
-    const timeoutId = setTimeout(() => {
-        if (!isConnected && isInitialLoad) {
-            console.warn("Firebase connection timeout, attempting offline mode");
+
+    // Use Web App URL to fetch data directly (bypassing Firebase which may have expired)
+    fetch(WEB_APP_URL + "?action=getInitPayrollData")
+        .then(res => res.json())
+        .then(jsonRes => {
+            if (jsonRes && jsonRes.status === "success") {
+                const data = jsonRes.data;
+                
+                isConnected = true;
+                // Save to cache
+                localStorage.setItem('snk_payroll_data', JSON.stringify({status: "success", data: data}));
+                
+                applyInitData(data, !isInitialLoad);
+                
+                if (isInitialLoad) {
+                    isInitialLoad = false;
+                    if (!isAdmin && !loggedInEmployee) {
+                        hideLoading();
+                    }
+                } else {
+                    if (loggedInEmployee) {
+                        setupPeriods();
+                        if (isAdmin) {
+                            if (currentPeriodVal) renderAdminSummary();
+                            if (!document.getElementById('view-admin-employees').classList.contains('hidden')) {
+                                const countEl = document.getElementById('emp-setup-count');
+                                if (countEl) countEl.innerText = employees.length;
+                                renderAdminEmployees();
+                            }
+                            const timelogsModal = document.getElementById('timelogs-modal');
+                            if (timelogsModal && !timelogsModal.classList.contains('hidden') && typeof currentLogsEmp !== 'undefined' && currentLogsEmp) {
+                                fetchTimeLogs(currentLogsEmp.name);
+                            }
+                        } else {
+                            const freshEmp = employees.find(e => e.name === loggedInEmployee.name);
+                            if (freshEmp) {
+                                loggedInEmployee = freshEmp;
+                                sessionStorage.setItem('snk_payroll_user', JSON.stringify(freshEmp));
+                                document.getElementById('emp-user-name').innerText = loggedInEmployee.name;
+                                const photoImg = document.getElementById('emp-user-photo');
+                                const initialSpan = document.getElementById('emp-user-initial');
+                                if (loggedInEmployee.photo) {
+                                    photoImg.src = loggedInEmployee.photo;
+                                    photoImg.classList.remove('hidden');
+                                    initialSpan.classList.add('hidden');
+                                } else {
+                                    photoImg.src = "";
+                                    photoImg.classList.add('hidden');
+                                    initialSpan.classList.remove('hidden');
+                                    initialSpan.innerText = loggedInEmployee.name.charAt(0);
+                                }
+                            }
+                            if (currentPeriodVal) renderEmployeeDashboard();
+                        }
+                    }
+                }
+            } else {
+                throw new Error("Invalid response");
+            }
+        })
+        .catch(error => {
+            console.error("GAS fetch error", error);
             const cachedStr = localStorage.getItem('snk_payroll_data');
-            if (cachedStr) {
+            if (cachedStr && isInitialLoad) {
                 try {
                     const cachedJson = JSON.parse(cachedStr);
                     if (cachedJson.status === "success") {
@@ -59,92 +117,7 @@ function initData() {
                     }
                 } catch(e){}
             }
-            hideLoading();
-            if (!cachedStr) {
-                showView('view-login', false);
-            }
-        }
-    }, 5000);
-
-    // Listen to Firebase Realtime Database
-    database.ref('data').on('value', snapshot => {
-        isConnected = true;
-        clearTimeout(timeoutId);
-        const data = snapshot.val();
-        if (data) {
-            // Save to cache just in case they go offline later
-            localStorage.setItem('snk_payroll_data', JSON.stringify({status: "success", data: data}));
-            
-            // Apply the data
-            applyInitData(data, !isInitialLoad);
-            
             if (isInitialLoad) {
-                isInitialLoad = false;
-                if (!isAdmin && !loggedInEmployee) {
-                    hideLoading();
-                }
-            } else {
-                // This acts like fetchFreshDataSilently: UI updates if already logged in
-                if (loggedInEmployee) {
-                    setupPeriods();
-                    if (isAdmin) {
-                        if (currentPeriodVal) renderAdminSummary();
-                        if (!document.getElementById('view-admin-employees').classList.contains('hidden')) {
-                            const countEl = document.getElementById('emp-setup-count');
-                            if (countEl) countEl.innerText = employees.length;
-                            renderAdminEmployees();
-                        }
-                        
-                        const timelogsModal = document.getElementById('timelogs-modal');
-                        if (timelogsModal && !timelogsModal.classList.contains('hidden') && typeof currentLogsEmp !== 'undefined' && currentLogsEmp) {
-                            fetchTimeLogs(currentLogsEmp.name);
-                        }
-                    } else {
-                        const freshEmp = employees.find(e => e.name === loggedInEmployee.name);
-                        if (freshEmp) {
-                            loggedInEmployee = freshEmp;
-                            sessionStorage.setItem('snk_payroll_user', JSON.stringify(freshEmp));
-                            document.getElementById('emp-user-name').innerText = loggedInEmployee.name;
-                            const photoImg = document.getElementById('emp-user-photo');
-                            const initialSpan = document.getElementById('emp-user-initial');
-                            if (loggedInEmployee.photo) {
-                                photoImg.src = loggedInEmployee.photo;
-                                photoImg.classList.remove('hidden');
-                                initialSpan.classList.add('hidden');
-                            } else {
-                                photoImg.src = "";
-                                photoImg.classList.add('hidden');
-                                initialSpan.classList.remove('hidden');
-                                initialSpan.innerText = loggedInEmployee.name.charAt(0);
-                            }
-                        }
-                        if (currentPeriodVal) renderEmployeeDashboard();
-                    }
-                }
-            }
-        } else {
-            console.warn("No data in Firebase yet.");
-            if (isInitialLoad) hideLoading();
-        }
-    }, error => {
-        console.error("Firebase fetch error", error);
-        // Fallback to cache
-        const cachedStr = localStorage.getItem('snk_payroll_data');
-        if (cachedStr && isInitialLoad) {
-            try {
-                const cachedJson = JSON.parse(cachedStr);
-                if (cachedJson.status === "success") {
-                    applyInitData(cachedJson.data);
-                }
-            } catch(e){}
-        }
-        if (isInitialLoad) {
-            hideLoading();
-            if (!cachedStr) {
-                showView('view-login', false);
-            }
-        }
-    });
 
 }
 
