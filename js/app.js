@@ -1609,6 +1609,13 @@ function renderAdminSummary() {
     
     let empStats = {};
     employees.forEach(e => {
+        let empDedType = String(e.deductionType || "").trim();
+        let e_hasSocialSecurity = (empDedType === "5%" || empDedType === "0.05" || empDedType.includes("5%"));
+        
+        // Filter based on period type
+        if (type === 'all' && e_hasSocialSecurity) return;
+        if ((type === 'h1' || type === 'h2') && !e_hasSocialSecurity) return;
+
         empStats[e.name] = {
             ...e,
             totalNormalHours: 0,
