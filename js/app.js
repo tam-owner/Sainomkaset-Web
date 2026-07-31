@@ -1703,6 +1703,7 @@ function renderAdminSummary() {
         } else if (empDedType === "5%" || empDedType === "0.05" || empDedType.includes("5%")) {
             let ssBase = Math.max(0, payBeforeTaxNoOT);
             standardDeduct = Math.round(ssBase * 0.05);
+            if (ssBase > 0 && standardDeduct < 83) standardDeduct = 83;
             deductLabel = `หักประกันสังคม 5% (ฐาน ฿${ssBase.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:2})})`;
         }
 
@@ -2656,6 +2657,7 @@ function calculateMonthlySlips() {
         } else if (empDedTypeForRound === "5%" || empDedTypeForRound === "0.05" || empDedTypeForRound.includes("5%")) {
             let ssBase = Math.max(0, payBeforeTaxNoOT);
             standardDeduct = Math.round(ssBase * 0.05);
+            if (ssBase > 0 && standardDeduct < 83) standardDeduct = 83;
             deductLabelStr = `หักประกันสังคม 5% (ฐาน ฿${ssBase.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:2})})`;
         }
         
@@ -4305,6 +4307,14 @@ function toggleQA(btn) {
     const content = btn.nextElementSibling;
     const icon = btn.querySelector('svg');
     
+    // Close other open items
+    document.querySelectorAll('.qa-content').forEach(c => {
+        if(c !== content && !c.classList.contains('hidden')) {
+            c.classList.add('hidden');
+            c.previousElementSibling.querySelector('svg').style.transform = 'rotate(0deg)';
+        }
+    });
+
     if (content.classList.contains('hidden')) {
         content.classList.remove('hidden');
         icon.style.transform = 'rotate(180deg)';
