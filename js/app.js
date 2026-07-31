@@ -15,7 +15,9 @@ let employees = [];
 let deductions = [];
 let leaves = [];
 let timeEditRequests = [];
-let shopAllowedIP = "";
+let shopLat = null;
+let shopLng = null;
+let shopRadius = 50;
 
 let processedAttendance = [];
 let availablePeriods = [];
@@ -162,8 +164,10 @@ function applyInitData(data, isSilent = false) {
         deductions = data.deductions || [];
         leaves = data.leaves || [];
         timeEditRequests = data.timeEditRequests || [];
-        if (data.settings && data.settings['ShopIP']) {
-            shopAllowedIP = data.settings['ShopIP'];
+        if (data.settings) {
+            if (data.settings['ShopLat']) shopLat = parseFloat(data.settings['ShopLat']);
+            if (data.settings['ShopLng']) shopLng = parseFloat(data.settings['ShopLng']);
+            if (data.settings['ShopRadius']) shopRadius = parseInt(data.settings['ShopRadius'], 10) || 50;
         }
 
         // Auto-register missing names
@@ -3715,54 +3719,85 @@ function cleanTimeStr(str) {
     return s;
 }
 
-async function openWifiSettings() {
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371e3; // Earth radius in meters
+    const rad = Math.PI / 180;
+    const dLat = (lat2 - lat1) * rad;
+    const dLon = (lon2 - lon1) * rad;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * rad) * Math.cos(lat2 * rad) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c; // Distance in meters
+}
+
+function openLocationSettings() {
+    if (!navigator.geolocation) {
+        Swal.fire('ข้อผิดพลาด', 'เบราว์เซอร์ของคุณไม่รองรับการดึงพิกัด (GPS)', 'error');
+        return;
+    }
+
     Swal.fire({
-        title: 'กำลังตรวจสอบ IP...',
+        title: 'กำลังดึงพิกัด GPS...',
+        text: 'โปรดกดยอมรับการเข้าถึงตำแหน่งหากเบราว์เซอร์ร้องขอ',
         allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
+        didOpen: () => { Swal.showLoading(); }
     });
 
-    try {
-        const res = await fetch('https://api.ipify.org?format=json');
-        const data = await res.json();
-        const ip = data.ip;
-        
-        Swal.fire({
-            title: 'ตั้งค่า Wi-Fi ร้านค้า',
-            html: `<div class="text-sm text-slate-600 text-left mb-4">
-                IP ปัจจุบันของคุณคือ:<br>
-                <span class="text-xl font-black text-indigo-600">${ip}</span>
-                <br><br>
-                หากคุณกำลังใช้ Wi-Fi ของร้าน กดบันทึกด้านล่าง เพื่อจำกัดให้พนักงานสแกนเวลาผ่าน Wi-Fi ของร้านเท่านั้น<br><br>
-                <span class="text-red-500 font-bold text-xs">*หากตั้งค่าแล้ว พนักงานจะสแกนเข้างานไม่ได้ถ้าไม่ใช้ Wi-Fi ของร้าน</span>
-            </div>`,
-            showCancelButton: true,
-            confirmButtonText: 'ตั้งค่า IP นี้เป็น Wi-Fi ร้าน',
-            cancelButtonText: 'ยกเลิก',
-            confirmButtonColor: '#10b981',
-            showLoaderOnConfirm: true,
-            preConfirm: async () => {
-                const saveRes = await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: "saveSetting", key: "ShopIP", value: ip })
-                });
-                const saveJson = await saveRes.json();
-                if(saveJson.status !== "success") throw new Error(saveJson.message);
-                return ip;
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                shopAllowedIP = result.value;
-                Swal.fire('สำเร็จ!', 'ตั้งค่า Wi-Fi ของร้านเรียบร้อยแล้ว พนักงานจะต้องใช้เน็ตวงนี้เพื่อบันทึกเวลา', 'success');
-                
-            }
-        });
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            
+            Swal.fire({
+                title: 'ตั้งค่าพิกัดร้านค้า',
+                html: `<div class="text-sm text-slate-600 text-left mb-4">
+                    พิกัดปัจจุบันของคุณคือ:<br>
+                    <span class="text-lg font-black text-indigo-600">${lat.toFixed(6)}, ${lng.toFixed(6)}</span>
+                    <br><br>
+                    <label class="block font-bold text-slate-700 mb-1">ระยะห่างที่อนุญาต (รัศมีเป็นเมตร)</label>
+                    <input type="number" id="shop-radius-input" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-3 mb-2 font-bold text-indigo-700" value="${shopRadius || 50}" min="10" max="1000">
+                    <span class="text-red-500 font-bold text-xs">*หากตั้งค่าแล้ว พนักงานจะต้องอยู่ในรัศมีนี้จึงจะเช็คอินได้</span>
+                </div>`,
+                showCancelButton: true,
+                confirmButtonText: 'บันทึกพิกัดร้าน',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#10b981',
+                showLoaderOnConfirm: true,
+                preConfirm: async () => {
+                    const rInput = document.getElementById('shop-radius-input').value;
+                    const r = parseInt(rInput, 10) || 50;
 
-    } catch (e) {
-        Swal.fire('ข้อผิดพลาด', 'ไม่สามารถอ่าน IP ของคุณได้ กรุณาตรวจสอบอินเทอร์เน็ต', 'error');
-    }
+                    try {
+                        const p1 = fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: "saveSetting", key: "ShopLat", value: lat.toString() }) }).then(res => res.json());
+                        const p2 = fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: "saveSetting", key: "ShopLng", value: lng.toString() }) }).then(res => res.json());
+                        const p3 = fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: "saveSetting", key: "ShopRadius", value: r.toString() }) }).then(res => res.json());
+                        
+                        const results = await Promise.all([p1, p2, p3]);
+                        const hasError = results.some(res => res.status !== "success");
+                        if (hasError) throw new Error("เกิดข้อผิดพลาดในการบันทึก");
+                        
+                        return { lat, lng, r };
+                    } catch (e) {
+                        Swal.showValidationMessage(e.message);
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    shopLat = result.value.lat;
+                    shopLng = result.value.lng;
+                    shopRadius = result.value.r;
+                    Swal.fire('สำเร็จ!', 'ตั้งค่าพิกัดร้านและระยะรัศมีเรียบร้อยแล้ว', 'success');
+                }
+            });
+        },
+        (error) => {
+            let msg = 'ไม่สามารถดึงพิกัดได้ กรุณาลองใหม่';
+            if (error.code === error.PERMISSION_DENIED) msg = 'คุณปฏิเสธการเข้าถึงตำแหน่ง กรุณาอนุญาตในเบราว์เซอร์ก่อน';
+            Swal.fire('ข้อผิดพลาด', msg, 'error');
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
 }
 
 // =====================================
@@ -3778,33 +3813,46 @@ async function openQuickAttendance(type) {
         return;
     }
 
-    // 1. Wi-Fi Check
-    if (shopAllowedIP) {
+    // 1. Location Check
+    if (shopLat !== null && shopLng !== null) {
+        if (!navigator.geolocation) {
+            Swal.fire('ข้อผิดพลาด', 'เบราว์เซอร์ของคุณไม่รองรับพิกัด GPS จึงไม่สามารถเข้างานได้', 'error');
+            return;
+        }
+
         Swal.fire({
-            title: 'กำลังตรวจสอบระบบ...',
-            text: 'รอสักครู่ ระบบกำลังตรวจสอบการเชื่อมต่อ Wi-Fi',
+            title: 'กำลังตรวจสอบพิกัด...',
+            text: 'กรุณาอนุญาตการเข้าถึงตำแหน่งหากเบราว์เซอร์ร้องขอ',
             allowOutsideClick: false,
             didOpen: () => { Swal.showLoading(); }
         });
 
         try {
-            const ipRes = await fetch('https://api.ipify.org?format=json');
-            const ipData = await ipRes.json();
+            const position = await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                    enableHighAccuracy: true, timeout: 10000, maximumAge: 0
+                });
+            });
+
+            const distance = calculateDistance(position.coords.latitude, position.coords.longitude, shopLat, shopLng);
+            const radius = shopRadius || 50;
             
-            if (ipData.ip !== shopAllowedIP) {
+            if (distance > radius) {
                 Swal.fire({
                     icon: 'error',
-                    title: 'เชื่อมต่อ Wi-Fi ผิดพลาด',
-                    text: 'กรุณาเชื่อมต่อ Wi-Fi ของร้านเพื่อใช้งานระบบบันทึกเวลา'
+                    title: 'พิกัดไม่อยู่ในระยะร้าน',
+                    text: `คุณอยู่ห่างจากร้าน ${Math.round(distance)} เมตร (อนุญาต ${radius} เมตร) กรุณาเข้าใกล้ร้านมากขึ้น`
                 });
                 return;
             }
         } catch (e) {
-            console.error("WiFi Check Error", e);
+            let msg = 'ไม่สามารถดึงพิกัดของคุณได้ กรุณาลองใหม่';
+            if (e.code === e.PERMISSION_DENIED) msg = 'คุณปฏิเสธการให้ตำแหน่ง กรุณาอนุญาตสิทธิ์ Location ในเบราว์เซอร์ก่อนทำการบันทึกเวลา';
+            
             Swal.fire({
                 icon: 'warning',
-                title: 'ตรวจสอบ IP ไม่สำเร็จ',
-                text: 'ไม่สามารถดึงข้อมูล IP ของคุณได้ กรุณาปิดตัวบล็อกโฆษณา หรือรีเฟรชลองใหม่'
+                title: 'ตรวจสอบพิกัดไม่สำเร็จ',
+                text: msg
             });
             return;
         }

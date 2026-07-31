@@ -667,11 +667,11 @@
                 <span class="font-bold text-slate-700 text-sm">อนุมัติแก้ไขเวลา</span>
                 <span id="admin-dash-time-edit-badge" class="absolute top-3 right-3 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center hidden"></span>
             </button>
-            <button onclick="openWifiSettings()" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95">
+            <button onclick="openLocationSettings()" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95">
                 <div class="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path></svg>
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 </div>
-                <span class="font-bold text-slate-700 text-sm">ตั้งค่า Wi-Fi ร้าน</span>
+                <span class="font-bold text-slate-700 text-sm">ตั้งค่าพิกัดร้าน</span>
             </button>
             <button onclick="showView('view-admin-today-status')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95">
                 <div class="w-14 h-14 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center">
@@ -1094,7 +1094,7 @@
     <script src="js/firebase-init.js?v=20260703_46"></script>
 
     <script src="js/customSelect.js"></script>
-    <script src="js/app.js?v=20260707_42"></script>
+    <script src="js/app.js?v=20260731_47"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -1137,7 +1137,7 @@
         ล้างแคช
     </button>
     <div id="app-version-display" class="fixed bottom-2 right-2 text-[10px] text-slate-400 font-medium z-[9999] pointer-events-none opacity-50">
-        v2.2.88 (Firebase)
+        v2.2.47 (Firebase)
     </div>
 </body>
 </html>
