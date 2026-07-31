@@ -1691,16 +1691,19 @@ function renderAdminSummary() {
         });
 
         let payBeforeTax = grossPay + customBonusTotal - customDeductTotal;
+        let payBeforeTaxNoOT = normalPay + customBonusTotal - customDeductTotal;
 
         let standardDeduct = 0;
         let deductLabel = '';
         let empDedType = String(emp.deductionType).trim();
         if (empDedType === "3%" || empDedType === "0.03" || empDedType.includes("3%") || empDedType === "" || empDedType === "None") {
-            standardDeduct = Math.round(payBeforeTax * 0.03);
-            deductLabel = "หักภาษี 3%";
+            let taxBase = Math.max(0, payBeforeTax);
+            standardDeduct = Math.round(taxBase * 0.03);
+            deductLabel = `หักภาษี 3% (ฐาน ฿${taxBase.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:2})})`;
         } else if (empDedType === "5%" || empDedType === "0.05" || empDedType.includes("5%")) {
-            standardDeduct = Math.round(payBeforeTax * 0.05);
-            deductLabel = "หักประกันสังคม 5%";
+            let ssBase = Math.max(0, payBeforeTaxNoOT);
+            standardDeduct = Math.round(ssBase * 0.05);
+            deductLabel = `หักประกันสังคม 5% (ฐาน ฿${ssBase.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:2})})`;
         }
 
         let netPay = payBeforeTax - standardDeduct - customAdvanceTotal;
@@ -2642,11 +2645,18 @@ function calculateMonthlySlips() {
         
         // standard deduct (tax/ss)
         let payBeforeTax = s.grossPay - latePayDeduct - s.otherDeductions;
+        let payBeforeTaxNoOT = s.normalPay + s.bonus - latePayDeduct - s.otherDeductions;
+        
         let standardDeduct = 0;
+        let deductLabelStr = '';
         if (empDedTypeForRound === "3%" || empDedTypeForRound === "0.03" || empDedTypeForRound.includes("3%") || empDedTypeForRound === "" || empDedTypeForRound === "None") {
-            standardDeduct = Math.round(payBeforeTax * 0.03);
+            let taxBase = Math.max(0, payBeforeTax);
+            standardDeduct = Math.round(taxBase * 0.03);
+            deductLabelStr = `หักภาษี 3% (ฐาน ฿${taxBase.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:2})})`;
         } else if (empDedTypeForRound === "5%" || empDedTypeForRound === "0.05" || empDedTypeForRound.includes("5%")) {
-            standardDeduct = Math.round(payBeforeTax * 0.05);
+            let ssBase = Math.max(0, payBeforeTaxNoOT);
+            standardDeduct = Math.round(ssBase * 0.05);
+            deductLabelStr = `หักประกันสังคม 5% (ฐาน ฿${ssBase.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:2})})`;
         }
         
         s.totalDeductions = latePayDeduct + s.otherDeductions + standardDeduct + s.advance;
@@ -2658,6 +2668,7 @@ function calculateMonthlySlips() {
         s.monthlyRate = monthlyRate;
         s.latePayDeduct = latePayDeduct;
         s.standardDeduct = standardDeduct;
+        s.deductLabel = deductLabelStr;
         
         // Generate period text
         let payDateText = "";
@@ -2804,7 +2815,7 @@ function printSlip(idx) {
                     </tr>` : ''}
                     ${s.standardDeduct > 0 ? `
                     <tr>
-                        <td>หักภาษี / หักประกันสังคม</td>
+                        <td>${s.deductLabel || 'หักภาษี / หักประกันสังคม'}</td>
                         <td>-</td>
                         <td>-${formatMoney(s.standardDeduct)} ฿</td>
                     </tr>` : ''}
