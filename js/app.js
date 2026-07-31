@@ -1013,12 +1013,30 @@ function renderPeriodDropdown() {
             let bg = isSel ? 'bg-indigo-50 border-indigo-200' : 'bg-white border-slate-100';
             let txt = isSel ? 'text-indigo-700 font-bold' : 'text-slate-700 font-semibold';
             
+            let periodTypeLabel = '';
+            let periodTypeClass = '';
+            if (p.value.startsWith('full_')) {
+                periodTypeLabel = 'หักภาษี';
+                periodTypeClass = 'bg-amber-50 text-amber-600 border-amber-200';
+            } else {
+                periodTypeLabel = 'ประกันสังคม';
+                periodTypeClass = 'bg-blue-50 text-blue-600 border-blue-200';
+            }
+            
+            let payDateHtml = '';
+            if (p.payDateStr) {
+                payDateHtml = `<span class="text-[12px] font-bold mt-1 inline-block ${isSel ? 'text-indigo-600 bg-indigo-100 border-indigo-200' : 'text-emerald-700 bg-emerald-50 border-emerald-200'} px-2 py-0.5 rounded-md border">${p.payDateStr}</span>`;
+            }
+            
             html += `<div onclick="selectPeriod('${p.value}', '${p.text}')" class="cursor-pointer ${bg} p-4 mb-2 rounded-xl border flex items-center justify-between active:scale-95 transition-all">
-                        <div class="flex items-center gap-2">
-                            <span class="${txt}">${p.text}</span>
-                            ${p.payDateStr ? `<span class="text-[11px] font-medium opacity-60 ${isSel ? 'text-indigo-600' : 'text-slate-400'}">${p.payDateStr}</span>` : ''}
+                        <div class="flex flex-col">
+                            <div class="flex items-center gap-2">
+                                <span class="${txt} text-[15px]">${p.text}</span>
+                                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded border ${periodTypeClass}">${periodTypeLabel}</span>
+                            </div>
+                            ${payDateHtml}
                         </div>
-                        ${isSel ? '<svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' : ''}
+                        ${isSel ? '<svg class="w-5 h-5 text-indigo-600 shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' : ''}
                      </div>`;
         });
     }
