@@ -4322,19 +4322,75 @@ function toggleQA(btn) {
     const content = btn.nextElementSibling;
     const icon = btn.querySelector('svg');
     
+    if (!content.hasAttribute('data-animating')) {
+        content.style.transition = 'max-height 0.3s ease-in-out, opacity 0.3s ease-in-out, padding 0.3s ease-in-out';
+        content.style.overflow = 'hidden';
+        content.setAttribute('data-animating', 'true');
+    }
+    
     // Close other open items
     document.querySelectorAll('.qa-content').forEach(c => {
         if(c !== content && !c.classList.contains('hidden')) {
-            c.classList.add('hidden');
+            c.style.maxHeight = c.scrollHeight + 'px';
+            c.style.opacity = '1';
+            
+            void c.offsetWidth; // force reflow
+            
+            c.style.maxHeight = '0px';
+            c.style.paddingTop = '0px';
+            c.style.paddingBottom = '0px';
+            c.style.opacity = '0';
             c.previousElementSibling.querySelector('svg').style.transform = 'rotate(0deg)';
+            
+            setTimeout(() => {
+                c.classList.add('hidden');
+                c.style.maxHeight = '';
+                c.style.paddingTop = '';
+                c.style.paddingBottom = '';
+                c.style.opacity = '';
+            }, 300);
         }
     });
 
     if (content.classList.contains('hidden')) {
         content.classList.remove('hidden');
+        content.style.paddingTop = ''; 
+        content.style.paddingBottom = '';
+        const fullHeight = content.scrollHeight + 'px';
+        
+        content.style.maxHeight = '0px';
+        content.style.paddingTop = '0px';
+        content.style.paddingBottom = '0px';
+        content.style.opacity = '0';
+        
+        void content.offsetWidth; // force reflow
+        
+        content.style.maxHeight = fullHeight; 
+        content.style.paddingTop = ''; 
+        content.style.paddingBottom = '';
+        content.style.opacity = '1';
         icon.style.transform = 'rotate(180deg)';
+        
+        setTimeout(() => { 
+            content.style.maxHeight = 'none'; 
+        }, 300);
     } else {
-        content.classList.add('hidden');
+        content.style.maxHeight = content.scrollHeight + 'px';
+        
+        void content.offsetWidth; // force reflow
+        
+        content.style.maxHeight = '0px';
+        content.style.paddingTop = '0px';
+        content.style.paddingBottom = '0px';
+        content.style.opacity = '0';
         icon.style.transform = 'rotate(0deg)';
+        
+        setTimeout(() => { 
+            content.classList.add('hidden'); 
+            content.style.maxHeight = '';
+            content.style.paddingTop = '';
+            content.style.paddingBottom = '';
+            content.style.opacity = '';
+        }, 300);
     }
 }
