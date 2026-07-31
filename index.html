@@ -13,7 +13,7 @@
     <title>Sainom Kaset - Payroll & Management</title>
     <!-- Auto Cache Clear Script -->
     <script>
-        const APP_VERSION = "20260801_119";
+        const APP_VERSION = "20260801_121";
         const currentVersion = localStorage.getItem('APP_VERSION');
         if (currentVersion !== APP_VERSION) {
             console.log("New version detected, clearing cache...");
@@ -682,7 +682,7 @@
                                         <li>ใส่ <strong>กางเกงขายาว</strong> (ไม่มีลาย หรือมีลายน้อยที่สุด)</li>
                                         <li>ใส่ <strong>รองเท้าผ้าใบ</strong> (ไม่มีลาย หรือมีลายน้อยที่สุด)</li>
                                         <li><strong>ต้องใส่ผ้ากันเปื้อน</strong> ตลอดเวลาที่ปฏิบัติงาน</li>
-                                        <li><em>ข้อยกเว้น:</em> เฉพาะผู้ที่ทำหน้าที่ <strong>"ครัวร้อน"</strong> ในวันนั้น สามารถใส่เสื้อยืดสีขาว สีดำ หรือสีเข้มได้</li>
+                                        <li><em>ข้อยกเว้น:</em> เฉพาะผู้ที่ทำหน้าที่ <strong>"ครัวร้อน"</strong> ในวันนั้น สามารถใส่เสื้อยืดสีขาว สีดำ หรือสีเข้มที่ไม่มีลายได้ และต้องใส่ผ้ากันเปื้อนตลอดเวลาที่ทำงาน</li>
                                     </ul>
                                 </div>
                                 <div>
@@ -720,6 +720,38 @@
                                 <ul class="list-disc pl-5 space-y-2 mt-1">
                                     <li>พนักงานสามารถซื้ออาหาร หรือ เครื่องดื่มใดก็ได้ภายในร้าน <strong>ได้รับส่วนลด 20%</strong> (จำกัด 1 อย่าง/วัน)</li>
                                     <li><strong class="text-emerald-600">เงื่อนไขสำคัญ:</strong> ต้องใช้ <strong>ภาชนะที่ล้างได้เท่านั้น</strong> (เช่น แก้วน้ำที่ใช้ซ้ำได้ หรือจานชามของร้าน) เพื่อลดการใช้พลาสติก <br><em>*ห้ามใช้ภาชนะพลาสติกแบบใช้แล้วทิ้งของทางร้าน หากใช้จะไม่ได้รับสิทธิ์ส่วนลดนี้*</em></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="qa-item border-b border-slate-100 last:border-0">
+                        <button class="w-full px-4 py-4 flex items-center justify-between text-left focus:outline-none bg-white hover:bg-slate-50 transition-colors" onclick="toggleQA(this)">
+                            <span class="font-bold text-slate-700 text-sm">การลางาน ลาป่วย ลากิจ ต้องทำอย่างไร?</span>
+                            <svg class="w-5 h-5 text-slate-400 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="qa-content hidden px-4 pb-4 text-sm text-slate-600">
+                            <div class="bg-slate-50 rounded-xl p-3 mt-1 space-y-3 leading-relaxed">
+                                <ul class="list-disc pl-5 space-y-2 mt-1">
+                                    <li><strong>การลางานทั่วไป:</strong> ต้องแจ้งล่วงหน้า ภายในวันจันทร์ก่อนที่ตารางงานสัปดาห์ถัดไปจะออก</li>
+                                    <li><strong>การลาในเรื่องที่จำเป็นกะทันหัน:</strong> ต้องแจ้งให้เร็วที่สุด ทันทีที่รู้ตัว</li>
+                                    <li><strong>การลาป่วย หรือลากิจ:</strong> ต้องมี <strong>หลักฐานในการลา</strong> (เช่น ใบรับรองแพทย์ หรือหลักฐานความจำเป็น) และต้องแจ้งให้ทราบเร็วที่สุด</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="qa-item border-b border-slate-100 last:border-0">
+                        <button class="w-full px-4 py-4 flex items-center justify-between text-left focus:outline-none bg-white hover:bg-slate-50 transition-colors" onclick="toggleQA(this)">
+                            <span class="font-bold text-slate-700 text-sm">เบอร์ติดต่อฉุกเฉิน / ติดต่อร้าน</span>
+                            <svg class="w-5 h-5 text-slate-400 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="qa-content hidden px-4 pb-4 text-sm text-slate-600">
+                            <div class="bg-slate-50 rounded-xl p-3 mt-1 space-y-3 leading-relaxed">
+                                <ul class="space-y-2 mt-1">
+                                    <li class="flex items-center gap-2">📞 <strong>พี่ตั้ม:</strong> <a href="tel:0898958556" class="text-indigo-600 font-medium">089-895-8556</a></li>
+                                    <li class="flex items-center gap-2">📞 <strong>เบอร์แม่:</strong> <a href="tel:0819181783" class="text-indigo-600 font-medium">081-918-1783</a></li>
+                                    <li class="flex items-center gap-2">🏪 <strong>เบอร์ร้าน:</strong> <a href="tel:0819191808" class="text-indigo-600 font-medium">081-919-1808</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -1295,10 +1327,10 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <!-- Add Firebase products that you want to use -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-    <script src="js/firebase-init.js?v=20260801_119"></script>
+    <script src="js/firebase-init.js?v=20260801_121"></script>
 
     <script src="js/customSelect.js"></script>
-    <script src="js/app.js?v=20260801_119"></script>
+    <script src="js/app.js?v=20260801_121"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -1341,7 +1373,7 @@
         ล้างแคช
     </button>
     <div id="app-version-display" class="fixed bottom-2 right-2 text-[10px] text-slate-400 font-medium z-[9999] pointer-events-none opacity-50">
-        v2.2.119 (Firebase)
+        v2.2.121 (Firebase)
     </div>
 </body>
 </html>
