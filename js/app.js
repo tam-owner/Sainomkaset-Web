@@ -109,7 +109,10 @@ function initData() {
         })
         .catch(error => {
             console.error("GAS fetch error", error);
-            alert("ไม่สามารถดึงข้อมูลได้: " + error.message + "\n(เช็คอินเทอร์เน็ตหรือรอสักครู่)");
+            
+            const select = document.getElementById('login-name');
+            if (select) select.innerHTML = `<option value="" disabled selected>ดึงข้อมูลล้มเหลว: ${error.message}</option>`;
+            
             const cachedStr = localStorage.getItem('snk_payroll_data');
             if (cachedStr && isInitialLoad) {
                 try {
@@ -222,8 +225,9 @@ function applyInitData(data, isSilent = false) {
         }
     } catch (e) {
         console.error("Error in applyInitData:", e);
+        const select = document.getElementById('login-name');
+        if (select) select.innerHTML = `<option value="" disabled selected>ประมวลผลผิดพลาด: ${e.message}</option>`;
         hideLoading();
-        alert('เกิดข้อผิดพลาดในการโหลดข้อมูล (applyInitData): ' + e.message);
     }
 }
 
