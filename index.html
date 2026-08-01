@@ -13,7 +13,7 @@
     <title>Sainom Kaset - Payroll & Management</title>
     <!-- Auto Cache Clear Script -->
     <script>
-        const APP_VERSION = "20260801_129";
+        const APP_VERSION = "20260801_130";
         const currentVersion = localStorage.getItem('APP_VERSION');
         if (currentVersion !== APP_VERSION) {
             console.log("New version detected, clearing cache...");
@@ -641,7 +641,7 @@
                                     <li><strong>เวลาในการบันทึก:</strong> การกดเข้าหรือออกงาน สามารถทำก่อนเวลาได้ แต่ไม่ควรเกิน 15 นาที</li>
                                     <li><strong>สภาพพร้อมทำงาน:</strong> ควรเปลี่ยนชุดและเตรียมตัวให้พร้อมเริ่มงานทันทีก่อนกดบันทึกเวลาเข้างาน</li>
                                     <li><strong>กรณีมือถือมีปัญหา/แบตหมด:</strong> สามารถใช้มือถือของร้านล็อกอินเพื่อบันทึกเวลาได้ โดยต้องออกจากระบบทุกครั้งที่ใช้เสร็จ <em>(ห้ามใช้มือถือของพนักงานคนอื่นในการเข้าใช้งานเด็ดขาด)</em></li>
-                                    <li><strong>การทุจริต:</strong> ห้ามฝากผู้อื่นกดบันทึกเวลาแทนโดยเด็ดขาด และต้องบันทึกตามจริงเท่านั้นโดยยึดเวลาตามตารางหรือตามที่ผู้จัดการอนุมัติแล้วเท่านั้น หากมาสายก็ยังต้องเลือกเวลาตามตารางตามเดิมที่จัดไว้แล้วไม่ใช่ตามเวลาที่มาถึง</li>
+                                    <li><strong>การทุจริต:</strong> ห้ามฝากผู้อื่นกดบันทึกเวลาแทนโดยเด็ดขาด และต้องบันทึกตามจริงเท่านั้นโดยยึดเวลาตามตารางหรือตามที่ผู้จัดการอนุมัติแล้วเท่านั้น หากมาสายก็ยังต้องเลือกเวลาตามตารางตามเดิมที่จัดไว้แล้วไม่ใช่ตามเวลาที่มาถึง <em class="text-orange-600 block mt-1">หากการบันทึกเวลาไม่ตรงตามจริงหรือไม่อยู่ตรงจุดที่กำหนดให้กดบันทึกจะถือว่าไม่ได้มีการทำงานในวันนั้นและอาจพิจารณาบทลงโทษ</em></li>
                                     <li>ควรหมั่นตรวจสอบประวัติการลงเวลาของตนเองทุกวัน หากพบว่าลืมลงเวลาให้รีบแก้ไขทันที</li>
                                 </ul>
                             </div>
@@ -1346,10 +1346,10 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <!-- Add Firebase products that you want to use -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-    <script src="js/firebase-init.js?v=20260801_129"></script>
+    <script src="js/firebase-init.js?v=20260801_130"></script>
 
     <script src="js/customSelect.js"></script>
-    <script src="js/app.js?v=20260801_129"></script>
+    <script src="js/app.js?v=20260801_130"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -1392,7 +1392,7 @@
         ล้างแคช
     </button>
     <div id="app-version-display" class="fixed bottom-2 right-2 text-[10px] text-slate-400 font-medium z-[9999] pointer-events-none opacity-50">
-        v2.2.129 (Firebase)
+        v2.2.130 (Firebase)
     </div>
 </body>
 </html>
