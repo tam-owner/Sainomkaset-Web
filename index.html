@@ -13,7 +13,7 @@
     <title>Sainom Kaset - Payroll & Management</title>
     <!-- Auto Cache Clear Script -->
     <script>
-        const APP_VERSION = "20260801_127";
+        const APP_VERSION = "20260801_128";
         const currentVersion = localStorage.getItem('APP_VERSION');
         if (currentVersion !== APP_VERSION) {
             console.log("New version detected, clearing cache...");
@@ -631,6 +631,25 @@
                 <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
                     <div class="qa-item border-b border-slate-100 last:border-0">
                         <button class="w-full px-4 py-4 flex items-center justify-between text-left focus:outline-none bg-white hover:bg-slate-50 transition-colors" onclick="toggleQA(this)">
+                            <span class="font-bold text-slate-700 text-sm">กฎปฏิบัติสำคัญในการบันทึกเวลา</span>
+                            <svg class="w-5 h-5 text-slate-400 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="qa-content hidden px-4 pb-4 text-sm text-slate-600">
+                            <div class="bg-red-50 border border-red-100 rounded-xl p-3 mt-1 space-y-2 text-[13px] text-red-800">
+                                <ul class="list-disc pl-5 space-y-2">
+                                    <li><strong>สถานที่บันทึกเวลา:</strong> ต้องบันทึกเวลาในร้านบริเวณหน้าแคชเชียร์ให้เสร็จก่อนเท่านั้น เพื่อให้สามารถตรวจสอบเวลาจากกล้องวงจรปิดได้ <em>(ห้ามกดบันทึกเข้าหรือออกงานที่จุดอื่นเด็ดขาด)</em></li>
+                                    <li><strong>เวลาในการบันทึก:</strong> การกดเข้าหรือออกงาน สามารถทำก่อนเวลาได้ แต่ไม่ควรเกิน 15 นาที</li>
+                                    <li><strong>สภาพพร้อมทำงาน:</strong> ควรเปลี่ยนชุดและเตรียมตัวให้พร้อมเริ่มงานทันทีก่อนกดบันทึกเวลาเข้างาน</li>
+                                    <li><strong>กรณีมือถือมีปัญหา/แบตหมด:</strong> สามารถใช้มือถือของร้านล็อกอินเพื่อบันทึกเวลาได้ โดยต้องออกจากระบบทุกครั้งที่ใช้เสร็จ <em>(ห้ามใช้มือถือของพนักงานคนอื่นในการเข้าใช้งานเด็ดขาด)</em></li>
+                                    <li><strong>การทุจริต:</strong> ห้ามฝากผู้อื่นกดบันทึกเวลาแทนโดยเด็ดขาด</li>
+                                    <li>ควรหมั่นตรวจสอบประวัติการลงเวลาของตนเองทุกวัน หากพบว่าลืมลงเวลาให้รีบแก้ไขทันที</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="qa-item border-b border-slate-100 last:border-0">
+                        <button class="w-full px-4 py-4 flex items-center justify-between text-left focus:outline-none bg-white hover:bg-slate-50 transition-colors" onclick="toggleQA(this)">
                             <span class="font-bold text-slate-700 text-sm">ลืมบันทึกเข้า-ออกงาน ต้องทำยังไง?</span>
                             <svg class="w-5 h-5 text-slate-400 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </button>
@@ -644,14 +663,7 @@
                                     <li>เมื่อกดยืนยันแล้ว คำขอจะขึ้นสถานะ <strong>"รออนุมัติ"</strong> เมื่อผู้จัดการตรวจสอบและกด "อนุมัติ" ระบบจึงจะคำนวณเงินให้ใหม่</li>
                                 </ol>
                                 <div class="bg-red-50 border border-red-100 rounded-xl p-3 mt-3 space-y-2 text-[13px] text-red-800">
-                                    <p class="font-bold">🚨 ข้อปฏิบัติสำคัญเรื่องเวลาเข้างาน:</p>
                                     <ul class="list-disc pl-5 space-y-1">
-                                        <li><strong>สถานที่บันทึกเวลา:</strong> ต้องบันทึกเวลาในร้านบริเวณหน้าแคชเชียร์ให้เสร็จก่อนเท่านั้น เพื่อให้สามารถตรวจสอบเวลาจากกล้องวงจรปิดได้ <em>(ห้ามกดบันทึกเข้าหรือออกงานที่จุดอื่นเด็ดขาด)</em></li>
-                                        <li><strong>เวลาในการบันทึก:</strong> การกดเข้าหรือออกงาน สามารถทำก่อนเวลาได้ แต่ไม่ควรเกิน 15 นาที</li>
-                                        <li><strong>สภาพพร้อมทำงาน:</strong> ควรเปลี่ยนชุดและเตรียมตัวให้พร้อมเริ่มงานทันทีก่อนกดบันทึกเวลาเข้างาน</li>
-                                        <li><strong>กรณีมือถือมีปัญหา/แบตหมด:</strong> สามารถใช้มือถือของร้านล็อกอินเพื่อบันทึกเวลาได้ โดยต้องออกจากระบบทุกครั้งที่ใช้เสร็จ <em>(ห้ามใช้มือถือของพนักงานคนอื่นในการเข้าใช้งานเด็ดขาด)</em></li>
-                                        <li><strong>การทุจริต:</strong> ห้ามฝากผู้อื่นกดบันทึกเวลาแทนโดยเด็ดขาด</li>
-                                        <li>ควรหมั่นตรวจสอบประวัติการลงเวลาของตนเองทุกวัน หากพบว่าลืมลงเวลาให้รีบแก้ไขทันที</li>
                                         <li><strong>กรณีลืมบันทึกเวลาเข้างาน:</strong> พนักงานต้องมีหลักฐานยืนยันเวลาที่เข้างานจริง หากไม่มีหลักฐานมายืนยัน จะถูกหักเวลางานอย่างน้อย 0.5 ชั่วโมง</li>
                                         <li>หากมีความจำเป็นต้องใช้ภาพจากกล้องวงจรปิดเป็นหลักฐาน <strong>ต้องได้รับอนุญาตจากผู้จัดการก่อนเสมอ</strong></li>
                                         <li>การแจ้งแก้ไขเวลาล่าช้า อาจส่งผลให้การพิจารณาและการจ่ายเงินเดือนในรอบนั้นๆ ล่าช้าออกไปด้วย</li>
@@ -1334,10 +1346,10 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <!-- Add Firebase products that you want to use -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-    <script src="js/firebase-init.js?v=20260801_127"></script>
+    <script src="js/firebase-init.js?v=20260801_128"></script>
 
     <script src="js/customSelect.js"></script>
-    <script src="js/app.js?v=20260801_127"></script>
+    <script src="js/app.js?v=20260801_128"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -1380,7 +1392,7 @@
         ล้างแคช
     </button>
     <div id="app-version-display" class="fixed bottom-2 right-2 text-[10px] text-slate-400 font-medium z-[9999] pointer-events-none opacity-50">
-        v2.2.127 (Firebase)
+        v2.2.128 (Firebase)
     </div>
 </body>
 </html>
