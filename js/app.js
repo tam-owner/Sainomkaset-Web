@@ -1360,12 +1360,14 @@ function generateSalarySummaryHtml(empObj, myRecords) {
                             <span class="text-xl font-black text-orange-700">${totalOTHours.toFixed(1)} <span class="text-sm font-bold text-orange-600/80">ชม.</span></span>
                         </div>
                     </div>
-                    <div class="bg-amber-50 rounded-[20px] p-5 flex flex-col justify-center items-center shadow-md border border-amber-200">
-                        <div class="bg-amber-100 p-3 rounded-full mb-2">
-                            <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <div class="bg-amber-50 rounded-[20px] p-4 flex flex-row items-center gap-4 shadow-md border border-amber-200">
+                        <div class="bg-amber-100 p-3 rounded-full shrink-0">
+                            <svg class="w-7 h-7 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         </div>
-                        <h3 class="text-[15px] font-black text-amber-800 text-center">กำลังดำเนินการ / ยังไม่สรุปยอด</h3>
-                        <p class="text-[11px] font-medium text-amber-700 text-center mt-1 leading-relaxed">ยอดเงินจะแสดงเมื่อผู้จัดการ<br>เปิดให้ตรวจสอบข้อมูลในรอบถัดไป</p>
+                        <div class="flex flex-col">
+                            <h3 class="text-[14px] font-black text-amber-800 leading-tight">กำลังดำเนินการ / ยังไม่สรุปยอด</h3>
+                            <p class="text-[11px] font-medium text-amber-700 mt-1 leading-relaxed">ยอดเงินจะแสดงเมื่อผู้จัดการแจ้งและ<br>เปิดให้ตรวจสอบอีกครั้ง</p>
+                        </div>
                     </div>
                     `;
                 } else {
