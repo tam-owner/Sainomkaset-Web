@@ -1016,6 +1016,25 @@ function setupPeriods() {
     renderPeriodDropdown();
 }
 
+// Period Status Helper
+function getPeriodStatus(periodVal) {
+    const key = "PeriodStatus_" + periodVal;
+    if (globalSettings && globalSettings[key]) {
+        try {
+            return JSON.parse(globalSettings[key]);
+        } catch (e) {
+            return { state: "normal", deadline: "" };
+        }
+    }
+    return { state: "normal", deadline: "" };
+}
+
+function isDeadlinePassed(deadlineStr) {
+    if (!deadlineStr) return false;
+    const deadline = new Date(deadlineStr);
+    return new Date() > deadline;
+}
+
 function renderPeriodDropdown() {
     const list = document.getElementById('period-dropdown-list');
     let html = '';
@@ -1085,6 +1104,85 @@ function closePeriodDropdown() {
         sheet.classList.add('translate-y-full');
         setTimeout(() => overlay.classList.add('opacity-0', 'pointer-events-none', 'hidden'), 300);
     }
+}
+
+// Period Status Modal Functions
+function openPeriodStatusModal() {
+    if (!currentPeriodVal) return;
+    
+    // Set title
+    const pObj = availablePeriods.find(p => p.value === currentPeriodVal);
+    document.getElementById('period-status-modal-name').innerText = pObj ? pObj.text : currentPeriodVal;
+    
+    // Get current status
+    const statusObj = getPeriodStatus(currentPeriodVal);
+    const rb = document.querySelector(`input[name="period-status-radio"][value="${statusObj.state}"]`);
+    if (rb) rb.checked = true;
+    
+    if (statusObj.deadline) {
+        document.getElementById('period-status-deadline').value = statusObj.deadline;
+    } else {
+        document.getElementById('period-status-deadline').value = "";
+    }
+    
+    toggleDeadlineInput();
+    
+    const overlay = document.getElementById('period-status-modal');
+    const sheet = overlay.querySelector('div');
+    overlay.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+    setTimeout(() => sheet.classList.remove('translate-y-full'), 10);
+}
+
+function closePeriodStatusModal() {
+    const overlay = document.getElementById('period-status-modal');
+    const sheet = overlay.querySelector('div');
+    sheet.classList.add('translate-y-full');
+    setTimeout(() => overlay.classList.add('opacity-0', 'pointer-events-none', 'hidden'), 300);
+}
+
+function toggleDeadlineInput() {
+    const rb = document.querySelector('input[name="period-status-radio"]:checked');
+    const container = document.getElementById('deadline-input-container');
+    if (rb && rb.value === 'employee_review') {
+        container.classList.remove('hidden');
+    } else {
+        container.classList.add('hidden');
+    }
+}
+
+async function savePeriodStatus() {
+    const rb = document.querySelector('input[name="period-status-radio"]:checked');
+    if (!rb) return;
+    const state = rb.value;
+    let deadline = "";
+    if (state === 'employee_review') {
+        deadline = document.getElementById('period-status-deadline').value;
+        if (!deadline) {
+            Swal.fire({ icon: 'error', title: 'ผิดพลาด', text: 'กรุณากำหนดวันเวลา Deadline' });
+            return;
+        }
+    }
+    
+    showLoading();
+    try {
+        const valObj = { state: state, deadline: deadline };
+        const key = "PeriodStatus_" + currentPeriodVal;
+        
+        const payload = { action: "saveSetting", key: key, value: JSON.stringify(valObj) };
+        const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const json = await res.json();
+        if (json.status === 'success') {
+            globalSettings[key] = JSON.stringify(valObj);
+            closePeriodStatusModal();
+            renderAdminSummary(); // re-render to update badge
+            Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ', timer: 1500, showConfirmButton: false });
+        } else {
+            Swal.fire({ icon: 'error', title: 'ผิดพลาด', text: 'ไม่สามารถบันทึกได้' });
+        }
+    } catch (e) {
+        Swal.fire({ icon: 'error', title: 'ผิดพลาด', text: e.message });
+    }
+    hideLoading();
 }
 
 function selectPeriod(val, text) {
@@ -1301,20 +1399,79 @@ function generateSalarySummaryHtml(empObj, myRecords) {
             </div>
             ` : ''}
 
-            <div ${isPayDateReached ? `onclick="downloadPayslipPdf('${empObj.name}')"` : ""} class="${isPayDateReached ? 'bg-[#0fa981] shadow-[#0fa981]/40 cursor-pointer active:scale-95 transition-transform duration-200 group' : 'bg-slate-800 shadow-slate-800/40'} rounded-[20px] p-5 flex justify-between items-center shadow-lg mt-4 relative overflow-hidden">
-                <div class="relative z-10 flex flex-col">
-                    <p class="text-[11px] font-black ${isPayDateReached ? 'text-emerald-50' : 'text-slate-300'} uppercase tracking-widest">${isPayDateReached ? 'รวมรายได้สุทธิ' : 'รายได้สะสมรอบปัจจุบัน'}</p>
-                    ${!isPayDateReached ? `<p class="text-[9.5px] text-yellow-300 font-bold mb-1">*จะได้รับเมื่อถึงรอบจ่าย${payDateText}*</p>` : ''}
-                    ${isPayDateReached ? `
-                    <div class="mt-2 flex items-center gap-1 bg-white/20 px-2 py-1 rounded-full w-max opacity-90 group-hover:opacity-100 transition-opacity">
-                        <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        <span class="text-[10px] font-bold text-white">แตะเพื่อโหลดสลิป</span>
-                    </div>` : ''}
-                </div>
-                <div class="text-3xl font-black text-white tracking-normal relative z-10 flex items-baseline">
-                    <span class="text-lg ${isPayDateReached ? 'text-emerald-200' : 'text-slate-400'} mr-1.5 font-bold">฿</span>${formatCurrencySmallDecimals(netPay)}
-                </div>
-            </div>
+            ` : ''}
+
+            <!-- Period Status Banners & Net Pay -->
+            ${(function() {
+                const statusObj = getPeriodStatus(currentPeriodVal);
+                if (statusObj.state === 'manager_review') {
+                    return `
+                        <div class="bg-amber-50 rounded-[20px] p-5 flex flex-col justify-center items-center shadow-lg mt-4 border border-amber-200">
+                            <div class="bg-amber-100 p-3 rounded-full mb-2">
+                                <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <h3 class="text-[15px] font-black text-amber-800 text-center">ผู้จัดการกำลังตรวจสอบยอด</h3>
+                            <p class="text-[11px] font-medium text-amber-700 text-center mt-1 leading-relaxed">กรุณารอการแจ้งเตือนจากผู้จัดการ<br>เพื่อตรวจสอบยอดเงินในภายหลัง</p>
+                        </div>
+                    `;
+                } else if (statusObj.state === 'locked') {
+                    return `
+                        <div class="bg-slate-100 rounded-[20px] p-5 flex flex-col justify-center items-center shadow-lg mt-4 border border-slate-200">
+                            <div class="bg-slate-200 p-3 rounded-full mb-2">
+                                <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7z"></path></svg>
+                            </div>
+                            <h3 class="text-[15px] font-black text-slate-700 text-center">ปิดยอดเงินแล้ว</h3>
+                            <p class="text-[11px] font-medium text-slate-500 text-center mt-1 leading-relaxed">ยอดเงินรอบนี้ถูกโอนเรียบร้อย<br>ไม่สามารถแก้ไขข้อมูลได้อีก</p>
+                        </div>
+                    `;
+                } else {
+                    let employeeReviewBanner = '';
+                    if (statusObj.state === 'employee_review') {
+                        const passed = isDeadlinePassed(statusObj.deadline);
+                        if (!passed) {
+                            const dl = new Date(statusObj.deadline);
+                            const dlStr = `${dl.getDate()} ${['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'][dl.getMonth()]} ${dl.getFullYear() + 543} เวลา ${String(dl.getHours()).padStart(2,'0')}:${String(dl.getMinutes()).padStart(2,'0')} น.`;
+                            employeeReviewBanner = `
+                                <div class="bg-blue-50 border border-blue-200 rounded-[16px] p-4 mt-4 shadow-sm flex items-start gap-3">
+                                    <svg class="w-6 h-6 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <div>
+                                        <h4 class="text-[13px] font-black text-blue-800">กรุณาตรวจสอบยอดเงิน</h4>
+                                        <p class="text-[11px] font-medium text-blue-700 mt-0.5 leading-relaxed">หากต้องการขอแก้ไขให้แจ้งภายใน <span class="font-bold underline">${dlStr}</span> หากพ้นกำหนดจะถือว่ายืนยันยอดนี้</p>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            employeeReviewBanner = `
+                                <div class="bg-rose-50 border border-rose-200 rounded-[16px] p-4 mt-4 shadow-sm flex items-start gap-3">
+                                    <svg class="w-6 h-6 text-rose-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <div>
+                                        <h4 class="text-[13px] font-black text-rose-800">หมดเวลาขอแก้ไขแล้ว</h4>
+                                        <p class="text-[11px] font-medium text-rose-700 mt-0.5 leading-relaxed">ระบบได้ถือว่ายอดนี้ได้รับการยืนยันแล้ว และไม่สามารถขอแก้ไขได้อีก</p>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }
+
+                    return `
+                        ${employeeReviewBanner}
+                        <div ${isPayDateReached ? \`onclick="downloadPayslipPdf('\${empObj.name}')"\` : ""} class="${isPayDateReached ? 'bg-[#0fa981] shadow-[#0fa981]/40 cursor-pointer active:scale-95 transition-transform duration-200 group' : 'bg-slate-800 shadow-slate-800/40'} rounded-[20px] p-5 flex justify-between items-center shadow-lg mt-4 relative overflow-hidden">
+                            <div class="relative z-10 flex flex-col">
+                                <p class="text-[11px] font-black ${isPayDateReached ? 'text-emerald-50' : 'text-slate-300'} uppercase tracking-widest">${isPayDateReached ? 'รวมรายได้สุทธิ' : 'รายได้สะสมรอบปัจจุบัน'}</p>
+                                ${!isPayDateReached ? \`<p class="text-[9.5px] text-yellow-300 font-bold mb-1">*จะได้รับเมื่อถึงรอบจ่าย\${payDateText}*</p>\` : ''}
+                                ${isPayDateReached ? \`
+                                <div class="mt-2 flex items-center gap-1 bg-white/20 px-2 py-1 rounded-full w-max opacity-90 group-hover:opacity-100 transition-opacity">
+                                    <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                    <span class="text-[10px] font-bold text-white">แตะเพื่อโหลดสลิป</span>
+                                </div>\` : ''}
+                            </div>
+                            <div class="text-3xl font-black text-white tracking-normal relative z-10 flex items-baseline">
+                                <span class="text-lg ${isPayDateReached ? 'text-emerald-200' : 'text-slate-400'} mr-1.5 font-bold">฿</span>${formatCurrencySmallDecimals(netPay)}
+                            </div>
+                        </div>
+                    `;
+                }
+            })()}
         </div>
     </div>
     </div>`;
@@ -1375,9 +1532,13 @@ function generateEmployeeTableHtml(empObj, myRecords, isAdmin = false) {
         const actualInStr = row.actualIn || inStr || schedInStr || '';
         const actualOutStr = row.actualOut || outStr || schedOutStr || '';
         
+        // Period Status Edit Lock for Employees
+        const statusObj = getPeriodStatus(currentPeriodVal);
+        const isLockedForEmployee = !isAdmin && (statusObj.state === 'manager_review' || statusObj.state === 'locked' || (statusObj.state === 'employee_review' && isDeadlinePassed(statusObj.deadline)));
+
         const onclickStr = isAdmin
             ? `onclick="openEditLogModal('${row.date}', '${schedInStr}', '${schedOutStr}', '${row.type || 'Work'}', '${actualInStr}', '${actualOutStr}')"`
-            : `onclick="openRequestTimeEditModal('${row.date}', '${actualInStr}', '${actualOutStr}', '${schedInStr}', '${schedOutStr}')"`;
+            : (isLockedForEmployee ? '' : `onclick="openRequestTimeEditModal('${row.date}', '${actualInStr}', '${actualOutStr}', '${schedInStr}', '${schedOutStr}')"`);
 
         const rowClickStr = isAdmin ? onclickStr : '';
         const colClickStr = isAdmin ? '' : onclickStr;
@@ -1388,7 +1549,7 @@ function generateEmployeeTableHtml(empObj, myRecords, isAdmin = false) {
             if (pendingReq && pendingReq.newIn !== '-') {
                 inDisplay = `<span class="text-amber-500 text-[11px] font-bold tracking-tight block leading-tight">รออนุมัติ<br>${pendingReq.newIn}</span>`;
             } else {
-                inDisplay = `<span class="text-red-500 text-[11px] font-bold tracking-tight block leading-tight">ไม่มี<br>เข้างาน</span><div ${onclickStr} class="scan-time-text text-white text-[9.5px] font-bold tracking-tight px-2 py-1 bg-orange-500 rounded-md shadow-sm hover:bg-orange-600 active:scale-95 transition-all cursor-pointer inline-block mt-1">${isAdmin ? 'แก้ไข' : 'ขอแก้ไข'}</div>`;
+                inDisplay = `<span class="text-red-500 text-[11px] font-bold tracking-tight block leading-tight">ไม่มี<br>เข้างาน</span>${isLockedForEmployee ? '' : `<div ${onclickStr} class="scan-time-text text-white text-[9.5px] font-bold tracking-tight px-2 py-1 bg-orange-500 rounded-md shadow-sm hover:bg-orange-600 active:scale-95 transition-all cursor-pointer inline-block mt-1">${isAdmin ? 'แก้ไข' : 'ขอแก้ไข'}</div>`}`;
             }
         }
         
@@ -1396,7 +1557,7 @@ function generateEmployeeTableHtml(empObj, myRecords, isAdmin = false) {
             if (pendingReq && pendingReq.newOut !== '-') {
                 outDisplay = `<span class="text-amber-500 text-[11px] font-bold tracking-tight block leading-tight">รออนุมัติ<br>${pendingReq.newOut}</span>`;
             } else {
-                outDisplay = `<span class="text-red-500 text-[11px] font-bold tracking-tight block leading-tight">ไม่มี<br>ออกงาน</span><div ${onclickStr} class="scan-time-text text-white text-[9.5px] font-bold tracking-tight px-2 py-1 bg-orange-500 rounded-md shadow-sm hover:bg-orange-600 active:scale-95 transition-all cursor-pointer inline-block mt-1">${isAdmin ? 'แก้ไข' : 'ขอแก้ไข'}</div>`;
+                outDisplay = `<span class="text-red-500 text-[11px] font-bold tracking-tight block leading-tight">ไม่มี<br>ออกงาน</span>${isLockedForEmployee ? '' : `<div ${onclickStr} class="scan-time-text text-white text-[9.5px] font-bold tracking-tight px-2 py-1 bg-orange-500 rounded-md shadow-sm hover:bg-orange-600 active:scale-95 transition-all cursor-pointer inline-block mt-1">${isAdmin ? 'แก้ไข' : 'ขอแก้ไข'}</div>`}`;
             }
         }
         
@@ -1617,6 +1778,30 @@ async function changePin() {
 // ----------------------------------------------------
 function renderAdminSummary() {
     if (!currentPeriodVal) return;
+
+    // Update Status Badge
+    const statusObj = getPeriodStatus(currentPeriodVal);
+    const badge = document.getElementById('admin-period-status-badge');
+    if (badge) {
+        if (statusObj.state === 'normal') {
+            badge.className = "text-[11px] font-bold px-2 py-1 rounded-md bg-emerald-100 text-emerald-700";
+            badge.innerText = "สถานะ: ปกติ";
+        } else if (statusObj.state === 'manager_review') {
+            badge.className = "text-[11px] font-bold px-2 py-1 rounded-md bg-amber-100 text-amber-700";
+            badge.innerText = "สถานะ: กำลังปรับแก้";
+        } else if (statusObj.state === 'employee_review') {
+            badge.className = "text-[11px] font-bold px-2 py-1 rounded-md bg-blue-100 text-blue-700";
+            if (isDeadlinePassed(statusObj.deadline)) {
+                badge.innerText = "สถานะ: หมดเวลาตรวจสอบ";
+                badge.className = "text-[11px] font-bold px-2 py-1 rounded-md bg-rose-100 text-rose-700";
+            } else {
+                badge.innerText = "สถานะ: พนักงานตรวจสอบ";
+            }
+        } else if (statusObj.state === 'locked') {
+            badge.className = "text-[11px] font-bold px-2 py-1 rounded-md bg-rose-100 text-rose-700";
+            badge.innerText = "สถานะ: ปิดยอดแล้ว";
+        }
+    }
 
     let parts = currentPeriodVal.split('_');
     let type = parts[0];
