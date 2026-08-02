@@ -18,6 +18,7 @@ let timeEditRequests = [];
 let shopLat = null;
 let shopLng = null;
 let shopRadius = 50;
+let globalSettings = {};
 
 let processedAttendance = [];
 let availablePeriods = [];
@@ -146,9 +147,12 @@ function applyInitData(data, isSilent = false) {
         leaves = data.leaves || [];
         timeEditRequests = data.timeEditRequests || [];
         if (data.settings) {
+            globalSettings = data.settings;
             if (data.settings['ShopLat']) shopLat = parseFloat(data.settings['ShopLat']);
             if (data.settings['ShopLng']) shopLng = parseFloat(data.settings['ShopLng']);
             if (data.settings['ShopRadius']) shopRadius = parseInt(data.settings['ShopRadius'], 10) || 50;
+        } else {
+            globalSettings = {};
         }
 
         // Auto-register missing names
@@ -1399,7 +1403,7 @@ function generateSalarySummaryHtml(empObj, myRecords) {
             </div>
             ` : ''}
 
-            ` : ''}
+
 
             <!-- Period Status Banners & Net Pay -->
             ${(function() {
@@ -1455,15 +1459,15 @@ function generateSalarySummaryHtml(empObj, myRecords) {
 
                     return `
                         ${employeeReviewBanner}
-                        <div ${isPayDateReached ? \`onclick="downloadPayslipPdf('\${empObj.name}')"\` : ""} class="${isPayDateReached ? 'bg-[#0fa981] shadow-[#0fa981]/40 cursor-pointer active:scale-95 transition-transform duration-200 group' : 'bg-slate-800 shadow-slate-800/40'} rounded-[20px] p-5 flex justify-between items-center shadow-lg mt-4 relative overflow-hidden">
+                        <div ${isPayDateReached ? `onclick="downloadPayslipPdf('${empObj.name}')"` : ""} class="${isPayDateReached ? 'bg-[#0fa981] shadow-[#0fa981]/40 cursor-pointer active:scale-95 transition-transform duration-200 group' : 'bg-slate-800 shadow-slate-800/40'} rounded-[20px] p-5 flex justify-between items-center shadow-lg mt-4 relative overflow-hidden">
                             <div class="relative z-10 flex flex-col">
                                 <p class="text-[11px] font-black ${isPayDateReached ? 'text-emerald-50' : 'text-slate-300'} uppercase tracking-widest">${isPayDateReached ? 'รวมรายได้สุทธิ' : 'รายได้สะสมรอบปัจจุบัน'}</p>
-                                ${!isPayDateReached ? \`<p class="text-[9.5px] text-yellow-300 font-bold mb-1">*จะได้รับเมื่อถึงรอบจ่าย\${payDateText}*</p>\` : ''}
-                                ${isPayDateReached ? \`
+                                ${!isPayDateReached ? `<p class="text-[9.5px] text-yellow-300 font-bold mb-1">*จะได้รับเมื่อถึงรอบจ่าย${payDateText}*</p>` : ''}
+                                ${isPayDateReached ? `
                                 <div class="mt-2 flex items-center gap-1 bg-white/20 px-2 py-1 rounded-full w-max opacity-90 group-hover:opacity-100 transition-opacity">
                                     <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                                     <span class="text-[10px] font-bold text-white">แตะเพื่อโหลดสลิป</span>
-                                </div>\` : ''}
+                                </div>` : ''}
                             </div>
                             <div class="text-3xl font-black text-white tracking-normal relative z-10 flex items-baseline">
                                 <span class="text-lg ${isPayDateReached ? 'text-emerald-200' : 'text-slate-400'} mr-1.5 font-bold">฿</span>${formatCurrencySmallDecimals(netPay)}
