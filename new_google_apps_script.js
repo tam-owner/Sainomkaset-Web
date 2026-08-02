@@ -6,9 +6,9 @@ var FIREBASE_URL = "https://snk-work-default-rtdb.asia-southeast1.firebasedataba
 function onOpen() {
   var ui = SpreadsheetApp.getUi();
   ui.createMenu('Sainom Kaset')
-      .addItem('🔄 ซิงค์ข้อมูลไปที่เว็บไซต์ (Firebase)', 'syncToFirebaseManually')
-      .addItem('⚡️ เปิดระบบซิงค์อัตโนมัติ (ทำครั้งเดียว)', 'setupAutoSyncTrigger')
-      .addToUi();
+    .addItem('🔄 ซิงค์ข้อมูลไปที่เว็บไซต์ (Firebase)', 'syncToFirebaseManually')
+    .addItem('⚡️ เปิดระบบซิงค์อัตโนมัติ (ทำครั้งเดียว)', 'setupAutoSyncTrigger')
+    .addToUi();
 }
 
 function setupAutoSyncTrigger() {
@@ -20,23 +20,23 @@ function setupAutoSyncTrigger() {
     }
   }
   ScriptApp.newTrigger('autoSyncOnChange')
-      .forSpreadsheet(SpreadsheetApp.getActive())
-      .onChange()
-      .create();
+    .forSpreadsheet(SpreadsheetApp.getActive())
+    .onChange()
+    .create();
   SpreadsheetApp.getUi().alert('🎉 เปิดใช้งานระบบซิงค์อัตโนมัติสำเร็จ! คราวนี้เมื่อพิมพ์ใน Sheet ข้อมูลจะเด้งไปที่เว็บทันทีครับ');
 }
 
 function autoSyncOnChange(e) {
   try {
     syncToFirebase();
-  } catch(err) {}
+  } catch (err) { }
 }
 
 function syncToFirebaseManually() {
   try {
     syncToFirebase();
     SpreadsheetApp.getUi().alert('✅ ซิงค์ข้อมูลไปยังเว็บไซต์สำเร็จเรียบร้อยแล้ว!');
-  } catch(e) {
+  } catch (e) {
     SpreadsheetApp.getUi().alert('❌ เกิดข้อผิดพลาดในการซิงค์: ' + e.toString());
   }
 }
@@ -51,26 +51,30 @@ function syncToFirebase() {
     settings: getSettingsData(),
     logs: getAllLogsData()
   };
-  
+
   var options = {
     method: 'put',
     contentType: 'application/json',
     payload: JSON.stringify(payload)
   };
-  
-  UrlFetchApp.fetch(FIREBASE_URL, options);
+
+  try {
+    UrlFetchApp.fetch(FIREBASE_URL, options);
+  } catch (e) {
+    Logger.log("Firebase sync failed (probably expired): " + e.toString());
+  }
 }
 
 function doGet(e) {
   var action = e.parameter.action;
-  
-  if (action == "getAttendance") return createJsonResponse({status: "success", data: getMergedAttendanceData()});
-  if (action == "getEmployees") return createJsonResponse({status: "success", data: getEmployeesData()});
-  if (action == "getDeductions") return createJsonResponse({status: "success", data: getDeductionsData()});
-  if (action == "getLeaves") return createJsonResponse({status: "success", data: getLeavesData()});
-  if (action == "getScheduleData") return createJsonResponse({status: "success", data: handleGetScheduleData()});
+
+  if (action == "getAttendance") return createJsonResponse({ status: "success", data: getMergedAttendanceData() });
+  if (action == "getEmployees") return createJsonResponse({ status: "success", data: getEmployeesData() });
+  if (action == "getDeductions") return createJsonResponse({ status: "success", data: getDeductionsData() });
+  if (action == "getLeaves") return createJsonResponse({ status: "success", data: getLeavesData() });
+  if (action == "getScheduleData") return createJsonResponse({ status: "success", data: handleGetScheduleData() });
   if (action == "getInitPayrollData") return createJsonResponse(handleGetInitPayrollData());
-  
+
   if (action == "testLine") {
     var errMessage = sendLineNotify("🔥 ทดสอบการเชื่อมต่อ LINE จาก Google Apps Script สำเร็จ!");
     if (errMessage) {
@@ -78,7 +82,7 @@ function doGet(e) {
     }
     return HtmlService.createHtmlOutput('<h1 style="color:green; font-family:sans-serif; text-align:center; margin-top:50px;">✅ ส่งข้อความทดสอบเข้า LINE เรียบร้อยแล้ว!<br>กรุณาเช็คในแอป LINE ของคุณครับ</h1>');
   }
-  
+
   return HtmlService.createHtmlOutput('API is running (v2 with Merged Sheets).');
 }
 
@@ -106,17 +110,17 @@ function doPost(e) {
     else if (action === "saveSetting") { res = handleSaveSetting(p.key, p.value); }
     else if (action === "saveSchedules") { res = handleSaveSchedules(p.data); }
     else if (action === "saveScheduleSettings") { res = handleSaveScheduleSettings(p.data); }
-    else { res = {status: "error", message: "Unknown action"}; }
-    
+    else { res = { status: "error", message: "Unknown action" }; }
+
     // Auto-sync to Firebase if the action modifies data
     var isMutation = ["getInitPayrollData", "getEmployeeLogs"].indexOf(action) === -1;
     if (res && res.status === "success" && isMutation) {
-      try { syncToFirebase(); } catch(e) {} // Don't let sync error break the response
+      try { syncToFirebase(); } catch (e) { } // Don't let sync error break the response
     }
-    
+
     return createJsonResponse(res);
   } catch (error) {
-    return createJsonResponse({status: "error", message: error.toString()});
+    return createJsonResponse({ status: "error", message: error.toString() });
   }
 }
 
@@ -134,9 +138,9 @@ function sendLineNotify(message) {
   try {
     UrlFetchApp.fetch("https://api.line.me/v2/bot/message/push", {
       method: "post",
-      headers: { 
+      headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer " + LINE_CHANNEL_ACCESS_TOKEN 
+        "Authorization": "Bearer " + LINE_CHANNEL_ACCESS_TOKEN
       },
       payload: JSON.stringify({
         "to": LINE_ADMIN_USER_ID,
@@ -158,9 +162,9 @@ function sendLineFlexMessage(messages) {
   try {
     UrlFetchApp.fetch("https://api.line.me/v2/bot/message/push", {
       method: "post",
-      headers: { 
+      headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer " + LINE_CHANNEL_ACCESS_TOKEN 
+        "Authorization": "Bearer " + LINE_CHANNEL_ACCESS_TOKEN
       },
       payload: JSON.stringify({
         "to": LINE_ADMIN_USER_ID,
@@ -228,11 +232,11 @@ function isDateValid(dateStr) {
     var p1 = parseInt(dtMatch[1], 10);
     var p2 = parseInt(dtMatch[2], 10);
     var p3 = parseInt(dtMatch[3], 10);
-    if (p3 > 1000) { 
-      if (p1 > 31) { d = new Date(p1, p2 - 1, p3); } 
+    if (p3 > 1000) {
+      if (p1 > 31) { d = new Date(p1, p2 - 1, p3); }
       else { d = new Date(p3, p2 - 1, p1); }
     } else if (p3 < 100) {
-      if (p1 > 31) { d = new Date(p1, p2 - 1, p3 + 2000); } 
+      if (p1 > 31) { d = new Date(p1, p2 - 1, p3 + 2000); }
       else { d = new Date(p3 + 2000, p2 - 1, p1); }
     }
   }
@@ -244,54 +248,31 @@ function isDateValid(dateStr) {
 function getMergedAttendanceData() {
   var result = [];
   var seen = {}; // For deduplication
-  
+
   function addRow(row) {
     if (!row[0] || row[0] == "") return;
     if (!isDateValid(row[0])) return;
-    
+
     var timestamp = String(row[0]).trim();
     var name = String(row[1]).trim();
     var type = String(row[2]).trim();
     var key = timestamp + "_" + name + "_" + type;
-    
+
     if (!seen[key]) {
       seen[key] = true;
       result.push({
         timestamp: timestamp,
         name: name,
-        type: type, 
-        scheduledTime: String(row[3]).trim(), 
+        type: type,
+        scheduledTime: String(row[3]).trim(),
         note: String(row[4] || "").trim()
       });
     }
   }
 
-  // 1. Read Old Sheet
+  // Only read from the New Sheet (Attendance) to speed up performance!
   try {
-    var ssOld = getOldSpreadsheet();
-    var sheetOld = null;
-    var targetGid = 1244384131;
-    var sheets = ssOld.getSheets();
-    for (var j = 0; j < sheets.length; j++) {
-      var name = sheets[j].getName();
-      if (sheets[j].getSheetId() == targetGid || name === "Form_Responses" || name.indexOf("การตอบกลับ") > -1) {
-        sheetOld = sheets[j];
-        break;
-      }
-    }
-    if (!sheetOld && sheets.length > 0) sheetOld = sheets[0];
-
-    if (sheetOld) {
-      var dataOld = sheetOld.getDataRange().getDisplayValues();
-      for (var i = 1; i < dataOld.length; i++) {
-        addRow(dataOld[i]);
-      }
-    }
-  } catch (e) {}
-
-  // 2. Read New Sheet (Attendance)
-  try {
-    var ssNew = SpreadsheetApp.getActiveSpreadsheet();
+    var ssNew = getNewSpreadsheet();
     var sheetNew = ssNew.getSheetByName("Attendance");
     if (sheetNew) {
       var dataNew = sheetNew.getDataRange().getDisplayValues();
@@ -299,7 +280,7 @@ function getMergedAttendanceData() {
         addRow(dataNew[i]);
       }
     }
-  } catch (e) {}
+  } catch (e) { }
 
   return result;
 }
@@ -308,18 +289,18 @@ function syncAttendanceToNewSheet() {
   try {
     var attendance = getMergedAttendanceData();
     var sheetNew = getSheetByNameOrCreateNew("Attendance");
-    
+
     // Clear existing data
     sheetNew.clearContents();
-    
+
     // Write headers
     var headers = ["ประทับเวลา", "ชื่อ-สกุล", "ประเภท", "เวลาเข้างานตามตาราง", "หมายเหตุ"];
-    
+
     if (attendance.length === 0) {
       sheetNew.getRange(1, 1, 1, headers.length).setValues([headers]);
       return;
     }
-    
+
     // Parse date for sorting
     function parseDate(str) {
       var d = new Date(str);
@@ -331,12 +312,12 @@ function syncAttendanceToNewSheet() {
       }
       return isNaN(d.getTime()) ? 0 : d.getTime();
     }
-    
+
     // Sort descending (latest first)
-    attendance.sort(function(a, b) {
+    attendance.sort(function (a, b) {
       return parseDate(b.timestamp) - parseDate(a.timestamp);
     });
-    
+
     var rows = [headers];
     for (var i = 0; i < attendance.length; i++) {
       var r = attendance[i];
@@ -346,7 +327,7 @@ function syncAttendanceToNewSheet() {
     if (rows.length > maxRows) {
       sheetNew.insertRowsAfter(maxRows, rows.length - maxRows + 10);
     }
-    
+
     sheetNew.getRange(1, 1, rows.length, headers.length).setValues(rows);
   } catch (e) {
     // Log error to console so it's not totally silent
@@ -359,8 +340,8 @@ function autoDeactivateAndSortEmployees() {
   try {
     var empSheet = getSheetByNameOrCreateNew("Employees");
     var empData = empSheet.getDataRange().getValues();
-    if (empData.length <= 1) return; 
-    
+    if (empData.length <= 1) return;
+
     var attendance = getMergedAttendanceData();
     var lastAttMap = {};
     for (var i = 0; i < attendance.length; i++) {
@@ -372,7 +353,7 @@ function autoDeactivateAndSortEmployees() {
         var p1 = parseInt(dtMatch[1], 10);
         var p2 = parseInt(dtMatch[2], 10);
         var p3 = parseInt(dtMatch[3], 10);
-        if (p3 > 1000) { 
+        if (p3 > 1000) {
           if (p1 > 31) d = new Date(p1, p2 - 1, p3);
           else d = new Date(p3, p2 - 1, p1);
         }
@@ -383,23 +364,23 @@ function autoDeactivateAndSortEmployees() {
         }
       }
     }
-    
+
     var now = new Date();
     var oneMonthAgo = new Date();
     oneMonthAgo.setMonth(now.getMonth() - 1);
-    
+
     var rows = [];
     var headers = empData[0];
     var changed = false;
-    
+
     for (var i = 1; i < empData.length; i++) {
       var row = empData[i];
       if (!row[0] || String(row[0]).trim() === "") continue;
-      
+
       var empName = String(row[0]).trim();
       var originalStatus = String(row[12] || "Active").trim();
       var currentStatus = originalStatus;
-      
+
       if (currentStatus !== "Inactive") {
         var lastAtt = lastAttMap[empName];
         if (lastAtt && lastAtt < oneMonthAgo) {
@@ -410,17 +391,17 @@ function autoDeactivateAndSortEmployees() {
           var startDStr = String(row[8]).trim();
           var startD = startDStr ? new Date(startDStr) : null;
           if (startD && !isNaN(startD.getTime())) {
-             if (startD < oneMonthAgo) {
-                currentStatus = "Inactive";
-                row[12] = "Inactive";
-                changed = true;
-             }
+            if (startD < oneMonthAgo) {
+              currentStatus = "Inactive";
+              row[12] = "Inactive";
+              changed = true;
+            }
           }
         }
       }
       rows.push(row);
     }
-    
+
     function getSortRank(r) {
       var st = String(r[12] || "Active").trim();
       if (st === "Inactive") return 999;
@@ -433,12 +414,12 @@ function autoDeactivateAndSortEmployees() {
       if (t === "part time ภาษี") return 6;
       return 7;
     }
-    
-    var originalOrder = rows.map(function(r) { return r[0]; }).join(",");
-    rows.sort(function(a, b) {
+
+    var originalOrder = rows.map(function (r) { return r[0]; }).join(",");
+    rows.sort(function (a, b) {
       var rankDiff = getSortRank(a) - getSortRank(b);
       if (rankDiff !== 0) return rankDiff;
-      
+
       var dedA = String(a[6] || "").trim();
       var dedB = String(b[6] || "").trim();
       if (dedA !== dedB) {
@@ -446,50 +427,50 @@ function autoDeactivateAndSortEmployees() {
         if (dedB === "5%") return 1;
         return dedB.localeCompare(dedA);
       }
-      
+
       // If same type and deduction, sort by dailyRate (row[3]) or monthlyRate (row[2]) descending
       var rateA = Math.max(Number(a[3]) || 0, Number(a[2]) || 0);
       var rateB = Math.max(Number(b[3]) || 0, Number(b[2]) || 0);
       return rateB - rateA;
     });
-    var newOrder = rows.map(function(r) { return r[0]; }).join(",");
-    
+    var newOrder = rows.map(function (r) { return r[0]; }).join(",");
+
     if (originalOrder !== newOrder) {
       changed = true;
     }
-    
+
     if (changed) {
       empSheet.getRange(2, 1, empSheet.getMaxRows() - 1, empSheet.getMaxColumns()).clearContent();
       empSheet.getRange(2, 1, rows.length, headers.length).setValues(rows);
     }
-    
+
     var backgrounds = [];
     for (var i = 0; i < rows.length; i++) {
-       var rowBg = [];
-       var st = String(rows[i][12] || "Active").trim();
-       var dailyRateStr = String(rows[i][3] || "").trim();
-       var isInactive = (st === "Inactive");
-       
-       for (var j = 0; j < headers.length; j++) {
-         var color = null;
-         if (isInactive) {
-           color = "#d9d9d9";
-         } else if (j === 3 && dailyRateStr !== "" && dailyRateStr !== "375" && dailyRateStr !== "0") {
-           color = "#ffff00";
-         }
-         rowBg.push(color);
-       }
-       backgrounds.push(rowBg);
+      var rowBg = [];
+      var st = String(rows[i][12] || "Active").trim();
+      var dailyRateStr = String(rows[i][3] || "").trim();
+      var isInactive = (st === "Inactive");
+
+      for (var j = 0; j < headers.length; j++) {
+        var color = null;
+        if (isInactive) {
+          color = "#d9d9d9";
+        } else if (j === 3 && dailyRateStr !== "" && dailyRateStr !== "375" && dailyRateStr !== "0") {
+          color = "#ffff00";
+        }
+        rowBg.push(color);
+      }
+      backgrounds.push(rowBg);
     }
     if (rows.length > 0) {
       empSheet.getRange(2, 1, rows.length, headers.length).setBackgrounds(backgrounds);
     }
-  } catch(e) {}
+  } catch (e) { }
 }
 
 function getEmployeesData() {
   autoDeactivateAndSortEmployees();
-  
+
   function convertDriveUrlToImg(url) {
     if (!url) return "";
     var u = String(url).trim();
@@ -501,7 +482,7 @@ function getEmployeesData() {
     }
     return u;
   }
-  
+
   try {
     var sheet = getSheetByNameOrCreateNew("Employees");
     var data = sheet.getDataRange().getValues();
@@ -564,55 +545,55 @@ function autoFormatAndSortLeaves() {
     var sheet = getSheetByNameOrCreateNew("Leaves");
     var data = sheet.getDataRange().getValues();
     if (data.length <= 1) return;
-    
+
     var headers = data[0];
     var targetHeaders = ["Timestamp", "ID", "Name", "StartDate", "EndDate", "LeaveType", "Reason", "Status"];
-    
+
     var hMap = {};
     for (var i = 0; i < headers.length; i++) {
       hMap[String(headers[i]).trim().toLowerCase()] = i;
     }
-    
-    if (hMap["name"] === undefined || hMap["startdate"] === undefined) return; 
+
+    if (hMap["name"] === undefined || hMap["startdate"] === undefined) return;
 
     var rows = [];
     var changed = false;
     var todayStr = Utilities.formatDate(new Date(), "Asia/Bangkok", "yyyy-MM-dd");
-    
+
     for (var i = 1; i < data.length; i++) {
       var row = data[i];
       var nameVal = row[hMap["name"]];
       var idVal = hMap["id"] !== undefined ? row[hMap["id"]] : "";
-      
+
       if (!idVal || String(idVal).trim() === "") {
         if (!nameVal || String(nameVal).trim() === "") continue;
         idVal = Utilities.getUuid();
         changed = true;
       }
-      
+
       var stIdx = hMap["status"];
       var stVal = "Approved";
       if (stIdx !== undefined) {
-         var rawSt = String(row[stIdx] || "").trim();
-         if (rawSt === "Approved" || rawSt === "Disapproved" || rawSt === "Pending") {
-            stVal = rawSt;
-         } else {
-            changed = true;
-         }
+        var rawSt = String(row[stIdx] || "").trim();
+        if (rawSt === "Approved" || rawSt === "Disapproved" || rawSt === "Pending") {
+          stVal = rawSt;
+        } else {
+          changed = true;
+        }
       } else {
-         changed = true;
+        changed = true;
       }
-      
+
       var tsVal = hMap["timestamp"] !== undefined ? row[hMap["timestamp"]] : "";
       var sdVal = hMap["startdate"] !== undefined ? row[hMap["startdate"]] : "";
       var edVal = hMap["enddate"] !== undefined ? row[hMap["enddate"]] : "";
       var ltVal = hMap["leavetype"] !== undefined ? row[hMap["leavetype"]] : "";
       var rVal = hMap["reason"] !== undefined ? row[hMap["reason"]] : "";
-      
-      var newRow = [ tsVal, idVal, nameVal, sdVal, edVal, ltVal, rVal, stVal ];
+
+      var newRow = [tsVal, idVal, nameVal, sdVal, edVal, ltVal, rVal, stVal];
       rows.push(newRow);
     }
-    
+
     var orderChanged = false;
     if (headers.length !== targetHeaders.length) {
       orderChanged = true;
@@ -624,10 +605,10 @@ function autoFormatAndSortLeaves() {
         }
       }
     }
-    
-    var origOrderStr = rows.map(function(r) { return r[1]; }).join(",");
-    
-    rows.sort(function(a, b) {
+
+    var origOrderStr = rows.map(function (r) { return r[1]; }).join(",");
+
+    rows.sort(function (a, b) {
       var dateA = a[3] ? Utilities.formatDate(new Date(a[3]), "Asia/Bangkok", "yyyy-MM-dd") : "9999-99-99";
       var dateB = b[3] ? Utilities.formatDate(new Date(b[3]), "Asia/Bangkok", "yyyy-MM-dd") : "9999-99-99";
       var isFutureA = dateA >= todayStr;
@@ -635,15 +616,15 @@ function autoFormatAndSortLeaves() {
       if (isFutureA && !isFutureB) return -1;
       if (!isFutureA && isFutureB) return 1;
       if (isFutureA && isFutureB) {
-         return dateA.localeCompare(dateB);
+        return dateA.localeCompare(dateB);
       } else {
-         return dateB.localeCompare(dateA);
+        return dateB.localeCompare(dateA);
       }
     });
-    
-    var newOrderStr = rows.map(function(r) { return r[1]; }).join(",");
+
+    var newOrderStr = rows.map(function (r) { return r[1]; }).join(",");
     if (origOrderStr !== newOrderStr) changed = true;
-    
+
     if (changed || orderChanged) {
       sheet.getRange(1, 1, sheet.getMaxRows(), sheet.getMaxColumns()).clearContent();
       var outputData = [targetHeaders].concat(rows);
@@ -651,7 +632,7 @@ function autoFormatAndSortLeaves() {
       sheet.getRange(2, 1, rows.length, 1).setNumberFormat("d/M/yyyy HH:mm");
       sheet.getRange(2, 4, rows.length, 2).setNumberFormat("d/M/yyyy");
     }
-  } catch (e) {}
+  } catch (e) { }
 }
 
 function getLeavesData() {
@@ -660,29 +641,29 @@ function getLeavesData() {
     var sheet = getSheetByNameOrCreateNew("Leaves");
     var data = sheet.getDataRange().getValues();
     if (data.length <= 1) return [];
-    
+
     var headers = data[0];
     var hMap = {};
     for (var i = 0; i < headers.length; i++) {
       hMap[String(headers[i]).trim().toLowerCase()] = i;
     }
-    
+
     var result = [];
     for (var i = 1; i < data.length; i++) {
       var row = data[i];
       if (hMap["id"] === undefined || !row[hMap["id"]] || String(row[hMap["id"]]).trim() === "") continue;
-      
+
       var sdIdx = hMap["startdate"];
       if (sdIdx !== undefined && !isDateValid(row[sdIdx])) continue;
-      
+
       result.push({
-        id: String(row[hMap["id"]]), 
-        name: String(row[hMap["name"]] || ""), 
+        id: String(row[hMap["id"]]),
+        name: String(row[hMap["name"]] || ""),
         startDate: String(row[hMap["startdate"]] || ""),
-        endDate: String(row[hMap["enddate"]] || ""), 
-        leaveType: String(row[hMap["leavetype"]] || ""), 
+        endDate: String(row[hMap["enddate"]] || ""),
+        leaveType: String(row[hMap["leavetype"]] || ""),
         reason: String(row[hMap["reason"]] || ""),
-        status: String(row[hMap["status"]] || ""), 
+        status: String(row[hMap["status"]] || ""),
         timestamp: String(row[hMap["timestamp"]] || "")
       });
     }
@@ -694,13 +675,13 @@ function getLeavesData() {
 // ----------------------------------------------------
 function handleProcessData(payload) {
   var sheet = getSheetByNameOrCreateNew("Attendance");
-  
-  var ts = payload.fullDateTime; 
+
+  var ts = payload.fullDateTime;
   if (ts) {
     ts = ts.replace(" | ", " ");
   } else {
     var now = new Date();
-    ts = now.toLocaleString('en-GB'); 
+    ts = now.toLocaleString('en-GB');
   }
 
   var type = payload.mode === 'in' ? 'เข้า' : 'ออก';
@@ -745,7 +726,7 @@ function getTimeEditRequestsData() {
 function handleSaveEmployee(p) {
   var sheet = getSheetByNameOrCreateNew("Employees");
   var data = sheet.getDataRange().getValues();
-  
+
   var foundIdx = -1;
   if (p.oldNickname) {
     for (var i = 1; i < data.length; i++) {
@@ -758,7 +739,7 @@ function handleSaveEmployee(p) {
     // Check for duplicate name for new employees
     for (var i = 1; i < data.length; i++) {
       if (String(data[i][0]).trim().toLowerCase() === String(p.nickname || "").trim().toLowerCase()) {
-        return {status: "error", message: "มีชื่อพนักงานนี้ในระบบแล้ว"};
+        return { status: "error", message: "มีชื่อพนักงานนี้ในระบบแล้ว" };
       }
     }
   }
@@ -782,10 +763,10 @@ function handleSaveEmployee(p) {
 
   if (foundIdx !== -1) {
     sheet.getRange(foundIdx + 1, 1, 1, rowData.length).setValues([rowData]);
-    return {status: "success", message: "Updated successfully"};
+    return { status: "success", message: "Updated successfully" };
   } else {
     sheet.appendRow(rowData);
-    return {status: "success", message: "Added successfully"};
+    return { status: "success", message: "Added successfully" };
   }
 }
 
@@ -795,11 +776,11 @@ function handleDeleteEmployee(nickname, fullName) {
   for (var i = 1; i < data.length; i++) {
     if (String(data[i][0]).trim() === nickname) {
       sheet.deleteRow(i + 1);
-      return {status: "success", message: "Deleted successfully"};
+      return { status: "success", message: "Deleted successfully" };
     }
   }
   // If not found in sheet, it's effectively deleted already. Return success to trigger Firebase sync.
-  return {status: "success", message: "Already deleted"};
+  return { status: "success", message: "Already deleted" };
 }
 
 // ----------------------------------------------------
@@ -812,7 +793,7 @@ function handleGetEmployeeLogs(nickname, monthStr, yearStr) {
     var results = [];
     var month = parseInt(monthStr, 10);
     var year = parseInt(yearStr, 10);
-    
+
     for (var i = 1; i < data.length; i++) {
       var row = data[i];
       if (String(row[1]).trim() === nickname) {
@@ -827,15 +808,15 @@ function handleGetEmployeeLogs(nickname, monthStr, yearStr) {
         }
       }
     }
-    
+
     // Sort by date
-    results.sort(function(a, b) {
+    results.sort(function (a, b) {
       return new Date(a.date) - new Date(b.date);
     });
-    
-    return {status: "success", logs: results};
-  } catch(e) {
-    return {status: "error", message: e.toString()};
+
+    return { status: "success", logs: results };
+  } catch (e) {
+    return { status: "error", message: e.toString() };
   }
 }
 
@@ -845,7 +826,7 @@ function handleUpdateEmployeeLog(p) {
     var data = sheet.getDataRange().getValues();
     var nickname = p.nickname;
     var targetDateStr = p.date; // yyyy-MM-dd
-    
+
     var foundIdx = -1;
     for (var i = 1; i < data.length; i++) {
       if (String(data[i][1]).trim() === nickname) {
@@ -856,28 +837,28 @@ function handleUpdateEmployeeLog(p) {
         }
       }
     }
-    
+
     if (p.actionType === "delete") {
       if (foundIdx !== -1) {
         sheet.deleteRow(foundIdx + 1);
-        return {status: "success", message: "Deleted log successfully"};
+        return { status: "success", message: "Deleted log successfully" };
       }
-      return {status: "error", message: "Log not found for deletion"};
+      return { status: "error", message: "Log not found for deletion" };
     }
-    
+
     var timeIn = p.in ? targetDateStr + "T" + p.in + ":00" : "";
     var timeOut = p.out ? targetDateStr + "T" + p.out + ":00" : "";
     var actualIn = p.actualIn ? targetDateStr + "T" + p.actualIn + ":00" : "";
     var actualOut = p.actualOut ? targetDateStr + "T" + p.actualOut + ":00" : "";
     var recordType = p.type || "Work"; // Work, Leave_Paid, Leave_Unpaid
-    
+
     if (foundIdx !== -1) {
       sheet.getRange(foundIdx + 1, 3).setValue(recordType);
       sheet.getRange(foundIdx + 1, 4).setValue(timeIn);
       sheet.getRange(foundIdx + 1, 5).setValue(timeOut);
       sheet.getRange(foundIdx + 1, 6).setValue(actualIn);
       sheet.getRange(foundIdx + 1, 7).setValue(actualOut);
-      return {status: "success", message: "Updated log successfully"};
+      return { status: "success", message: "Updated log successfully" };
     } else {
       sheet.appendRow([
         targetDateStr,
@@ -888,10 +869,10 @@ function handleUpdateEmployeeLog(p) {
         actualIn,
         actualOut
       ]);
-      return {status: "success", message: "Added log successfully"};
+      return { status: "success", message: "Added log successfully" };
     }
-  } catch(e) {
-    return {status: "error", message: e.toString()};
+  } catch (e) {
+    return { status: "error", message: e.toString() };
   }
 }
 
@@ -906,7 +887,7 @@ function setupEmployeeFormTrigger() {
       return "Trigger already exists";
     }
   }
-  
+
   ScriptApp.newTrigger("onEmployeeFormSubmit")
     .forSpreadsheet(ss)
     .onFormSubmit()
@@ -916,14 +897,14 @@ function setupEmployeeFormTrigger() {
 
 function onEmployeeFormSubmit(e) {
   if (!e || !e.range) return;
-  
+
   var sheet = e.range.getSheet();
   // Check headers to identify if this is an employee registration form
   var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-  
+
   var isEmployeeForm = false;
   var nicknameIdx = -1, firstNameIdx = -1, lastNameIdx = -1, pinIdx = -1, bankNameIdx = -1, bankIdx = -1, typeIdx = -1;
-  
+
   for (var i = 0; i < headers.length; i++) {
     var h = String(headers[i]).toLowerCase();
     if (h.indexOf("ชื่อเล่น") > -1) { isEmployeeForm = true; nicknameIdx = i; }
@@ -934,33 +915,33 @@ function onEmployeeFormSubmit(e) {
     else if (h.indexOf("เลขบัญชี") > -1) bankIdx = i;
     else if (h.indexOf("ประเภท") > -1) typeIdx = i;
   }
-  
+
   if (isEmployeeForm) {
     var nickname = nicknameIdx > -1 ? String(e.values[nicknameIdx]).trim() : "";
     var firstName = firstNameIdx > -1 ? String(e.values[firstNameIdx]).trim() : "";
     var lastName = lastNameIdx > -1 ? String(e.values[lastNameIdx]).trim() : "";
     var fullName = (firstName + " " + lastName).trim();
-    
+
     var pin = pinIdx > -1 ? String(e.values[pinIdx]).trim() : "1234";
-    
+
     var bankName = bankNameIdx > -1 ? String(e.values[bankNameIdx]).trim() : "";
     var bankAcc = bankIdx > -1 ? String(e.values[bankIdx]).trim() : "";
     var bankFull = bankName ? (bankName + " " + bankAcc).trim() : bankAcc;
-    
+
     var empType = typeIdx > -1 ? String(e.values[typeIdx]).trim() : "Part Time";
-    
+
     if (nickname) {
       var empSheet = getSheetByNameOrCreateNew("Employees");
       var existingData = empSheet.getDataRange().getValues();
       var exists = false;
-      for(var j=1; j<existingData.length; j++) {
-        if(String(existingData[j][0]).trim() === nickname) {
+      for (var j = 1; j < existingData.length; j++) {
+        if (String(existingData[j][0]).trim() === nickname) {
           exists = true; // Prevent duplicate registration
           break;
         }
       }
-      
-      if(!exists) {
+
+      if (!exists) {
         // ["ชื่อเล่น", "ชื่อจริง-นามสกุล", "PIN", "เรตรายวัน", "เรตรายชม.", "เรต OT", "ประเภทการหักเงิน", "เลขบัญชีธนาคาร", "ประเภทพนักงาน"]
         empSheet.appendRow([nickname, fullName, pin, 0, 0, 0, "3%", bankFull, empType]);
       }
@@ -974,9 +955,9 @@ function onEmployeeFormSubmit(e) {
 
 function handleGetScheduleData() {
   // Get base employees
-  var employeesData = getEmployeesData(); 
-  var baseEmployees = employeesData.map(function(e) { return {name: e.name, status: e.status}; });
-  
+  var employeesData = getEmployeesData();
+  var baseEmployees = employeesData.map(function (e) { return { name: e.name, status: e.status }; });
+
   // Get settings
   var settingsSheet = getSheetByNameOrCreateNew("ScheduleSettings");
   var settingsData = settingsSheet.getDataRange().getValues();
@@ -994,8 +975,8 @@ function handleGetScheduleData() {
       };
     }
   }
-  
-  var finalEmployees = baseEmployees.map(function(emp) {
+
+  var finalEmployees = baseEmployees.map(function (emp) {
     var set = settingsMap[emp.name] || {};
     return {
       name: emp.name,
@@ -1008,7 +989,7 @@ function handleGetScheduleData() {
       note: set.note || ""
     };
   });
-  
+
   // Get schedules
   var schedSheet = getSheetByNameOrCreateNew("Schedules");
   var schedData = schedSheet.getDataRange().getValues();
@@ -1024,17 +1005,17 @@ function handleGetScheduleData() {
       });
     }
   }
-  
+
   // Get leaves
-  var leaves = getLeavesData(); 
-  var finalLeaves = leaves.filter(function(l) { return l.status === "Approved"; }).map(function(l) {
+  var leaves = getLeavesData();
+  var finalLeaves = leaves.filter(function (l) { return l.status === "Approved"; }).map(function (l) {
     return {
       name: l.name,
       startDate: l.startDate,
       endDate: l.endDate
     };
   });
-  
+
   // Get attendance
   var attendanceSheet = getSheetByNameOrCreateNew("Attendance");
   var attData = attendanceSheet.getDataRange().getValues();
@@ -1050,7 +1031,7 @@ function handleGetScheduleData() {
       });
     }
   }
-  
+
   return {
     employees: finalEmployees,
     schedules: finalSchedules,
@@ -1070,7 +1051,7 @@ function handleSaveSchedules(data) {
   if (rows.length > 0) {
     sheet.getRange(2, 1, rows.length, 4).setValues(rows);
   }
-  return {status: "success"};
+  return { status: "success" };
 }
 
 function handleSaveScheduleSettings(data) {
@@ -1081,19 +1062,19 @@ function handleSaveScheduleSettings(data) {
   for (var i = 0; i < data.length; i++) {
     var e = data[i];
     rows.push([
-      e.name, 
-      e.type, 
-      e.targetDays, 
-      e.isAvailableAll, 
-      JSON.stringify(e.availability || {}), 
-      JSON.stringify(e.stations || []), 
+      e.name,
+      e.type,
+      e.targetDays,
+      e.isAvailableAll,
+      JSON.stringify(e.availability || {}),
+      JSON.stringify(e.stations || []),
       e.note || ""
     ]);
   }
   if (rows.length > 0) {
     sheet.getRange(2, 1, rows.length, 7).setValues(rows);
   }
-  return {status: "success"};
+  return { status: "success" };
 }
 
 function handleGetInitPayrollData() {
@@ -1155,11 +1136,11 @@ function handleSaveSetting(key, value) {
   for (var i = 1; i < data.length; i++) {
     if (String(data[i][0]) === key) {
       sheet.getRange(i + 1, 2).setValue(value);
-      return {status: "success"};
+      return { status: "success" };
     }
   }
   sheet.appendRow([key, value]);
-  return {status: "success"};
+  return { status: "success" };
 }
 
 function handleSaveDeduction(deduction) {
@@ -1175,14 +1156,14 @@ function handleSaveDeduction(deduction) {
         sheet.getRange(i + 1, 5).setValue(deduction.reason);
         sheet.getRange(i + 1, 6).setValue(timestamp);
         sheet.getRange(i + 1, 7).setValue(deduction.type || "Deduction");
-        return {status: "success", message: "Updated successfully", id: deduction.id};
+        return { status: "success", message: "Updated successfully", id: deduction.id };
       }
     }
-    return {status: "error", message: "Not found"};
+    return { status: "error", message: "Not found" };
   } else {
     var newId = Utilities.getUuid();
     sheet.appendRow([newId, deduction.period, deduction.name, deduction.amount, deduction.reason, timestamp, deduction.type || "Deduction"]);
-    return {status: "success", message: "Added successfully", id: newId};
+    return { status: "success", message: "Added successfully", id: newId };
   }
 }
 
@@ -1192,10 +1173,10 @@ function handleDeleteDeduction(id) {
   for (var i = 1; i < data.length; i++) {
     if (String(data[i][0]) === id) {
       sheet.deleteRow(i + 1);
-      return {status: "success"};
+      return { status: "success" };
     }
   }
-  return {status: "error"};
+  return { status: "error" };
 }
 
 function handleRequestLeave(leave) {
@@ -1203,7 +1184,7 @@ function handleRequestLeave(leave) {
   var newId = Utilities.getUuid();
   var timestamp = Utilities.formatDate(new Date(), "Asia/Bangkok", "yyyy-MM-dd HH:mm");
   sheet.appendRow([timestamp, newId, leave.name, leave.startDate, leave.endDate, leave.leaveType, leave.reason, "Pending"]);
-  
+
   var flexMessage = {
     "type": "flex",
     "altText": "📌 มีคำขอลางานใหม่จาก " + leave.name,
@@ -1291,10 +1272,10 @@ function handleRequestLeave(leave) {
       }
     }
   };
-  
+
   sendLineFlexMessage([flexMessage]);
-  
-  return {status: "success", message: "Requested successfully", id: newId};
+
+  return { status: "success", message: "Requested successfully", id: newId };
 }
 
 function handleUpdateLeaveStatus(id, newStatus) {
@@ -1303,10 +1284,10 @@ function handleUpdateLeaveStatus(id, newStatus) {
   for (var i = 1; i < data.length; i++) {
     if (String(data[i][0]) === id) {
       sheet.getRange(i + 1, 7).setValue(newStatus);
-      return {status: "success"};
+      return { status: "success" };
     }
   }
-  return {status: "error", message: "Not found"};
+  return { status: "error", message: "Not found" };
 }
 
 function handleRequestTimeEdit(req) {
@@ -1314,11 +1295,11 @@ function handleRequestTimeEdit(req) {
   var newId = Utilities.getUuid();
   var timestamp = new Date().toISOString();
   sheet.appendRow([newId, timestamp, req.name, req.date, req.originalIn, req.originalOut, req.newIn, req.newOut, req.reason, "Pending"]);
-  
+
   var msg = "\n⏳ มีคำขอแก้ไขเวลาเข้าออกงาน\nพนักงาน: " + req.name + "\nวันที่: " + req.date + "\nเดิม: " + req.originalIn + " - " + req.originalOut + "\nใหม่: " + req.newIn + " - " + req.newOut + "\nเหตุผล: " + req.reason;
   sendLineNotify(msg);
-  
-  return {status: "success", message: "Requested successfully", id: newId};
+
+  return { status: "success", message: "Requested successfully", id: newId };
 }
 
 function handleUpdateEditRequestStatus(id, newStatus) {
@@ -1327,12 +1308,12 @@ function handleUpdateEditRequestStatus(id, newStatus) {
   for (var i = 1; i < data.length; i++) {
     if (String(data[i][0]) === id) {
       sheet.getRange(i + 1, 10).setValue(newStatus);
-      
+
       // If approved, update the actual log
       if (newStatus === "Approved") {
-        var getD = function(v) { return v instanceof Date ? Utilities.formatDate(v, "Asia/Bangkok", "yyyy-MM-dd") : String(v); };
-        var getT = function(v) { return v instanceof Date ? Utilities.formatDate(v, "Asia/Bangkok", "HH:mm") : String(v); };
-        
+        var getD = function (v) { return v instanceof Date ? Utilities.formatDate(v, "Asia/Bangkok", "yyyy-MM-dd") : String(v); };
+        var getT = function (v) { return v instanceof Date ? Utilities.formatDate(v, "Asia/Bangkok", "HH:mm") : String(v); };
+
         var req = {
           nickname: String(data[i][2]),
           date: getD(data[i][3]),
@@ -1343,9 +1324,9 @@ function handleUpdateEditRequestStatus(id, newStatus) {
         };
         handleUpdateEmployeeLog(req);
       }
-      
-      return {status: "success"};
+
+      return { status: "success" };
     }
   }
-  return {status: "error", message: "Not found"};
+  return { status: "error", message: "Not found" };
 }

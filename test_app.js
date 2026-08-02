@@ -1,18 +1,26 @@
 const fs = require('fs');
-const jsdom = require("jsdom");
+const jsdom = require('jsdom');
 const { JSDOM } = jsdom;
-
-const html = fs.readFileSync('index.html', 'utf8');
-const dom = new JSDOM(html, { runScripts: "dangerously", resources: "usable" });
-
-const scriptCode = fs.readFileSync('js/app.js', 'utf8');
-
-const scriptEl = dom.window.document.createElement("script");
-scriptEl.textContent = scriptCode;
-
-dom.window.document.body.appendChild(scriptEl);
-
-dom.window.addEventListener('error', (event) => {
-    console.error("Caught error:", event.error);
+const dom = new JSDOM('<!DOCTYPE html><html><body><div id="login-name"></div></body></html>', {
+  url: "http://localhost/",
+  runScripts: "dangerously"
 });
-console.log("Loaded successfully");
+
+// Setup mock browser environment
+global.window = dom.window;
+global.document = dom.window.document;
+global.localStorage = { getItem: () => null, setItem: () => {} };
+global.sessionStorage = { getItem: () => null, setItem: () => {} };
+global.navigator = dom.window.navigator;
+global.fetch = () => Promise.resolve({ json: () => Promise.resolve({}) });
+
+// Mock Swal
+global.Swal = { fire: () => Promise.resolve({}) };
+global.window.Swal = global.Swal;
+
+try {
+  require('./js/app.js');
+  console.log("No runtime errors on initial load.");
+} catch (e) {
+  console.error("Runtime error:", e);
+}

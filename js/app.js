@@ -564,7 +564,7 @@ function hideLoading() {
 }
 
 function showView(viewId, pushToHistory = true) {
-    const views = ['view-login', 'view-dashboard', 'view-employee', 'view-profile', 'view-leave', 'view-stock', 'view-checklist', 'view-qa', 'view-admin-dashboard', 'view-admin-employees', 'view-admin-overview', 'view-admin-leaves'];
+    const views = ['view-login', 'view-dashboard', 'view-employee', 'view-profile', 'view-leave', 'view-stock', 'view-checklist', 'view-qa', 'view-admin-dashboard', 'view-admin-employees', 'view-admin-overview', 'view-admin-leaves', 'view-admin-today-status', 'view-admin-time-edits'];
     views.forEach(v => {
         let el = document.getElementById(v);
         if (el) el.classList.add('hidden');
