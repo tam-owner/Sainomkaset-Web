@@ -1408,14 +1408,14 @@ function generateSalarySummaryHtml(empObj, myRecords) {
             <!-- Period Status Banners & Net Pay -->
             ${(function() {
                 const statusObj = getPeriodStatus(currentPeriodVal);
-                if (statusObj.state === 'manager_review') {
+                if (statusObj.state === 'normal' || statusObj.state === 'manager_review') {
                     return `
                         <div class="bg-amber-50 rounded-[20px] p-5 flex flex-col justify-center items-center shadow-lg mt-4 border border-amber-200">
                             <div class="bg-amber-100 p-3 rounded-full mb-2">
                                 <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                             </div>
-                            <h3 class="text-[15px] font-black text-amber-800 text-center">ผู้จัดการกำลังตรวจสอบยอด</h3>
-                            <p class="text-[11px] font-medium text-amber-700 text-center mt-1 leading-relaxed">กรุณารอการแจ้งเตือนจากผู้จัดการ<br>เพื่อตรวจสอบยอดเงินในภายหลัง</p>
+                            <h3 class="text-[15px] font-black text-amber-800 text-center">กำลังดำเนินการ / ยังไม่สรุปยอด</h3>
+                            <p class="text-[11px] font-medium text-amber-700 text-center mt-1 leading-relaxed">ยอดเงินจะแสดงเมื่อผู้จัดการ<br>เปิดให้ตรวจสอบข้อมูลในรอบถัดไป</p>
                         </div>
                     `;
                 } else if (statusObj.state === 'locked') {
@@ -1787,12 +1787,9 @@ function renderAdminSummary() {
     const statusObj = getPeriodStatus(currentPeriodVal);
     const badge = document.getElementById('admin-period-status-badge');
     if (badge) {
-        if (statusObj.state === 'normal') {
-            badge.className = "text-[11px] font-bold px-2 py-1 rounded-md bg-emerald-100 text-emerald-700";
-            badge.innerText = "สถานะ: ปกติ";
-        } else if (statusObj.state === 'manager_review') {
+        if (statusObj.state === 'normal' || statusObj.state === 'manager_review') {
             badge.className = "text-[11px] font-bold px-2 py-1 rounded-md bg-amber-100 text-amber-700";
-            badge.innerText = "สถานะ: กำลังปรับแก้";
+            badge.innerText = "สถานะ: กำลังดำเนินการ";
         } else if (statusObj.state === 'employee_review') {
             badge.className = "text-[11px] font-bold px-2 py-1 rounded-md bg-blue-100 text-blue-700";
             if (isDeadlinePassed(statusObj.deadline)) {
