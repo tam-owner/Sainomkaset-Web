@@ -539,7 +539,7 @@ function logout() {
 // ----------------------------------------------------
 // Loading Helpers & Views Routing
 // ----------------------------------------------------
-function showLoading(text) {
+function showLoading(text = 'กำลังโหลด...') {
     const overlay = document.getElementById('loading-overlay');
     if (overlay) {
         document.getElementById('loading-text').innerText = text;
