@@ -1182,7 +1182,7 @@ function generateSalarySummaryHtml(empObj, myRecords) {
     let formatCurrencySmallDecimals = (val) => {
         let str = Number(val || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         let parts = str.split('.');
-        return `${parts[0]}<span class="text-[0.65em]">.${parts[1]}</span>`;
+        return `${parts[0]}<span class="text-[0.65em] font-bold tracking-normal ml-[1px]">.${parts[1]}</span>`;
     };
     let formatCurrencyNoDecimals = (val) => Number(val || 0).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
     let periodText = availablePeriods.find(p => p.value === currentPeriodVal)?.text || '';
@@ -1311,7 +1311,7 @@ function generateSalarySummaryHtml(empObj, myRecords) {
                         <span class="text-[10px] font-bold text-white">แตะเพื่อโหลดสลิป</span>
                     </div>` : ''}
                 </div>
-                <div class="text-3xl font-black text-white tracking-tight relative z-10 flex items-baseline">
+                <div class="text-3xl font-black text-white tracking-normal relative z-10 flex items-baseline">
                     <span class="text-lg ${isPayDateReached ? 'text-emerald-200' : 'text-slate-400'} mr-1.5 font-bold">฿</span>${formatCurrencySmallDecimals(netPay)}
                 </div>
             </div>
@@ -1667,7 +1667,7 @@ function renderAdminSummary() {
     let formatCurrencySmallDecimals = (val) => {
         let str = Number(val || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         let parts = str.split('.');
-        return `${parts[0]}<span class="text-[0.65em]">.${parts[1]}</span>`;
+        return `${parts[0]}<span class="text-[0.65em] font-bold tracking-normal ml-[1px]">.${parts[1]}</span>`;
     };
     
     Object.values(empStats).forEach(emp => {
