@@ -1346,6 +1346,30 @@ function generateSalarySummaryHtml(empObj, myRecords) {
                 </div>
             </div>
 
+            ${(function() {
+                const statusObj = getPeriodStatus(currentPeriodVal);
+                if (statusObj.state === 'normal' || statusObj.state === 'manager_review') {
+                    return `
+                    <div class="flex gap-3 mb-4 mt-2">
+                        <div class="flex-1 p-3 bg-emerald-50 rounded-xl border border-emerald-100 flex flex-col items-center justify-center shadow-sm">
+                            <span class="text-[11px] font-bold text-emerald-600 mb-1 tracking-wide">เวลาทำงานปกติ</span>
+                            <span class="text-xl font-black text-emerald-700">${totalNormalHours.toFixed(1)} <span class="text-sm font-bold text-emerald-600/80">ชม.</span></span>
+                        </div>
+                        <div class="flex-1 p-3 bg-orange-50 rounded-xl border border-orange-100 flex flex-col items-center justify-center shadow-sm">
+                            <span class="text-[11px] font-bold text-orange-600 mb-1 tracking-wide">ล่วงเวลา (OT)</span>
+                            <span class="text-xl font-black text-orange-700">${totalOTHours.toFixed(1)} <span class="text-sm font-bold text-orange-600/80">ชม.</span></span>
+                        </div>
+                    </div>
+                    <div class="bg-amber-50 rounded-[20px] p-5 flex flex-col justify-center items-center shadow-md border border-amber-200">
+                        <div class="bg-amber-100 p-3 rounded-full mb-2">
+                            <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <h3 class="text-[15px] font-black text-amber-800 text-center">กำลังดำเนินการ / ยังไม่สรุปยอด</h3>
+                        <p class="text-[11px] font-medium text-amber-700 text-center mt-1 leading-relaxed">ยอดเงินจะแสดงเมื่อผู้จัดการ<br>เปิดให้ตรวจสอบข้อมูลในรอบถัดไป</p>
+                    </div>
+                    `;
+                } else {
+                    let html = `
             <div class="space-y-3">
                 <div class="flex justify-between items-center p-3 bg-gradient-to-r from-emerald-50 to-white rounded-xl border border-emerald-100/50 shadow-sm transition-all hover:shadow-md">
                     <div class="flex items-center gap-3">
@@ -1382,44 +1406,33 @@ function generateSalarySummaryHtml(empObj, myRecords) {
                     <span class="text-lg font-black text-slate-800">฿${formatCurrencySmallDecimals(otPay)}</span>
                 </div>
             </div>
-            
-            ${customDeductHtml ? `
+            `;
+                    if (customDeductHtml) {
+                        html += `
             <div class="mt-3 pt-2 border-t border-slate-100">
                 <div class="bg-slate-50 rounded-xl px-3 py-2 border border-slate-100 space-y-1">
                     ${customDeductHtml}
                 </div>
             </div>
-            ` : ''}
-            
+                        `;
+                    }
+                    html += `
             <div class="flex justify-between items-center px-2 mt-4 mb-2">
                 <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">${beforeDeductLabel}</span>
                 <span class="text-sm font-black text-slate-700">฿${formatCurrency(payBeforeTax)}</span>
             </div>
-
-            ${standardDeduct > 0 ? `
+                    `;
+                    if (standardDeduct > 0) {
+                        html += `
             <div class="flex justify-between items-center px-2 mb-2">
                 <span class="text-xs font-bold text-red-500 uppercase tracking-wide">${deductLabel}</span>
                 <span class="text-sm font-black text-red-600">-฿${formatCurrency(standardDeduct)}</span>
             </div>
-            ` : ''}
+                        `;
+                    }
 
-
-
-            <!-- Period Status Banners & Net Pay -->
-            ${(function() {
-                const statusObj = getPeriodStatus(currentPeriodVal);
-                if (statusObj.state === 'normal' || statusObj.state === 'manager_review') {
-                    return `
-                        <div class="bg-amber-50 rounded-[20px] p-5 flex flex-col justify-center items-center shadow-lg mt-4 border border-amber-200">
-                            <div class="bg-amber-100 p-3 rounded-full mb-2">
-                                <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            </div>
-                            <h3 class="text-[15px] font-black text-amber-800 text-center">กำลังดำเนินการ / ยังไม่สรุปยอด</h3>
-                            <p class="text-[11px] font-medium text-amber-700 text-center mt-1 leading-relaxed">ยอดเงินจะแสดงเมื่อผู้จัดการ<br>เปิดให้ตรวจสอบข้อมูลในรอบถัดไป</p>
-                        </div>
-                    `;
-                } else if (statusObj.state === 'locked') {
-                    return `
+                    if (statusObj.state === 'locked') {
+                        html += `
                         <div class="bg-slate-100 rounded-[20px] p-5 flex flex-col justify-center items-center shadow-lg mt-4 border border-slate-200">
                             <div class="bg-slate-200 p-3 rounded-full mb-2">
                                 <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7z"></path></svg>
@@ -1427,10 +1440,9 @@ function generateSalarySummaryHtml(empObj, myRecords) {
                             <h3 class="text-[15px] font-black text-slate-700 text-center">ปิดยอดเงินแล้ว</h3>
                             <p class="text-[11px] font-medium text-slate-500 text-center mt-1 leading-relaxed">ยอดเงินรอบนี้ถูกโอนเรียบร้อย<br>ไม่สามารถแก้ไขข้อมูลได้อีก</p>
                         </div>
-                    `;
-                } else {
-                    let employeeReviewBanner = '';
-                    if (statusObj.state === 'employee_review') {
+                        `;
+                    } else if (statusObj.state === 'employee_review') {
+                        let employeeReviewBanner = '';
                         const passed = isDeadlinePassed(statusObj.deadline);
                         if (!passed) {
                             const dl = new Date(statusObj.deadline);
@@ -1455,10 +1467,8 @@ function generateSalarySummaryHtml(empObj, myRecords) {
                                 </div>
                             `;
                         }
-                    }
-
-                    return `
-                        ${employeeReviewBanner}
+                        html += employeeReviewBanner;
+                        html += `
                         <div ${isPayDateReached ? `onclick="downloadPayslipPdf('${empObj.name}')"` : ""} class="${isPayDateReached ? 'bg-[#0fa981] shadow-[#0fa981]/40 cursor-pointer active:scale-95 transition-transform duration-200 group' : 'bg-slate-800 shadow-slate-800/40'} rounded-[20px] p-5 flex justify-between items-center shadow-lg mt-4 relative overflow-hidden">
                             <div class="relative z-10 flex flex-col">
                                 <p class="text-[11px] font-black ${isPayDateReached ? 'text-emerald-50' : 'text-slate-300'} uppercase tracking-widest">${isPayDateReached ? 'รวมรายได้สุทธิ' : 'รายได้สะสมรอบปัจจุบัน'}</p>
@@ -1473,7 +1483,10 @@ function generateSalarySummaryHtml(empObj, myRecords) {
                                 <span class="text-lg ${isPayDateReached ? 'text-emerald-200' : 'text-slate-400'} mr-1.5 font-bold">฿</span>${formatCurrencySmallDecimals(netPay)}
                             </div>
                         </div>
-                    `;
+                        `;
+                    }
+                    
+                    return html;
                 }
             })()}
         </div>
