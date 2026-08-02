@@ -1123,14 +1123,6 @@ function openPeriodStatusModal() {
     const rb = document.querySelector(`input[name="period-status-radio"][value="${statusObj.state}"]`);
     if (rb) rb.checked = true;
     
-    if (statusObj.deadline) {
-        document.getElementById('period-status-deadline').value = statusObj.deadline;
-    } else {
-        document.getElementById('period-status-deadline').value = "";
-    }
-    
-    toggleDeadlineInput();
-    
     const overlay = document.getElementById('period-status-modal');
     const sheet = overlay.querySelector('div');
     overlay.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
@@ -1144,32 +1136,16 @@ function closePeriodStatusModal() {
     setTimeout(() => overlay.classList.add('opacity-0', 'pointer-events-none', 'hidden'), 300);
 }
 
-function toggleDeadlineInput() {
-    const rb = document.querySelector('input[name="period-status-radio"]:checked');
-    const container = document.getElementById('deadline-input-container');
-    if (rb && rb.value === 'employee_review') {
-        container.classList.remove('hidden');
-    } else {
-        container.classList.add('hidden');
-    }
-}
+
 
 async function savePeriodStatus() {
     const rb = document.querySelector('input[name="period-status-radio"]:checked');
     if (!rb) return;
     const state = rb.value;
-    let deadline = "";
-    if (state === 'employee_review') {
-        deadline = document.getElementById('period-status-deadline').value;
-        if (!deadline) {
-            Swal.fire({ icon: 'error', title: 'ผิดพลาด', text: 'กรุณากำหนดวันเวลา Deadline' });
-            return;
-        }
-    }
     
     showLoading();
     try {
-        const valObj = { state: state, deadline: deadline };
+        const valObj = { state: state, deadline: "" };
         const key = "PeriodStatus_" + currentPeriodVal;
         
         const payload = { action: "saveSetting", key: key, value: JSON.stringify(valObj) };
@@ -1444,31 +1420,15 @@ function generateSalarySummaryHtml(empObj, myRecords) {
                         </div>
                         `;
                     } else if (statusObj.state === 'employee_review') {
-                        let employeeReviewBanner = '';
-                        const passed = isDeadlinePassed(statusObj.deadline);
-                        if (!passed) {
-                            const dl = new Date(statusObj.deadline);
-                            const dlStr = `${dl.getDate()} ${['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'][dl.getMonth()]} ${dl.getFullYear() + 543} เวลา ${String(dl.getHours()).padStart(2,'0')}:${String(dl.getMinutes()).padStart(2,'0')} น.`;
-                            employeeReviewBanner = `
-                                <div class="bg-blue-50 border border-blue-200 rounded-[16px] p-4 mt-4 shadow-sm flex items-start gap-3">
-                                    <svg class="w-6 h-6 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                    <div>
-                                        <h4 class="text-[13px] font-black text-blue-800">กรุณาตรวจสอบยอดเงิน</h4>
-                                        <p class="text-[11px] font-medium text-blue-700 mt-0.5 leading-relaxed">หากต้องการขอแก้ไขให้แจ้งภายใน <span class="font-bold underline">${dlStr}</span> หากพ้นกำหนดจะถือว่ายืนยันยอดนี้</p>
-                                    </div>
+                        let employeeReviewBanner = `
+                            <div class="bg-blue-50 border border-blue-200 rounded-[16px] p-4 mt-4 shadow-sm flex items-start gap-3">
+                                <svg class="w-6 h-6 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <div>
+                                    <h4 class="text-[13px] font-black text-blue-800">กรุณาตรวจสอบยอดเงิน</h4>
+                                    <p class="text-[11px] font-medium text-blue-700 mt-0.5 leading-relaxed">หากพบข้อผิดพลาดสามารถกดขอแก้ไขเวลาได้ ก่อนที่ผู้จัดการจะปิดยอด</p>
                                 </div>
-                            `;
-                        } else {
-                            employeeReviewBanner = `
-                                <div class="bg-rose-50 border border-rose-200 rounded-[16px] p-4 mt-4 shadow-sm flex items-start gap-3">
-                                    <svg class="w-6 h-6 text-rose-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                    <div>
-                                        <h4 class="text-[13px] font-black text-rose-800">หมดเวลาขอแก้ไขแล้ว</h4>
-                                        <p class="text-[11px] font-medium text-rose-700 mt-0.5 leading-relaxed">ระบบได้ถือว่ายอดนี้ได้รับการยืนยันแล้ว และไม่สามารถขอแก้ไขได้อีก</p>
-                                    </div>
-                                </div>
-                            `;
-                        }
+                            </div>
+                        `;
                         html += employeeReviewBanner;
                         html += `
                         <div ${isPayDateReached ? `onclick="downloadPayslipPdf('${empObj.name}')"` : ""} class="${isPayDateReached ? 'bg-[#0fa981] shadow-[#0fa981]/40 cursor-pointer active:scale-95 transition-transform duration-200 group' : 'bg-slate-800 shadow-slate-800/40'} rounded-[20px] p-5 flex justify-between items-center shadow-lg mt-4 relative overflow-hidden">
@@ -1553,7 +1513,7 @@ function generateEmployeeTableHtml(empObj, myRecords, isAdmin = false) {
         
         // Period Status Edit Lock for Employees
         const statusObj = getPeriodStatus(currentPeriodVal);
-        const isLockedForEmployee = !isAdmin && (statusObj.state === 'manager_review' || statusObj.state === 'locked' || (statusObj.state === 'employee_review' && isDeadlinePassed(statusObj.deadline)));
+        const isLockedForEmployee = !isAdmin && (statusObj.state === 'manager_review' || statusObj.state === 'locked');
 
         const onclickStr = isAdmin
             ? `onclick="openEditLogModal('${row.date}', '${schedInStr}', '${schedOutStr}', '${row.type || 'Work'}', '${actualInStr}', '${actualOutStr}')"`
@@ -1807,12 +1767,7 @@ function renderAdminSummary() {
             badge.innerText = "สถานะ: กำลังดำเนินการ";
         } else if (statusObj.state === 'employee_review') {
             badge.className = "text-[11px] font-bold px-2 py-1 rounded-md bg-blue-100 text-blue-700";
-            if (isDeadlinePassed(statusObj.deadline)) {
-                badge.innerText = "สถานะ: หมดเวลาตรวจสอบ";
-                badge.className = "text-[11px] font-bold px-2 py-1 rounded-md bg-rose-100 text-rose-700";
-            } else {
-                badge.innerText = "สถานะ: พนักงานตรวจสอบ";
-            }
+            badge.innerText = "สถานะ: พนักงานตรวจสอบ";
         } else if (statusObj.state === 'locked') {
             badge.className = "text-[11px] font-bold px-2 py-1 rounded-md bg-rose-100 text-rose-700";
             badge.innerText = "สถานะ: ปิดยอดแล้ว";
