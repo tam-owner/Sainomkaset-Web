@@ -1409,17 +1409,7 @@ function generateSalarySummaryHtml(empObj, myRecords) {
                         `;
                     }
 
-                    if (statusObj.state === 'locked') {
-                        html += `
-                        <div class="bg-slate-100 rounded-[20px] p-5 flex flex-col justify-center items-center shadow-lg mt-4 border border-slate-200">
-                            <div class="bg-slate-200 p-3 rounded-full mb-2">
-                                <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7z"></path></svg>
-                            </div>
-                            <h3 class="text-[15px] font-black text-slate-700 text-center">ปิดยอดเงินแล้ว</h3>
-                            <p class="text-[11px] font-medium text-slate-500 text-center mt-1 leading-relaxed">ยอดเงินรอบนี้ถูกโอนเรียบร้อย<br>ไม่สามารถแก้ไขข้อมูลได้อีก</p>
-                        </div>
-                        `;
-                    } else if (statusObj.state === 'employee_review') {
+                    if (statusObj.state === 'employee_review') {
                         let employeeReviewBanner = `
                             <div class="bg-blue-50 border border-blue-200 rounded-[16px] p-4 mt-4 shadow-sm flex items-start gap-3">
                                 <svg class="w-6 h-6 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
