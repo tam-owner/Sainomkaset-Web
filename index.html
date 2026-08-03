@@ -1156,13 +1156,7 @@
                         <span class="block text-[11px] text-slate-500 mt-0.5">พนักงานจะเห็นยอดเงิน และสามารถกดขอแก้ไขเวลาได้</span>
                     </div>
                 </label>
-                <label class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors" onclick="toggleDeadlineInput()">
-                    <input type="radio" name="period-status-radio" value="locked" class="mt-1 w-4 h-4 text-rose-600 focus:ring-rose-500">
-                    <div>
-                        <span class="block text-[14px] font-bold text-slate-800">3. ปิดยอด / โอนเงินเรียบร้อย</span>
-                        <span class="block text-[11px] text-slate-500 mt-0.5">แสดงสลิปเงินเดือน ปิดไม่ให้กดขอแก้ไขเวลาใดๆ</span>
-                    </div>
-                </label>
+
                 
                 <button type="button" onclick="savePeriodStatus()" class="w-full mt-2 bg-slate-800 text-white font-bold text-sm py-3 rounded-xl shadow-md hover:bg-slate-900 active:scale-95 transition-all">
                     บันทึกสถานะ
@@ -1397,10 +1391,10 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <!-- Add Firebase products that you want to use -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-    <script src="js/firebase-init.js?v=20260803_147"></script>
+    <script src="js/firebase-init.js?v=20260803_148"></script>
 
     <script src="js/customSelect.js"></script>
-    <script src="js/app.js?v=20260803_147"></script>
+    <script src="js/app.js?v=20260803_148"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -1443,7 +1437,7 @@
         ล้างแคช
     </button>
     <div id="app-version-display" class="fixed bottom-2 right-2 text-[10px] text-slate-400 font-medium z-[9999] pointer-events-none opacity-50">
-        v2.2.147 (Firebase)
+        v2.2.148 (Firebase)
     </div>
 </body>
 </html>

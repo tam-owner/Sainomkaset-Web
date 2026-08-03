@@ -1422,7 +1422,7 @@ function generateSalarySummaryHtml(empObj, myRecords) {
                         html += employeeReviewBanner;
                     }
                     
-                    if (statusObj.state === 'employee_review' || statusObj.state === 'locked') {
+                    if (statusObj.state === 'employee_review') {
                         html += `
                         <div ${isPayDateReached ? `onclick="downloadPayslipPdf('${empObj.name}')"` : ""} class="${isPayDateReached ? 'bg-[#0fa981] shadow-[#0fa981]/40 cursor-pointer active:scale-95 transition-transform duration-200 group' : 'bg-slate-800 shadow-slate-800/40'} rounded-[20px] p-5 flex justify-between items-center shadow-lg mt-4 relative overflow-hidden">
                             <div class="relative z-10 flex flex-col">
@@ -1506,7 +1506,7 @@ function generateEmployeeTableHtml(empObj, myRecords, isAdmin = false) {
         
         // Period Status Edit Lock for Employees
         const statusObj = getPeriodStatus(currentPeriodVal);
-        const isLockedForEmployee = !isAdmin && (statusObj.state === 'manager_review' || statusObj.state === 'locked');
+        const isLockedForEmployee = !isAdmin && (statusObj.state === 'manager_review');
 
         const onclickStr = isAdmin
             ? `onclick="openEditLogModal('${row.date}', '${schedInStr}', '${schedOutStr}', '${row.type || 'Work'}', '${actualInStr}', '${actualOutStr}')"`
@@ -1761,9 +1761,6 @@ function renderAdminSummary() {
         } else if (statusObj.state === 'employee_review') {
             badge.className = "text-[11px] font-bold px-2 py-1 rounded-md bg-blue-100 text-blue-700";
             badge.innerText = "สถานะ: พนักงานตรวจสอบ";
-        } else if (statusObj.state === 'locked') {
-            badge.className = "text-[11px] font-bold px-2 py-1 rounded-md bg-rose-100 text-rose-700";
-            badge.innerText = "สถานะ: ปิดยอดแล้ว";
         }
     }
 
