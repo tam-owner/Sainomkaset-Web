@@ -1425,7 +1425,7 @@ function generateSalarySummaryHtml(empObj, myRecords) {
                                 <svg class="w-6 h-6 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 <div>
                                     <h4 class="text-[13px] font-black text-blue-800">กรุณาตรวจสอบยอดเงิน</h4>
-                                    <p class="text-[11px] font-medium text-blue-700 mt-0.5 leading-relaxed">หากพบข้อผิดพลาดสามารถกดขอแก้ไขเวลาได้ ก่อนที่ผู้จัดการจะปิดยอด</p>
+                                    <p class="text-[11px] font-medium text-blue-700 mt-0.5 leading-relaxed">หากพบข้อผิดพลาดสามารถกดขอแก้ไขเวลาได้</p>
                                 </div>
                             </div>
                         `;
