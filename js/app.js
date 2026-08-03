@@ -1420,6 +1420,9 @@ function generateSalarySummaryHtml(empObj, myRecords) {
                             </div>
                         `;
                         html += employeeReviewBanner;
+                    }
+                    
+                    if (statusObj.state === 'employee_review' || statusObj.state === 'locked') {
                         html += `
                         <div ${isPayDateReached ? `onclick="downloadPayslipPdf('${empObj.name}')"` : ""} class="${isPayDateReached ? 'bg-[#0fa981] shadow-[#0fa981]/40 cursor-pointer active:scale-95 transition-transform duration-200 group' : 'bg-slate-800 shadow-slate-800/40'} rounded-[20px] p-5 flex justify-between items-center shadow-lg mt-4 relative overflow-hidden">
                             <div class="relative z-10 flex flex-col">
