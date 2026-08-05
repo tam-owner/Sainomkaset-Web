@@ -110,6 +110,7 @@ function doPost(e) {
     else if (action === "saveSetting") { res = handleSaveSetting(p.key, p.value); }
     else if (action === "saveSchedules") { res = handleSaveSchedules(p.data); }
     else if (action === "saveScheduleSettings") { res = handleSaveScheduleSettings(p.data); }
+    else if (action === "saveChecklist") { res = handleSaveChecklist(p); }
     else { res = { status: "error", message: "Unknown action" }; }
 
     // Auto-sync to Firebase if the action modifies data
@@ -1329,4 +1330,45 @@ function handleUpdateEditRequestStatus(id, newStatus) {
     }
   }
   return { status: "error", message: "Not found" };
+}
+
+// ----------------------------------------------------
+// Checklist Handlers
+// ----------------------------------------------------
+function handleSaveChecklist(p) {
+  try {
+    var lock = LockService.getScriptLock();
+    lock.waitLock(10000);
+
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Checklist_Logs");
+    if (!sheet) {
+      sheet = SpreadsheetApp.getActiveSpreadsheet().insertSheet("Checklist_Logs");
+      sheet.appendRow(["Timestamp", "EmployeeName", "Category", "Period", "Task", "Status", "Reason"]);
+    }
+
+    var items = p.items || [];
+    var dataRows = [];
+    
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      dataRows.push([
+        p.timestamp,
+        p.employeeName,
+        p.category,
+        p.period,
+        item.task,
+        item.status,
+        item.reason || ""
+      ]);
+    }
+    
+    if (dataRows.length > 0) {
+      sheet.getRange(sheet.getLastRow() + 1, 1, dataRows.length, dataRows[0].length).setValues(dataRows);
+    }
+    
+    lock.releaseLock();
+    return { status: "success", message: "Checklist saved successfully" };
+  } catch (error) {
+    return { status: "error", message: error.toString() };
+  }
 }

@@ -564,7 +564,7 @@ function hideLoading() {
 }
 
 function showView(viewId, pushToHistory = true) {
-    const views = ['view-login', 'view-dashboard', 'view-employee', 'view-profile', 'view-leave', 'view-stock', 'view-checklist', 'view-qa', 'view-admin-dashboard', 'view-admin-employees', 'view-admin-overview', 'view-admin-leaves', 'view-admin-today-status', 'view-admin-time-edits'];
+    const views = ['view-login', 'view-dashboard', 'view-employee', 'view-profile', 'view-leave', 'view-stock', 'view-checklist', 'view-checklist-period', 'view-checklist-detail', 'view-qa', 'view-admin-dashboard', 'view-admin-employees', 'view-admin-overview', 'view-admin-leaves', 'view-admin-today-status', 'view-admin-time-edits'];
     views.forEach(v => {
         let el = document.getElementById(v);
         if (el) el.classList.add('hidden');
@@ -4538,5 +4538,212 @@ function toggleQA(btn) {
             content.style.paddingBottom = '';
             content.style.opacity = '';
         }, 300);
+    }
+}
+
+// ==========================================
+// CHECKLIST SYSTEM
+// ==========================================
+let currentChecklistCategory = '';
+let currentChecklistPeriod = '';
+let currentChecklistItems = [];
+
+// Template data if no specific items are provided
+const checklistTemplateData = {
+    'Service': {
+        'เปิดร้าน': ['เปิดระบบ POS', 'ตรวจสอบเงินทอน', 'ทำความสะอาดเคาน์เตอร์', 'เช็ดโต๊ะและจัดเก้าอี้', 'เปิดเครื่องชงกาแฟ'],
+        'ปิดร้าน': ['นับยอดเงินลิ้นชัก', 'ปิดระบบ POS', 'ล้างเครื่องชงกาแฟ', 'เก็บกวาดพื้นและเช็ดโต๊ะ', 'ปิดไฟและแอร์']
+    },
+    'Bread': {
+        'เปิดร้าน': ['อุ่นเตาอบ', 'เช็คสต็อกขนมปัง', 'จัดเรียงขนมปังในตู้โชว์', 'เตรียมอุปกรณ์คีบและถาด'],
+        'ปิดร้าน': ['เช็คยอดขนมปังเหลือ', 'ทำความสะอาดเตาอบ', 'เก็บกวาดเศษขนมปัง', 'จัดเก็บอุปกรณ์']
+    },
+    'Drink': {
+        'เปิดร้าน': ['เช็คสต็อกแก้วและหลอด', 'เตรียมน้ำแข็ง', 'เช็ควัตถุดิบชงดื่ม', 'ตรวจสอบเครื่องดื่มในตู้แช่'],
+        'ปิดร้าน': ['ล้างอุปกรณ์ชงดื่ม', 'เคลียร์ขยะ', 'เช็ดทำความสะอาดบาร์น้ำ', 'ตรวจสอบตู้แช่ก่อนปิด']
+    },
+    'Lava': {
+        'เปิดร้าน': ['เตรียมไส้ลาวา', 'เปิดเครื่องอุ่น', 'เช็คสต็อกวัตถุดิบลาวา'],
+        'ปิดร้าน': ['เก็บไส้ลาวาเข้าตู้เย็น', 'ล้างเครื่องอุ่น', 'เช็ดทำความสะอาดบริเวณลาวา']
+    },
+    'Hot meal': {
+        'เปิดร้าน': ['เปิดเตาทำอาหาร', 'เตรียมวัตถุดิบอาหารคาว', 'เช็คสต็อกจานชาม', 'ตรวจสอบเครื่องปรุง'],
+        'ปิดร้าน': ['ล้างจานชามและอุปกรณ์', 'เก็บวัตถุดิบเข้าตู้เย็น', 'ทำความสะอาดเตาและครัว', 'เช็คและกำจัดเศษอาหาร']
+    }
+};
+
+function openChecklistCategory(category) {
+    currentChecklistCategory = category;
+    document.getElementById('checklist-period-title').innerText = `Checklist - ${category}`;
+    showView('view-checklist-period');
+}
+
+function openChecklistPeriod(period) {
+    currentChecklistPeriod = period;
+    document.getElementById('checklist-detail-title').innerText = `Checklist - ${currentChecklistCategory}`;
+    document.getElementById('checklist-detail-subtitle').innerText = `รอบ: ${period}`;
+    
+    // Initialize checklist items based on template
+    const items = checklistTemplateData[currentChecklistCategory]?.[period] || ['รายการตัวอย่าง 1', 'รายการตัวอย่าง 2'];
+    currentChecklistItems = items.map(item => ({
+        task: item,
+        status: null, // null = unchecked, 'done' = done, 'not-done' = not done
+        reason: ''
+    }));
+    
+    renderChecklistItems();
+    showView('view-checklist-detail');
+}
+
+function renderChecklistItems() {
+    const container = document.getElementById('checklist-items-container');
+    container.innerHTML = '';
+    
+    let allChecked = true;
+    
+    currentChecklistItems.forEach((item, index) => {
+        if (item.status === null) {
+            allChecked = false;
+        } else if (item.status === 'not-done' && !item.reason.trim()) {
+            allChecked = false;
+        }
+        
+        const isDone = item.status === 'done';
+        const isNotDone = item.status === 'not-done';
+        
+        const html = `
+            <div class="bg-white rounded-2xl p-4 shadow-sm border ${item.status ? 'border-blue-200' : 'border-slate-200'} transition-all">
+                <div class="font-bold text-slate-800 mb-3">${index + 1}. ${item.task}</div>
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <button onclick="handleChecklistChange(${index}, 'done')" class="py-2 px-3 rounded-xl border flex items-center justify-center gap-2 text-sm font-bold transition-all ${isDone ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/20' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        ทำเรียบร้อย
+                    </button>
+                    <button onclick="handleChecklistChange(${index}, 'not-done')" class="py-2 px-3 rounded-xl border flex items-center justify-center gap-2 text-sm font-bold transition-all ${isNotDone ? 'bg-rose-500 text-white border-rose-500 shadow-md shadow-rose-500/20' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        ไม่ได้ทำ
+                    </button>
+                </div>
+                ${isNotDone ? `
+                <div class="mt-3 animate-fade-in-up">
+                    <input type="text" placeholder="ระบุเหตุผลที่ไม่ได้ทำ (บังคับ)" 
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none transition-all"
+                           value="${item.reason}"
+                           oninput="handleChecklistReasonChange(${index}, this.value)">
+                </div>` : ''}
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', html);
+    });
+    
+    // Toggle submit button bar
+    const submitBar = document.getElementById('checklist-submit-bar');
+    if (allChecked && currentChecklistItems.length > 0) {
+        submitBar.classList.remove('translate-y-full');
+    } else {
+        submitBar.classList.add('translate-y-full');
+    }
+}
+
+function handleChecklistChange(index, status) {
+    currentChecklistItems[index].status = status;
+    if (status === 'done') {
+        currentChecklistItems[index].reason = '';
+    }
+    renderChecklistItems();
+}
+
+function handleChecklistReasonChange(index, value) {
+    currentChecklistItems[index].reason = value;
+    // We want to update the submit button state without re-rendering everything and losing focus
+    let allChecked = true;
+    currentChecklistItems.forEach((item) => {
+        if (item.status === null) {
+            allChecked = false;
+        } else if (item.status === 'not-done' && !item.reason.trim()) {
+            allChecked = false;
+        }
+    });
+    
+    const submitBar = document.getElementById('checklist-submit-bar');
+    if (allChecked && currentChecklistItems.length > 0) {
+        submitBar.classList.remove('translate-y-full');
+    } else {
+        submitBar.classList.add('translate-y-full');
+    }
+}
+
+async function submitChecklist() {
+    // Validate again just in case
+    let isValid = true;
+    for (let i = 0; i < currentChecklistItems.length; i++) {
+        const item = currentChecklistItems[i];
+        if (item.status === null) {
+            Swal.fire({ icon: 'warning', title: 'กรุณาตรวจสอบครบทุกข้อ', text: `รายการที่ ${i+1} ยังไม่ได้ระบุสถานะ`});
+            isValid = false;
+            break;
+        }
+        if (item.status === 'not-done' && !item.reason.trim()) {
+            Swal.fire({ icon: 'warning', title: 'กรุณาระบุเหตุผล', text: `รายการที่ ${i+1} ยังไม่ได้ระบุเหตุผล`});
+            isValid = false;
+            break;
+        }
+    }
+    
+    if (!isValid) return;
+
+    showLoading("กำลังบันทึกข้อมูล Checklist...");
+    try {
+        const payload = {
+            action: 'saveChecklist',
+            category: currentChecklistCategory,
+            period: currentChecklistPeriod,
+            items: currentChecklistItems,
+            employeeName: localStorage.getItem('employeeName') || 'Unknown',
+            timestamp: new Date().toISOString()
+        };
+
+        const response = await fetch(SCRIPT_URL + '?action=saveChecklist', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: { 'Content-Type': 'text/plain' } // Use text/plain for GAS compatibility
+        });
+        
+        let result = {};
+        try {
+            result = await response.json();
+        } catch (e) {
+            // Handle if response is not JSON
+            const text = await response.text();
+            if (text.includes("Success") || text.includes("success")) {
+                result = { success: true };
+            } else {
+                throw new Error("Invalid response");
+            }
+        }
+        
+        hideLoading();
+        
+        if (result.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'บันทึกสำเร็จ',
+                text: 'บันทึกรายงาน Checklist เรียบร้อยแล้ว',
+                timer: 2000,
+                showConfirmButton: false
+            }).then(() => {
+                showView('view-checklist');
+            });
+        } else {
+            throw new Error(result.message || 'บันทึกไม่สำเร็จ');
+        }
+    } catch (error) {
+        hideLoading();
+        console.error("Save Checklist Error:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'ผิดพลาด',
+            text: 'ไม่สามารถบันทึกได้ กรุณาลองใหม่อีกครั้ง'
+        });
     }
 }
