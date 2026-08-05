@@ -4610,6 +4610,18 @@ function openChecklistPeriod(period) {
 }
 
 function renderChecklistItems() {
+    // Auto-sync with template in case of background updates
+    if (currentChecklistCategory && currentChecklistPeriod) {
+        const newTemplateItems = checklistTemplateData[currentChecklistCategory]?.[currentChecklistPeriod] || [];
+        let newItems = [];
+        newTemplateItems.forEach(taskName => {
+            const existing = currentChecklistItems.find(i => i.task === taskName);
+            if (existing) newItems.push(existing);
+            else newItems.push({ task: taskName, status: null, reason: '' });
+        });
+        currentChecklistItems = newItems;
+    }
+
     const container = document.getElementById('checklist-items-container');
     container.innerHTML = '';
     
