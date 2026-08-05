@@ -45,8 +45,27 @@ document.addEventListener('DOMContentLoaded', () => {
 let isInitialLoad = true;
 
 function initData() {
-    showLoading("กำลังโหลดข้อมูลจากเซิร์ฟเวอร์...");
     let isConnected = false;
+    let fastLoaded = false;
+    
+    // Fast path: Load from cache immediately
+    const cachedStr = localStorage.getItem('snk_payroll_data');
+    if (cachedStr && isInitialLoad) {
+        try {
+            const cachedJson = JSON.parse(cachedStr);
+            if (cachedJson.status === "success") {
+                applyInitData(cachedJson.data, true);
+                if (loggedInEmployee || isAdmin) {
+                    hideLoading(); // Already applied and logged in, hide loading immediately
+                    fastLoaded = true;
+                }
+            }
+        } catch(e){}
+    }
+
+    if (!fastLoaded) {
+        showLoading("กำลังโหลดข้อมูลจากเซิร์ฟเวอร์...");
+    }
 
     // Use Web App URL to fetch data directly (bypassing Firebase which may have expired)
     fetch(WEB_APP_URL + "?action=getInitPayrollData")

@@ -1227,7 +1227,8 @@ function handleGetInitPayrollData() {
       timeEditRequests: timeEditRequests,
       settings: settings,
       logs: logs,
-      checklistSettings: checklistSettings
+      checklistSettings: checklistSettings,
+      times: "att=" + (t1-t0) + ", emp=" + (t2-t1) + ", ded=" + (t3-t2) + ", leave=" + (t4-t3) + ", req=" + (t5-t4) + ", set=" + (t6-t5) + ", logs=" + (t7-t6) + ", chk=" + (t8-t7)
     }
   };
 }
