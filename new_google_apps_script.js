@@ -1079,7 +1079,7 @@ function handleSaveScheduleSettings(data) {
 }
 
 function handleGetInitPayrollData() {
-  syncAttendanceToNewSheet();
+  // syncAttendanceToNewSheet(); // Removed to improve load performance
   return {
     status: "success",
     data: {
