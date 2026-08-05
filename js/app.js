@@ -4699,7 +4699,7 @@ async function submitChecklist() {
             category: currentChecklistCategory,
             period: currentChecklistPeriod,
             items: currentChecklistItems,
-            employeeName: localStorage.getItem('employeeName') || 'Unknown',
+            employeeName: (loggedInEmployee && loggedInEmployee !== "ADMIN") ? loggedInEmployee.name : "ADMIN",
             timestamp: new Date().toISOString()
         };
 
