@@ -183,8 +183,12 @@ function getOldSpreadsheet() {
   return SpreadsheetApp.openById(OLD_SHEET_ID);
 }
 
+var _activeSpreadsheet = null;
 function getNewSpreadsheet() {
-  return SpreadsheetApp.getActiveSpreadsheet();
+  if (!_activeSpreadsheet) {
+    _activeSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  }
+  return _activeSpreadsheet;
 }
 
 function getSheetByNameOrCreateOld(name) {
@@ -276,9 +280,22 @@ function getMergedAttendanceData() {
     var ssNew = getNewSpreadsheet();
     var sheetNew = ssNew.getSheetByName("Attendance");
     if (sheetNew) {
-      var dataNew = sheetNew.getDataRange().getDisplayValues();
+      var dataNew = sheetNew.getDataRange().getValues();
       for (var i = 1; i < dataNew.length; i++) {
-        addRow(dataNew[i]);
+        var rawRow = dataNew[i];
+        if (!rawRow[0]) continue;
+        
+        var ts = rawRow[0] instanceof Date 
+                 ? Utilities.formatDate(rawRow[0], "Asia/Bangkok", "dd/MM/yyyy HH:mm:ss") 
+                 : String(rawRow[0]);
+        var name = String(rawRow[1]);
+        var type = String(rawRow[2]);
+        var sched = rawRow[3] instanceof Date 
+                    ? Utilities.formatDate(rawRow[3], "Asia/Bangkok", "HH:mm") 
+                    : String(rawRow[3]);
+        var note = String(rawRow[4] || "");
+        
+        addRow([ts, name, type, sched, note]);
       }
     }
   } catch (e) { }
@@ -470,7 +487,7 @@ function autoDeactivateAndSortEmployees() {
 }
 
 function getEmployeesData() {
-  autoDeactivateAndSortEmployees();
+  // autoDeactivateAndSortEmployees(); // Removed to massively improve load performance
 
   function convertDriveUrlToImg(url) {
     if (!url) return "";
@@ -1080,16 +1097,35 @@ function handleSaveScheduleSettings(data) {
 
 function handleGetInitPayrollData() {
   // syncAttendanceToNewSheet(); // Removed to improve load performance
+  
+  var t0 = new Date().getTime();
+  var attendance = getMergedAttendanceData();
+  var t1 = new Date().getTime();
+  var employees = getEmployeesData();
+  var t2 = new Date().getTime();
+  var deductions = getDeductionsData();
+  var t3 = new Date().getTime();
+  var leaves = getLeavesData();
+  var t4 = new Date().getTime();
+  var timeEditRequests = getTimeEditRequestsData();
+  var t5 = new Date().getTime();
+  var settings = getSettingsData();
+  var t6 = new Date().getTime();
+  var logs = getAllLogsData();
+  var t7 = new Date().getTime();
+
+  console.log("Times: att=" + (t1-t0) + ", emp=" + (t2-t1) + ", ded=" + (t3-t2) + ", leave=" + (t4-t3) + ", req=" + (t5-t4) + ", set=" + (t6-t5) + ", logs=" + (t7-t6));
+
   return {
     status: "success",
     data: {
-      attendance: getMergedAttendanceData(),
-      employees: getEmployeesData(),
-      deductions: getDeductionsData(),
-      leaves: getLeavesData(),
-      timeEditRequests: getTimeEditRequestsData(),
-      settings: getSettingsData(),
-      logs: getAllLogsData()
+      attendance: attendance,
+      employees: employees,
+      deductions: deductions,
+      leaves: leaves,
+      timeEditRequests: timeEditRequests,
+      settings: settings,
+      logs: logs
     }
   };
 }
