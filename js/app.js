@@ -246,6 +246,21 @@ function applyInitData(data, isSilent = false) {
                 }
                 showView('view-login', false);
             }
+        } else {
+            // Silent update: just re-render the currently active views without changing the view
+            if (loggedInEmployee) {
+                if (isAdmin) {
+                    if (!document.getElementById('view-admin-dashboard').classList.contains('hidden')) renderAdminSummary();
+                    if (!document.getElementById('view-admin-employees').classList.contains('hidden')) renderAdminEmployees();
+                    if (!document.getElementById('view-admin-checklist').classList.contains('hidden')) renderAdminChecklistItems();
+                    if (!document.getElementById('view-admin-leaves').classList.contains('hidden')) renderAdminLeaves();
+                    if (!document.getElementById('view-admin-time-edits').classList.contains('hidden')) renderAdminTimeEdits();
+                } else {
+                    if (!document.getElementById('view-dashboard').classList.contains('hidden')) renderEmployeeDashboard();
+                    if (!document.getElementById('view-checklist-detail').classList.contains('hidden')) renderChecklistItems();
+                    // view-checklist doesn't have a specific render function, it is rendered via renderEmployeeDashboard usually
+                }
+            }
         }
     } catch (e) {
         console.error("Error in applyInitData:", e);
