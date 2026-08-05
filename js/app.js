@@ -4703,7 +4703,7 @@ async function submitChecklist() {
             timestamp: new Date().toISOString()
         };
 
-        const response = await fetch(SCRIPT_URL + '?action=saveChecklist', {
+        const response = await fetch(WEB_APP_URL + '?action=saveChecklist', {
             method: 'POST',
             body: JSON.stringify(payload),
             headers: { 'Content-Type': 'text/plain' } // Use text/plain for GAS compatibility
@@ -4724,7 +4724,7 @@ async function submitChecklist() {
         
         hideLoading();
         
-        if (result.success) {
+        if (result.status === 'success' || result.success) {
             Swal.fire({
                 icon: 'success',
                 title: 'บันทึกสำเร็จ',
