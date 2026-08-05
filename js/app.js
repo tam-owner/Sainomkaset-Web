@@ -146,6 +146,7 @@ function applyInitData(data, isSilent = false) {
         deductions = data.deductions || [];
         leaves = data.leaves || [];
         timeEditRequests = data.timeEditRequests || [];
+        checklistTemplateData = data.checklistSettings || {};
         if (data.settings) {
             globalSettings = data.settings;
             if (data.settings['ShopLat']) shopLat = parseFloat(data.settings['ShopLat']);
@@ -4548,29 +4549,8 @@ let currentChecklistCategory = '';
 let currentChecklistPeriod = '';
 let currentChecklistItems = [];
 
-// Template data if no specific items are provided
-const checklistTemplateData = {
-    'Service': {
-        'เปิดร้าน': ['เปิดระบบ POS', 'ตรวจสอบเงินทอน', 'ทำความสะอาดเคาน์เตอร์', 'เช็ดโต๊ะและจัดเก้าอี้', 'เปิดเครื่องชงกาแฟ'],
-        'ปิดร้าน': ['นับยอดเงินลิ้นชัก', 'ปิดระบบ POS', 'ล้างเครื่องชงกาแฟ', 'เก็บกวาดพื้นและเช็ดโต๊ะ', 'ปิดไฟและแอร์']
-    },
-    'Bread': {
-        'เปิดร้าน': ['อุ่นเตาอบ', 'เช็คสต็อกขนมปัง', 'จัดเรียงขนมปังในตู้โชว์', 'เตรียมอุปกรณ์คีบและถาด'],
-        'ปิดร้าน': ['เช็คยอดขนมปังเหลือ', 'ทำความสะอาดเตาอบ', 'เก็บกวาดเศษขนมปัง', 'จัดเก็บอุปกรณ์']
-    },
-    'Drink': {
-        'เปิดร้าน': ['เช็คสต็อกแก้วและหลอด', 'เตรียมน้ำแข็ง', 'เช็ควัตถุดิบชงดื่ม', 'ตรวจสอบเครื่องดื่มในตู้แช่'],
-        'ปิดร้าน': ['ล้างอุปกรณ์ชงดื่ม', 'เคลียร์ขยะ', 'เช็ดทำความสะอาดบาร์น้ำ', 'ตรวจสอบตู้แช่ก่อนปิด']
-    },
-    'Lava': {
-        'เปิดร้าน': ['เตรียมไส้ลาวา', 'เปิดเครื่องอุ่น', 'เช็คสต็อกวัตถุดิบลาวา'],
-        'ปิดร้าน': ['เก็บไส้ลาวาเข้าตู้เย็น', 'ล้างเครื่องอุ่น', 'เช็ดทำความสะอาดบริเวณลาวา']
-    },
-    'Hot meal': {
-        'เปิดร้าน': ['เปิดเตาทำอาหาร', 'เตรียมวัตถุดิบอาหารคาว', 'เช็คสต็อกจานชาม', 'ตรวจสอบเครื่องปรุง'],
-        'ปิดร้าน': ['ล้างจานชามและอุปกรณ์', 'เก็บวัตถุดิบเข้าตู้เย็น', 'ทำความสะอาดเตาและครัว', 'เช็คและกำจัดเศษอาหาร']
-    }
-};
+// Template data fetched from server
+let checklistTemplateData = {};
 
 function openChecklistCategory(category) {
     currentChecklistCategory = category;
@@ -4745,5 +4725,107 @@ async function submitChecklist() {
             title: 'ผิดพลาด',
             text: 'ไม่สามารถบันทึกได้ กรุณาลองใหม่อีกครั้ง'
         });
+    }
+}
+
+// ==========================================
+// ADMIN CHECKLIST SETTINGS FUNCTIONS
+// ==========================================
+let editingChecklistData = {};
+
+function showAdminChecklistSettings() {
+    // Clone current checklist data to edit locally
+    editingChecklistData = JSON.parse(JSON.stringify(checklistTemplateData));
+    showView('view-admin-checklist');
+    renderAdminChecklistItems();
+}
+
+function renderAdminChecklistItems() {
+    const cat = document.getElementById('admin-chk-category').value;
+    const per = document.getElementById('admin-chk-period').value;
+    const container = document.getElementById('admin-checklist-items-container');
+    
+    if (!editingChecklistData[cat]) editingChecklistData[cat] = {};
+    if (!editingChecklistData[cat][per]) editingChecklistData[cat][per] = [];
+    
+    const items = editingChecklistData[cat][per];
+    container.innerHTML = '';
+    
+    if (items.length === 0) {
+        container.innerHTML = `<div class="p-4 text-center text-slate-500 text-sm">ยังไม่มีรายการในหมวดหมู่นี้</div>`;
+        return;
+    }
+    
+    items.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = "flex items-center justify-between p-4 hover:bg-slate-50 transition-colors";
+        div.innerHTML = `
+            <div class="flex items-center gap-3">
+                <span class="text-sm font-bold text-slate-400 w-6 text-center">${idx + 1}.</span>
+                <span class="text-sm text-slate-700">${item}</span>
+            </div>
+            <button onclick="removeAdminChecklistItem('${cat}', '${per}', ${idx})" class="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors active:scale-95">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </button>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function removeAdminChecklistItem(cat, per, idx) {
+    if (editingChecklistData[cat] && editingChecklistData[cat][per]) {
+        editingChecklistData[cat][per].splice(idx, 1);
+        renderAdminChecklistItems();
+    }
+}
+
+async function promptAddAdminChecklistItem() {
+    const { value: text } = await Swal.fire({
+        title: 'เพิ่มรายการ Checklist',
+        input: 'text',
+        inputPlaceholder: 'กรอกชื่อรายการ...',
+        showCancelButton: true,
+        confirmButtonText: 'เพิ่ม',
+        cancelButtonText: 'ยกเลิก',
+        inputValidator: (value) => {
+            if (!value || value.trim() === '') {
+                return 'กรุณากรอกชื่อรายการ';
+            }
+        }
+    });
+
+    if (text) {
+        const cat = document.getElementById('admin-chk-category').value;
+        const per = document.getElementById('admin-chk-period').value;
+        if (!editingChecklistData[cat]) editingChecklistData[cat] = {};
+        if (!editingChecklistData[cat][per]) editingChecklistData[cat][per] = [];
+        
+        editingChecklistData[cat][per].push(text.trim());
+        renderAdminChecklistItems();
+    }
+}
+
+async function saveAdminChecklistSettings() {
+    showLoading("กำลังบันทึกการตั้งค่า...");
+    try {
+        const payload = {
+            action: 'saveChecklistSettings',
+            data: editingChecklistData
+        };
+        const response = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        hideLoading();
+        if (result.status === "success") {
+            checklistTemplateData = JSON.parse(JSON.stringify(editingChecklistData)); // Update local state
+            Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ', timer: 1500, showConfirmButton: false });
+        } else {
+            Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: result.message });
+        }
+    } catch (e) {
+        hideLoading();
+        Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: e.toString() });
     }
 }

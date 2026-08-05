@@ -13,7 +13,7 @@
     <title>Sainom Kaset - Payroll & Management</title>
     <!-- Auto Cache Clear Script -->
     <script>
-        const APP_VERSION = "20260805_156";
+        const APP_VERSION = "20260805_157";
         const currentVersion = localStorage.getItem('APP_VERSION');
         if (currentVersion !== APP_VERSION) {
             console.log("New version detected, clearing cache...");
@@ -994,6 +994,12 @@
                 <span class="font-bold text-slate-700 text-sm">อนุมัติแก้ไขเวลา</span>
                 <span id="admin-dash-time-edit-badge" class="absolute top-3 right-3 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center hidden"></span>
             </button>
+            <button onclick="showAdminChecklistSettings()" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95">
+                <div class="w-14 h-14 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                </div>
+                <span class="font-bold text-slate-700 text-sm">จัดการ Checklist</span>
+            </button>
             <button onclick="openLocationSettings()" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95">
                 <div class="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
@@ -1144,9 +1150,67 @@
     </div>
 
     <!-- ===================================== -->
+    <!-- VIEW: ADMIN CHECKLIST SETTINGS        -->
+    <!-- ===================================== -->
+    <div id="view-admin-checklist" class="hidden">
+        <div class="bg-white shadow-sm sticky top-0 z-20 border-b border-slate-200">
+            <div class="flex items-center justify-between px-4 py-3">
+                <button onclick="showView('view-admin-dashboard')" class="text-slate-500 hover:text-slate-800 p-2 rounded-full hover:bg-slate-100 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <h1 class="text-lg font-bold text-slate-800 font-['Sarabun']">จัดการ Checklist</h1>
+                <div class="w-10"></div>
+            </div>
+        </div>
+
+        <div class="p-4 space-y-4 pb-24 max-w-lg mx-auto">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">เลือกหมวดหมู่</label>
+                    <select id="admin-chk-category" onchange="renderAdminChecklistItems()" class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
+                        <option value="Service">Service</option>
+                        <option value="Bread">Bread</option>
+                        <option value="Drink">Drink</option>
+                        <option value="Lava">Lava</option>
+                        <option value="Hot meal">Hot meal</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">เลือกรอบเวลา</label>
+                    <select id="admin-chk-period" onchange="renderAdminChecklistItems()" class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
+                        <option value="เปิดร้าน">เปิดร้าน</option>
+                        <option value="ปิดร้าน">ปิดร้าน</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="bg-slate-50 border-b border-slate-200 px-4 py-3 flex justify-between items-center">
+                    <h2 class="font-bold text-slate-800 text-sm">รายการ Checklist</h2>
+                    <button onclick="promptAddAdminChecklistItem()" class="text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-full text-xs font-bold transition-colors">
+                        + เพิ่มข้อ
+                    </button>
+                </div>
+                <div id="admin-checklist-items-container" class="divide-y divide-slate-100">
+                    <!-- Items will be injected here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Bar -->
+        <div class="fixed bottom-0 w-full md:w-[480px] bg-white border-t border-slate-200 p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20 pb-safe">
+            <button onclick="saveAdminChecklistSettings()" class="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-3 px-4 rounded-xl shadow-sm transition-all transform active:scale-[0.98]">
+                บันทึกการตั้งค่า Checklist
+            </button>
+        </div>
+    </div>
+
+    <!-- ===================================== -->
     <!-- VIEW: ADMIN TIME EDITS                -->
     <!-- ===================================== -->
     <div id="view-admin-time-edits" class="hidden">
+
+
         <div class="px-4 mb-4 flex items-center gap-3">
             <button onclick="showView('view-admin-dashboard')" class="p-2 bg-white rounded-full shadow-sm border border-slate-200 text-slate-600 active:scale-95 shrink-0">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
@@ -1465,10 +1529,10 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <!-- Add Firebase products that you want to use -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-    <script src="js/firebase-init.js?v=20260805_156"></script>
+    <script src="js/firebase-init.js?v=20260805_157"></script>
 
     <script src="js/customSelect.js"></script>
-    <script src="js/app.js?v=20260805_156"></script>
+    <script src="js/app.js?v=20260805_157"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -1511,7 +1575,7 @@
         ล้างแคช
     </button>
     <div id="app-version-display" class="fixed bottom-2 right-2 text-[10px] text-slate-400 font-medium z-[9999] pointer-events-none opacity-50">
-        v2.2.156 (Firebase)
+        v2.2.157 (Firebase)
     </div>
 </body>
 </html>

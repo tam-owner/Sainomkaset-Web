@@ -107,7 +107,8 @@ function doPost(e) {
     else if (action === "getInitPayrollData") { res = handleGetInitPayrollData(); }
     else if (action === "requestTimeEdit") { res = handleRequestTimeEdit(p.timeEditRequest); }
     else if (action === "updateEditRequestStatus") { res = handleUpdateEditRequestStatus(p.id, p.status); }
-    else if (action === "saveSetting") { res = handleSaveSetting(p.key, p.value); }
+    else if (action === "saveSettings") { res = handleSaveSettings(p.payload); }
+    else if (action === "saveChecklistSettings") { res = handleSaveChecklistSettings(p.payload); }
     else if (action === "saveSchedules") { res = handleSaveSchedules(p.data); }
     else if (action === "saveScheduleSettings") { res = handleSaveScheduleSettings(p.data); }
     else if (action === "saveChecklist") { res = handleSaveChecklist(p); }
@@ -220,6 +221,57 @@ function getSheetByNameOrCreateNew(name) {
       sheet.appendRow(["ID", "Timestamp", "Name", "Date", "OriginalIn", "OriginalOut", "NewIn", "NewOut", "Reason", "Status"]);
     } else if (name === "Settings") {
       sheet.appendRow(["Key", "Value"]);
+    } else if (name === "Checklist_Settings") {
+      sheet.appendRow(["Category", "Period", "ItemName"]);
+      
+      // Default initial data
+      var defaults = [
+        ["Service", "เปิดร้าน", "เปิดระบบ POS"],
+        ["Service", "เปิดร้าน", "ตรวจสอบเงินทอน"],
+        ["Service", "เปิดร้าน", "ทำความสะอาดเคาน์เตอร์"],
+        ["Service", "เปิดร้าน", "เช็ดโต๊ะและจัดเก้าอี้"],
+        ["Service", "เปิดร้าน", "เปิดเครื่องชงกาแฟ"],
+        ["Service", "ปิดร้าน", "นับยอดเงินลิ้นชัก"],
+        ["Service", "ปิดร้าน", "ปิดระบบ POS"],
+        ["Service", "ปิดร้าน", "ล้างเครื่องชงกาแฟ"],
+        ["Service", "ปิดร้าน", "เก็บกวาดพื้นและเช็ดโต๊ะ"],
+        ["Service", "ปิดร้าน", "ปิดไฟและแอร์"],
+        
+        ["Bread", "เปิดร้าน", "อุ่นเตาอบ"],
+        ["Bread", "เปิดร้าน", "เช็คสต็อกขนมปัง"],
+        ["Bread", "เปิดร้าน", "จัดเรียงขนมปังในตู้โชว์"],
+        ["Bread", "เปิดร้าน", "เตรียมอุปกรณ์คีบและถาด"],
+        ["Bread", "ปิดร้าน", "เช็คยอดขนมปังเหลือ"],
+        ["Bread", "ปิดร้าน", "ทำความสะอาดเตาอบ"],
+        ["Bread", "ปิดร้าน", "เก็บกวาดเศษขนมปัง"],
+        ["Bread", "ปิดร้าน", "จัดเก็บอุปกรณ์"],
+        
+        ["Drink", "เปิดร้าน", "เช็คสต็อกแก้วและหลอด"],
+        ["Drink", "เปิดร้าน", "เตรียมน้ำแข็ง"],
+        ["Drink", "เปิดร้าน", "เช็ควัตถุดิบชงดื่ม"],
+        ["Drink", "เปิดร้าน", "ตรวจสอบเครื่องดื่มในตู้แช่"],
+        ["Drink", "ปิดร้าน", "ล้างอุปกรณ์ชงดื่ม"],
+        ["Drink", "ปิดร้าน", "เคลียร์ขยะ"],
+        ["Drink", "ปิดร้าน", "เช็ดทำความสะอาดบาร์น้ำ"],
+        ["Drink", "ปิดร้าน", "ตรวจสอบตู้แช่ก่อนปิด"],
+        
+        ["Lava", "เปิดร้าน", "เตรียมไส้ลาวา"],
+        ["Lava", "เปิดร้าน", "เปิดเครื่องอุ่น"],
+        ["Lava", "เปิดร้าน", "เช็คสต็อกวัตถุดิบลาวา"],
+        ["Lava", "ปิดร้าน", "เก็บไส้ลาวาเข้าตู้เย็น"],
+        ["Lava", "ปิดร้าน", "ล้างเครื่องอุ่น"],
+        ["Lava", "ปิดร้าน", "เช็ดทำความสะอาดบริเวณลาวา"],
+        
+        ["Hot meal", "เปิดร้าน", "เปิดเตาทำอาหาร"],
+        ["Hot meal", "เปิดร้าน", "เตรียมวัตถุดิบอาหารคาว"],
+        ["Hot meal", "เปิดร้าน", "เช็คสต็อกจานชาม"],
+        ["Hot meal", "เปิดร้าน", "ตรวจสอบเครื่องปรุง"],
+        ["Hot meal", "ปิดร้าน", "ล้างจานชามและอุปกรณ์"],
+        ["Hot meal", "ปิดร้าน", "เก็บวัตถุดิบเข้าตู้เย็น"],
+        ["Hot meal", "ปิดร้าน", "ทำความสะอาดเตาและครัว"],
+        ["Hot meal", "ปิดร้าน", "เช็คและกำจัดเศษอาหาร"]
+      ];
+      sheet.getRange(2, 1, defaults.length, 3).setValues(defaults);
     }
   }
   return sheet;
@@ -691,6 +743,53 @@ function getLeavesData() {
 // ----------------------------------------------------
 // Post Data Logic
 // ----------------------------------------------------
+function getChecklistSettingsData() {
+  try {
+    var sheet = getSheetByNameOrCreateNew("Checklist_Settings");
+    var data = sheet.getDataRange().getValues();
+    var result = {};
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      var cat = String(row[0]).trim();
+      var per = String(row[1]).trim();
+      var item = String(row[2]).trim();
+      if (!cat || !per || !item) continue;
+      
+      if (!result[cat]) result[cat] = {};
+      if (!result[cat][per]) result[cat][per] = [];
+      result[cat][per].push(item);
+    }
+    return result;
+  } catch (e) {
+    return {};
+  }
+}
+
+function handleSaveChecklistSettings(payload) {
+  try {
+    var dataObj = payload.data || {};
+    var sheet = getSheetByNameOrCreateNew("Checklist_Settings");
+    sheet.clearContents();
+    
+    var rows = [["Category", "Period", "ItemName"]];
+    for (var cat in dataObj) {
+      for (var per in dataObj[cat]) {
+        var items = dataObj[cat][per] || [];
+        for (var i = 0; i < items.length; i++) {
+          rows.push([cat, per, items[i]]);
+        }
+      }
+    }
+    
+    if (rows.length > 0) {
+      sheet.getRange(1, 1, rows.length, 3).setValues(rows);
+    }
+    return { status: "success", message: "Checklist settings saved successfully" };
+  } catch (e) {
+    return { status: "error", message: e.toString() };
+  }
+}
+
 function handleProcessData(payload) {
   var sheet = getSheetByNameOrCreateNew("Attendance");
 
@@ -1113,8 +1212,10 @@ function handleGetInitPayrollData() {
   var t6 = new Date().getTime();
   var logs = getAllLogsData();
   var t7 = new Date().getTime();
+  var checklistSettings = getChecklistSettingsData();
+  var t8 = new Date().getTime();
 
-  console.log("Times: att=" + (t1-t0) + ", emp=" + (t2-t1) + ", ded=" + (t3-t2) + ", leave=" + (t4-t3) + ", req=" + (t5-t4) + ", set=" + (t6-t5) + ", logs=" + (t7-t6));
+  console.log("Times: att=" + (t1-t0) + ", emp=" + (t2-t1) + ", ded=" + (t3-t2) + ", leave=" + (t4-t3) + ", req=" + (t5-t4) + ", set=" + (t6-t5) + ", logs=" + (t7-t6) + ", chk=" + (t8-t7));
 
   return {
     status: "success",
@@ -1125,7 +1226,8 @@ function handleGetInitPayrollData() {
       leaves: leaves,
       timeEditRequests: timeEditRequests,
       settings: settings,
-      logs: logs
+      logs: logs,
+      checklistSettings: checklistSettings
     }
   };
 }
