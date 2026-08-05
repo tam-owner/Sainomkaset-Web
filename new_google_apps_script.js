@@ -107,8 +107,8 @@ function doPost(e) {
     else if (action === "getInitPayrollData") { res = handleGetInitPayrollData(); }
     else if (action === "requestTimeEdit") { res = handleRequestTimeEdit(p.timeEditRequest); }
     else if (action === "updateEditRequestStatus") { res = handleUpdateEditRequestStatus(p.id, p.status); }
-    else if (action === "saveSettings") { res = handleSaveSettings(p.payload); }
-    else if (action === "saveChecklistSettings") { res = handleSaveChecklistSettings(p.payload); }
+    else if (action === "saveSetting") { res = handleSaveSetting(p.key, p.value); }
+    else if (action === "saveChecklistSettings") { res = handleSaveChecklistSettings(p); }
     else if (action === "saveSchedules") { res = handleSaveSchedules(p.data); }
     else if (action === "saveScheduleSettings") { res = handleSaveScheduleSettings(p.data); }
     else if (action === "saveChecklist") { res = handleSaveChecklist(p); }
