@@ -4598,12 +4598,25 @@ function openChecklistPeriod(period) {
     document.getElementById('checklist-detail-subtitle').innerText = `รอบ: ${period}`;
     
     // Initialize checklist items based on template
-    const items = checklistTemplateData[currentChecklistCategory]?.[period] || ['รายการตัวอย่าง 1', 'รายการตัวอย่าง 2'];
-    currentChecklistItems = items.map(item => ({
-        task: item,
-        status: null, // null = unchecked, 'done' = done, 'not-done' = not done
-        reason: ''
-    }));
+    const items = checklistTemplateData[currentChecklistCategory]?.[period] || [];
+    
+    // Check for saved progress in localStorage
+    const savedKey = `snk_checklist_draft_${currentChecklistCategory}_${period}`;
+    const savedStr = localStorage.getItem(savedKey);
+    let savedItems = [];
+    if (savedStr) {
+        try { savedItems = JSON.parse(savedStr); } catch(e){}
+    }
+    
+    currentChecklistItems = items.map(item => {
+        const existing = savedItems.find(i => i.task === item);
+        if (existing) return existing;
+        return {
+            task: item,
+            status: null, // null = unchecked, 'done' = done, 'not-done' = not done
+            reason: ''
+        };
+    });
     
     renderChecklistItems();
     showView('view-checklist-detail');
@@ -4620,6 +4633,7 @@ function renderChecklistItems() {
             else newItems.push({ task: taskName, status: null, reason: '' });
         });
         currentChecklistItems = newItems;
+        // Do not auto-save here, wait for user interaction to save draft
     }
 
     const container = document.getElementById('checklist-items-container');
@@ -4676,11 +4690,18 @@ function handleChecklistChange(index, status) {
     if (status === 'done') {
         currentChecklistItems[index].reason = '';
     }
+    const savedKey = `snk_checklist_draft_${currentChecklistCategory}_${currentChecklistPeriod}`;
+    localStorage.setItem(savedKey, JSON.stringify(currentChecklistItems));
+    
     renderChecklistItems();
 }
 
 function handleChecklistReasonChange(index, value) {
     currentChecklistItems[index].reason = value;
+    
+    const savedKey = `snk_checklist_draft_${currentChecklistCategory}_${currentChecklistPeriod}`;
+    localStorage.setItem(savedKey, JSON.stringify(currentChecklistItems));
+    
     // We want to update the submit button state without re-rendering everything and losing focus
     let allChecked = true;
     currentChecklistItems.forEach((item) => {
@@ -4751,6 +4772,10 @@ async function submitChecklist() {
         hideLoading();
         
         if (result.status === 'success' || result.success) {
+            // Clear draft
+            const savedKey = `snk_checklist_draft_${currentChecklistCategory}_${currentChecklistPeriod}`;
+            localStorage.removeItem(savedKey);
+            
             Swal.fire({
                 icon: 'success',
                 title: 'บันทึกสำเร็จ',
