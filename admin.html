@@ -386,12 +386,12 @@
         </div>
     </div>
 
-    <div id="view-stock" class="hidden px-4">
-        <div class="mb-6 mt-2 flex items-center gap-3">
-            <button onclick="showView('view-dashboard')" class="p-2 bg-white rounded-full shadow-sm border border-slate-200 text-slate-600 active:scale-95">
+    <div id="view-stock" class="hidden px-4 pb-20">
+        <div class="mb-4 mt-2 flex items-center gap-3">
+            <button onclick="showAdminDashboard()" class="p-2 bg-white rounded-full shadow-sm border border-slate-200 text-slate-600 active:scale-95 shrink-0">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
             </button>
-            <h1 class="text-xl font-bold text-slate-800">นับ Stock</h1>
+            <h1 class="text-xl font-bold text-slate-800">จัดการ Stock</h1>
             <div class="flex gap-2 ml-auto">
                 <button onclick="openChangePinModal()" class="text-slate-600 bg-slate-200 w-10 h-10 rounded-full active:scale-95 transition flex items-center justify-center">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
@@ -401,12 +401,30 @@
                 </button>
             </div>
         </div>
-        <div class="bg-white rounded-[24px] p-6 shadow-sm border border-slate-200 text-center flex flex-col items-center gap-3">
-            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-400">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+
+        <div class="flex gap-2 mb-4">
+            <button id="tab-stock-history" onclick="switchStockTab('history')" class="flex-1 py-2 text-sm font-bold rounded-lg shadow-sm bg-slate-700 text-white transition-all">ประวัติการนับ</button>
+            <button id="tab-stock-par" onclick="switchStockTab('par')" class="flex-1 py-2 text-sm font-bold rounded-lg text-slate-400 hover:text-slate-200 transition-all">ตั้งค่า Par Level</button>
+        </div>
+
+        <div id="stock-tab-history">
+            <div class="mb-4">
+                <a href="stock.html" target="_blank" class="w-full block text-center bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-indigo-700 font-bold py-3 rounded-xl shadow-sm active:scale-[0.98] transition-all">
+                    เปิดหน้าสำหรับนับ Stock (พนักงาน)
+                </a>
             </div>
-            <h2 class="font-bold text-slate-700">กำลังพัฒนาระบบ</h2>
-            <p class="text-sm text-slate-500">หน้าจอสำหรับการนับและบันทึกสต็อกสินค้า</p>
+            <div id="stock-history-container" class="space-y-3">
+                <!-- History injected here -->
+            </div>
+        </div>
+
+        <div id="stock-tab-par" class="hidden">
+            <div class="mb-4 flex gap-2 overflow-x-auto custom-scroll pb-2" id="stock-par-stations">
+                <!-- Station filters injected here -->
+            </div>
+            <div id="stock-par-container" class="space-y-2">
+                <!-- Par levels injected here -->
+            </div>
         </div>
     </div>
 
@@ -873,7 +891,7 @@
 
     <script>sessionStorage.setItem('snk_payroll_user', 'ADMIN');</script>
     <script src="js/customSelect.js?v=1"></script>
-    <script src="js/app.js?v=20260806_165"></script>
+    <script src="js/app.js?v=20260829_003"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {

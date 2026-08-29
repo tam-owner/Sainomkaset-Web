@@ -1,5 +1,5 @@
 const FIREBASE_URL = 'https://sainom-kaset-2c5e7-default-rtdb.asia-southeast1.firebasedatabase.app/sainom.json';
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxcxPlO2Ui5wNn8G1_AxwqjQsVJ7U9lI--BFJzL2YrKu8pdF3eGugibclhVZFv8fJI/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxKDX-S-xw4wn4Pxv9rBh-39MmUUFsw-xLPCL_-119DUzWt6CWNR9LgNPCICOymtB4/exec';
 
 window.onerror = function(msg, url, line, col, error) {
     alert("Error: " + msg + "\nLine: " + line + "\nCol: " + col);
@@ -612,6 +612,10 @@ function showView(viewId, pushToHistory = true) {
         target.classList.remove('animate-fade-in-up');
         void target.offsetWidth; // Trigger reflow
         target.classList.add('animate-fade-in-up');
+    }
+
+    if (viewId === 'view-stock') {
+        loadStockData();
     }
     
     let animatedBg = document.getElementById('animated-bg');
@@ -4949,3 +4953,209 @@ async function saveAdminChecklistSettings() {
         Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: e.toString() });
     }
 }
+
+// =====================================
+// ADMIN STOCK MANAGEMENT
+// =====================================
+let adminStockHistory = [];
+let adminStockSettings = [];
+let adminStockStationFilter = 'Service';
+
+async function loadStockData() {
+    showLoading("กำลังโหลดข้อมูล Stock...");
+    try {
+        const resSettings = await fetch(WEB_APP_URL + "?action=getStockSettings");
+        const jsonSettings = await resSettings.json();
+        if (jsonSettings.status === 'success') {
+            adminStockSettings = jsonSettings.data;
+        }
+
+        const resHistory = await fetch(WEB_APP_URL + "?action=getStockHistory");
+        const jsonHistory = await resHistory.json();
+        if (jsonHistory.status === 'success') {
+            adminStockHistory = jsonHistory.data;
+        }
+
+        hideLoading();
+        switchStockTab('history');
+    } catch (e) {
+        hideLoading();
+        Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูล Stock ได้: ' + e.message, 'error');
+    }
+}
+
+function switchStockTab(tab) {
+    document.getElementById('stock-tab-history').classList.add('hidden');
+    document.getElementById('stock-tab-par').classList.add('hidden');
+    
+    document.getElementById('tab-stock-history').className = "flex-1 py-2 text-sm font-bold rounded-lg text-slate-400 hover:text-slate-200 transition-all";
+    document.getElementById('tab-stock-par').className = "flex-1 py-2 text-sm font-bold rounded-lg text-slate-400 hover:text-slate-200 transition-all";
+    
+    if (tab === 'history') {
+        document.getElementById('stock-tab-history').classList.remove('hidden');
+        document.getElementById('tab-stock-history').className = "flex-1 py-2 text-sm font-bold rounded-lg shadow-sm bg-slate-700 text-white transition-all";
+        renderStockHistory();
+    } else {
+        document.getElementById('stock-tab-par').classList.remove('hidden');
+        document.getElementById('tab-stock-par').className = "flex-1 py-2 text-sm font-bold rounded-lg shadow-sm bg-slate-700 text-white transition-all";
+        renderStockParStations();
+        renderStockParLevels();
+    }
+}
+
+function renderStockHistory() {
+    const container = document.getElementById('stock-history-container');
+    container.innerHTML = '';
+    
+    if (adminStockHistory.length === 0) {
+        container.innerHTML = '<div class="text-center text-slate-500 py-6">ไม่มีประวัติการนับ</div>';
+        return;
+    }
+    
+    adminStockHistory.forEach(record => {
+        let itemsHtml = '';
+        if (record.data && Array.isArray(record.data)) {
+            record.data.forEach(item => {
+                let remarkStr = item.remark ? `<div class="text-xs text-slate-500 mt-0.5 whitespace-pre-wrap">${item.remark}</div>` : '';
+                let styleStr = item.count < item.parLevel ? 'text-rose-600 bg-rose-50 border-rose-100' : 'text-slate-700 bg-slate-50 border-slate-100';
+                
+                itemsHtml += `
+                    <div class="border rounded p-2 mt-1 ${styleStr}">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-sm">${item.itemName}</span>
+                            <span class="font-bold text-sm">ยอด: ${item.count}</span>
+                        </div>
+                        <div class="text-xs text-slate-400">Par: ${item.parLevel}</div>
+                        ${remarkStr}
+                    </div>
+                `;
+            });
+        }
+        
+        let dateStr = record.timestamp;
+        try {
+            const d = new Date(record.timestamp);
+            if (!isNaN(d)) {
+                dateStr = d.toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            }
+        } catch(e) {}
+        
+        container.innerHTML += `
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="font-bold text-indigo-700">Station: ${record.station}</span>
+                    <span class="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-full">${dateStr}</span>
+                </div>
+                <div class="text-sm font-bold text-slate-600 mb-2 border-b pb-2">ผู้ตรวจนับ: ${record.counterName}</div>
+                <div>${itemsHtml}</div>
+            </div>
+        `;
+    });
+}
+
+function renderStockParStations() {
+    const stations = ['Service', 'Bingsu', 'Bread', 'Drink', 'Hotmeal'];
+    const container = document.getElementById('stock-par-stations');
+    container.innerHTML = '';
+    
+    stations.forEach(st => {
+        const activeClass = (st === adminStockStationFilter) ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200';
+        container.innerHTML += `
+            <button onclick="adminStockStationFilter='${st}'; renderStockParLevels(); renderStockParStations();" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap shrink-0 ${activeClass}">
+                ${st}
+            </button>
+        `;
+    });
+}
+
+function renderStockParLevels() {
+    const container = document.getElementById('stock-par-container');
+    container.innerHTML = '';
+    
+    const items = adminStockSettings.filter(i => i.station === adminStockStationFilter);
+    
+    if (items.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-slate-500 py-6 border border-dashed border-slate-300 rounded-xl">
+                ไม่มีรายการสินค้าใน Station นี้<br>
+                <span class="text-xs">กรุณาเพิ่มรายการใน Google Sheet (Sheet: StockSettings)</span>
+            </div>`;
+        return;
+    }
+    
+    items.forEach((item, idx) => {
+        container.innerHTML += `
+            <div class="bg-white rounded-xl p-3 border border-slate-200 flex justify-between items-center shadow-sm">
+                <div>
+                    <div class="font-bold text-slate-800">${item.itemName}</div>
+                    <div class="text-xs text-slate-500">Par Level: ${item.parLevel}</div>
+                </div>
+                <button onclick="openEditParLevelModal('${item.station}', '${item.itemName}', ${item.parLevel})" class="bg-amber-100 hover:bg-amber-200 text-amber-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0">
+                    แก้ไข Par
+                </button>
+            </div>
+        `;
+    });
+}
+
+async function openEditParLevelModal(station, itemName, currentPar) {
+    const { value: newParStr } = await Swal.fire({
+        title: 'แก้ไข Par Level',
+        text: `สินค้า: ${itemName}`,
+        input: 'number',
+        inputValue: currentPar,
+        inputAttributes: {
+            min: 0,
+            step: 1
+        },
+        showCancelButton: true,
+        confirmButtonText: 'บันทึก',
+        cancelButtonText: 'ยกเลิก',
+        inputValidator: (value) => {
+            if (!value) {
+                return 'กรุณาระบุตัวเลข Par Level';
+            }
+        }
+    });
+
+    if (newParStr !== undefined) {
+        const newPar = parseInt(newParStr);
+        if (newPar !== currentPar) {
+            saveParLevel(station, itemName, newPar);
+        }
+    }
+}
+
+async function saveParLevel(station, itemName, newPar) {
+    showLoading('กำลังอัปเดต Par Level...');
+    try {
+        const payload = {
+            action: 'updateParLevel',
+            station: station,
+            itemName: itemName,
+            parLevel: newPar
+        };
+        const res = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+        
+        if (result.status === 'success') {
+            // Update local state directly
+            const item = adminStockSettings.find(i => i.station === station && i.itemName === itemName);
+            if (item) {
+                item.parLevel = newPar;
+            }
+            renderStockParLevels();
+            hideLoading();
+            Swal.fire({ icon: 'success', title: 'อัปเดตสำเร็จ', timer: 1500, showConfirmButton: false });
+        } else {
+            throw new Error(result.message);
+        }
+    } catch(e) {
+        hideLoading();
+        Swal.fire('ข้อผิดพลาด', e.message, 'error');
+    }
+}
+
