@@ -177,6 +177,16 @@
                     <!-- low stock injected here -->
                 </div>
             </div>
+
+            <div id="remark-section" class="hidden mt-3 bg-slate-50/80 border border-slate-200/80 rounded-xl p-3.5 text-left">
+                <h3 class="font-bold text-slate-600 mb-3 flex items-center gap-1.5 text-[13px]">
+                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    รายการอื่นๆ ที่ระบุหมายเหตุ
+                </h3>
+                <div id="remark-list" class="flex flex-col gap-2">
+                    <!-- remark items injected here -->
+                </div>
+            </div>
         </div>
 
         <div id="summary-buttons">
@@ -342,7 +352,7 @@
                         </div>
                         
                         <div class="mb-3">
-                            <input type="number" inputmode="numeric" pattern="[0-9]*" id="count-${index}" ${countValAttr} class="w-full border border-slate-200 rounded-xl px-3 py-2.5 font-bold text-lg text-slate-800 placeholder:text-slate-300 placeholder:font-normal" placeholder="ยอดนับ" required>
+                            <input type="number" inputmode="decimal" step="any" id="count-${index}" ${countValAttr} class="w-full border border-slate-200 rounded-xl px-3 py-2.5 font-bold text-lg text-slate-800 placeholder:text-slate-300 placeholder:font-normal" placeholder="ยอดนับ">
                         </div>
                         
                         <div id="zero-choice-${index}" class="hidden mb-3 p-3 bg-amber-50 rounded-xl border border-amber-200">
@@ -410,7 +420,7 @@
                     </div>
                     
                     <div class="mb-3">
-                        <input type="number" inputmode="numeric" pattern="[0-9]*" id="count-${index}" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 font-bold text-lg text-slate-800 placeholder:text-slate-300 placeholder:font-normal" placeholder="ยอดนับ" required>
+                        <input type="number" inputmode="decimal" step="any" id="count-${index}" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 font-bold text-lg text-slate-800 placeholder:text-slate-300 placeholder:font-normal" placeholder="ยอดนับ" required>
                     </div>
                     
                     <div id="zero-choice-${index}" class="hidden mb-3 p-3 bg-amber-50 rounded-xl border border-amber-200">
@@ -520,7 +530,7 @@
                     break;
                 }
 
-                const countNum = parseInt(countInput);
+                const countNum = parseFloat(countInput);
                 if (countNum === 0) {
                     const radios = document.getElementsByName(`zero-status-${i}`);
                     let selectedRadio = null;
@@ -622,6 +632,13 @@
             const lowStockItems = dataToSave.filter(item => item.count < item.parLevel || item.itemName.includes('(เพิ่มนอกรายการ)'));
             const listContainer = document.getElementById('low-stock-list');
             
+            // Sort low stock items: 0 count items at the top
+            lowStockItems.sort((a, b) => {
+                if (a.count === 0 && b.count !== 0) return -1;
+                if (b.count === 0 && a.count !== 0) return 1;
+                return 0;
+            });
+            
             // Format date
             const now = new Date();
             const dateStr = now.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' }) + ' ' + now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
@@ -649,21 +666,54 @@
                                 <span class="text-rose-500 font-bold">ขาด: ${missing}</span>`;
                     }
                     
+                    let cardClass = 'bg-white border-slate-200';
+                    let badgeClass = 'text-rose-600 bg-rose-50 border-rose-100';
+                    
+                    if (item.count === 0) {
+                        cardClass = 'bg-rose-50 border-rose-300';
+                        badgeClass = 'text-white bg-rose-600 border-rose-600';
+                    }
+                    
                     listContainer.innerHTML += `
-                        <div class="bg-white rounded-lg p-3 border border-slate-200 shadow-sm">
+                        <div class="rounded-lg p-3 border shadow-sm ${cardClass}">
                             <div class="flex justify-between items-center mb-1">
-                                <div class="font-bold text-slate-800 text-[13px] leading-tight">${index+1}. ${item.itemName}${item.unit ? ` <span class="text-slate-400 font-medium text-[11px]">(${item.unit})</span>` : ''}</div>
-                                <div class="text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded text-[12px] shrink-0 border border-rose-100 leading-tight">
+                                <div class="font-bold text-slate-800 text-[13px] leading-tight">${index+1}. ${item.itemName} <span class="text-slate-500 font-medium text-[11px] whitespace-nowrap">${item.unit ? `(${item.unit})` : ''}</span></div>
+                                <div class="${badgeClass} font-bold px-2 py-0.5 rounded text-[12px] shrink-0 border flex items-center justify-center min-w-[55px]">
                                     เหลือ ${item.count}
                                 </div>
                             </div>
-                            <div class="flex items-center gap-2 text-[11px] text-slate-500 font-medium">
+                            <div class="flex items-center gap-2 text-[11px] text-slate-500 font-medium mt-1">
                                 ${missingInfo}
                             </div>
                             ${remarkStr}
                         </div>
                     `;
                 });
+            }
+            
+            // Render other items with remarks
+            const remarkItems = dataToSave.filter(item => item.remark && item.count >= item.parLevel && !item.itemName.includes('(เพิ่มนอกรายการ)'));
+            const remarkContainer = document.getElementById('remark-list');
+            if (remarkContainer) {
+                if (remarkItems.length === 0) {
+                    document.getElementById('remark-section').classList.add('hidden');
+                } else {
+                    document.getElementById('remark-section').classList.remove('hidden');
+                    remarkContainer.innerHTML = '';
+                    remarkItems.forEach((item, index) => {
+                        remarkContainer.innerHTML += `
+                            <div class="bg-white rounded-lg p-3 border border-slate-200 shadow-sm">
+                                <div class="flex justify-between items-center mb-1">
+                                    <div class="font-bold text-slate-800 text-[13px] leading-tight">${index+1}. ${item.itemName} <span class="text-slate-500 font-medium text-[11px] whitespace-nowrap">${item.unit ? `(${item.unit})` : ''}</span></div>
+                                </div>
+                                <div class="text-[11px] text-slate-500 pt-1 flex items-start gap-1">
+                                    <svg class="w-3.5 h-3.5 shrink-0 text-amber-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                    <span class="leading-relaxed">${item.remark}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
             }
         }
 
