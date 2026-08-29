@@ -337,7 +337,7 @@
                 const html = `
                     <div class="card p-4">
                         <div class="flex justify-between items-start mb-3">
-                            <div class="font-bold text-slate-800 text-lg">${item.itemName}${item.unit ? ` <span class="text-slate-400 font-medium text-sm">(${item.unit})</span>` : ''}</div>
+                            <div class="font-bold text-indigo-900 text-lg">${item.itemName}${item.unit ? ` <span class="text-slate-500 font-medium text-sm whitespace-nowrap">(${item.unit})</span>` : ''}</div>
                             <div class="text-xs text-slate-500 font-bold bg-slate-100 px-2 py-1 rounded-lg">ควรมี: <span class="text-indigo-600">${item.parLevel}</span></div>
                         </div>
                         
@@ -359,7 +359,7 @@
 
                         <div>
                             <label class="block text-xs font-bold text-slate-500 mb-1">หมายเหตุ <span class="text-rose-500" id="req-${index}"></span></label>
-                            <input type="text" id="remark-${index}" ${remarkValAttr} class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-700" placeholder="กรอกหมายเหตุ (ถ้ามี)...">
+                            <input type="text" id="remark-${index}" ${remarkValAttr} class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-700 placeholder:text-slate-300 placeholder:font-normal" placeholder="กรอกหากมี">
                         </div>
                     </div>
                 `;
@@ -372,8 +372,67 @@
                 });
             });
 
+            // Add "Custom Item" button
+            const addBtnHtml = `
+                <button onclick="addCustomItem()" id="add-custom-btn" class="w-full py-3 mb-5 border-2 border-dashed border-slate-300 rounded-xl text-slate-500 font-bold hover:bg-slate-50 hover:border-slate-400 transition-colors flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                    เพิ่มรายการอื่นๆ (ถ้ามี)
+                </button>
+            `;
+            container.insertAdjacentHTML('beforeend', addBtnHtml);
+
             // Initialize UI state based on pre-filled values
             currentItems.forEach((item, index) => {
+                checkRemarkRequirement(index);
+            });
+        }
+
+        function addCustomItem() {
+            const index = currentItems.length;
+            const item = {
+                itemName: '',
+                unit: '',
+                parLevel: 0,
+                isCustom: true,
+                station: selectedStation
+            };
+            currentItems.push(item);
+
+            const html = `
+                <div class="card p-4 mb-4 border-dashed border-2 border-slate-300 bg-slate-50/50">
+                    <div class="mb-3">
+                        <label class="block text-xs font-bold text-slate-500 mb-1">ชื่อรายการ <span class="text-rose-500">*</span></label>
+                        <input type="text" id="custom-name-${index}" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-indigo-900 font-bold" placeholder="เช่น น้ำตาลทราย..." required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <input type="number" inputmode="numeric" pattern="[0-9]*" id="count-${index}" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 font-bold text-lg text-slate-800 placeholder:text-slate-300 placeholder:font-normal" placeholder="ยอดนับ" required>
+                    </div>
+                    
+                    <div id="zero-choice-${index}" class="hidden mb-3 p-3 bg-amber-50 rounded-xl border border-amber-200">
+                        <label class="block text-xs font-bold text-amber-800 mb-2">กรุณาระบุสถานะสินค้า:</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-2 text-sm text-amber-900 cursor-pointer">
+                                <input type="radio" name="zero-status-${index}" value="in_container" onchange="checkRemarkRequirement(${index})" class="accent-amber-600"> ยังเหลือในภาชนะ
+                            </label>
+                            <label class="flex items-center gap-2 text-sm text-amber-900 cursor-pointer">
+                                <input type="radio" name="zero-status-${index}" value="empty" onchange="checkRemarkRequirement(${index})" class="accent-amber-600"> ไม่เหลือเลย
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">หมายเหตุ <span class="text-rose-500" id="req-${index}"></span></label>
+                        <input type="text" id="remark-${index}" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-700 placeholder:text-slate-300 placeholder:font-normal" placeholder="กรอกหากมี">
+                    </div>
+                </div>
+            `;
+
+            const btn = document.getElementById('add-custom-btn');
+            btn.insertAdjacentHTML('beforebegin', html);
+
+            const countInput = document.getElementById(`count-${index}`);
+            countInput.addEventListener('input', () => {
                 checkRemarkRequirement(index);
             });
         }
@@ -398,18 +457,18 @@
                 } else if (selectedRadio === 'empty') {
                     reqLabel.innerText = '';
                     remarkInput.classList.remove('border-amber-400', 'bg-amber-50/30');
-                    remarkInput.placeholder = 'กรอกหมายเหตุ (ถ้ามี)...';
+                    remarkInput.placeholder = 'กรอกหากมี';
                 } else {
                     reqLabel.innerText = '';
                     remarkInput.classList.remove('border-amber-400', 'bg-amber-50/30');
-                    remarkInput.placeholder = 'กรอกหมายเหตุ (ถ้ามี)...';
+                    remarkInput.placeholder = 'กรอกหากมี';
                 }
             } else {
                 zeroChoiceDiv.classList.add('hidden');
                 radios.forEach(r => r.checked = false);
                 reqLabel.innerText = '';
                 remarkInput.classList.remove('border-amber-400', 'bg-amber-50/30');
-                remarkInput.placeholder = 'กรอกหมายเหตุ (ถ้ามี)...';
+                remarkInput.placeholder = 'กรอกหากมี';
             }
         }
 
@@ -424,11 +483,23 @@
 
             for (let i = 0; i < currentItems.length; i++) {
                 const item = currentItems[i];
+                let itemName = item.itemName;
+
+                if (item.isCustom) {
+                    const customNameEl = document.getElementById(`custom-name-${i}`);
+                    if (!customNameEl || !customNameEl.value.trim()) {
+                        Swal.fire('ข้อมูลไม่ครบ', `กรุณาระบุชื่อรายการที่เพิ่มเข้ามาใหม่`, 'warning');
+                        hasError = true;
+                        break;
+                    }
+                    itemName = customNameEl.value.trim() + " (เพิ่มนอกรายการ)";
+                }
+
                 const countInput = document.getElementById(`count-${i}`).value;
                 const remarkInput = document.getElementById(`remark-${i}`).value.trim();
 
                 if (countInput === '') {
-                    Swal.fire('ข้อมูลไม่ครบ', `กรุณาระบุยอดนับสำหรับ ${item.itemName}`, 'warning');
+                    Swal.fire('ข้อมูลไม่ครบ', `กรุณาระบุยอดนับสำหรับ ${itemName}`, 'warning');
                     hasError = true;
                     break;
                 }
@@ -440,13 +511,13 @@
                     radios.forEach(r => { if (r.checked) selectedRadio = r.value; });
                     
                     if (!selectedRadio) {
-                        Swal.fire('ข้อมูลไม่ครบ', `กรุณาระบุสถานะสินค้า (เหลือในภาชนะ/ไม่เหลือเลย) สำหรับ ${item.itemName}`, 'warning');
+                        Swal.fire('ข้อมูลไม่ครบ', `กรุณาระบุสถานะสินค้า (เหลือในภาชนะ/ไม่เหลือเลย) สำหรับ ${itemName}`, 'warning');
                         hasError = true;
                         break;
                     }
                     
                     if (selectedRadio === 'in_container' && remarkInput === '') {
-                        Swal.fire('ข้อมูลไม่ครบ', `กรุณาระบุหมายเหตุสำหรับ ${item.itemName} (ระบุจำนวนที่เหลือ หรือแจ้งว่าถ่ายรูปลงกลุ่ม)`, 'warning');
+                        Swal.fire('ข้อมูลไม่ครบ', `กรุณาระบุหมายเหตุสำหรับ ${itemName} (ระบุจำนวนที่เหลือ หรือแจ้งว่าถ่ายรูปลงกลุ่ม)`, 'warning');
                         document.getElementById(`remark-${i}`).focus();
                         hasError = true;
                         break;
@@ -459,7 +530,7 @@
                 }
 
                 dataToSave.push({
-                    itemName: item.itemName,
+                    itemName: itemName,
                     parLevel: item.parLevel,
                     count: countNum,
                     remark: remarkInput,
@@ -532,7 +603,7 @@
             document.getElementById('view-summary').classList.remove('hidden');
             window.scrollTo(0,0);
 
-            const lowStockItems = dataToSave.filter(item => item.count < item.parLevel);
+            const lowStockItems = dataToSave.filter(item => item.count < item.parLevel || item.itemName.includes('(เพิ่มนอกรายการ)'));
             const listContainer = document.getElementById('low-stock-list');
             
             // Format date
@@ -548,12 +619,19 @@
             } else {
                 listContainer.innerHTML = '';
                 lowStockItems.forEach((item, index) => {
-                    const missing = item.parLevel - item.count;
                     const remarkStr = item.remark ? `
                         <div class="text-[11px] text-slate-500 mt-2 pt-2 border-t border-slate-50 flex items-start gap-1">
                             <svg class="w-3.5 h-3.5 shrink-0 text-amber-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                             <span class="leading-relaxed">${item.remark}</span>
                         </div>` : '';
+                    let missingInfo = '';
+                    if (item.itemName.includes('(เพิ่มนอกรายการ)')) {
+                        missingInfo = `<span>รายการเพิ่มเติม (ระบุนอกรอบ)</span>`;
+                    } else {
+                        const missing = item.parLevel - item.count;
+                        missingInfo = `<span>ควรมี: ${item.parLevel}</span>
+                                <span class="text-rose-500 font-bold">ขาด: ${missing}</span>`;
+                    }
                     
                     listContainer.innerHTML += `
                         <div class="bg-white rounded-lg p-3 border border-slate-200 shadow-sm">
@@ -564,8 +642,7 @@
                                 </div>
                             </div>
                             <div class="flex items-center gap-2 text-[11px] text-slate-500 font-medium">
-                                <span>ควรมี: ${item.parLevel}</span>
-                                <span class="text-rose-500 font-bold">ขาด: ${missing}</span>
+                                ${missingInfo}
                             </div>
                             ${remarkStr}
                         </div>
