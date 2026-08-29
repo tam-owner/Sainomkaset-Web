@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#10B981">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="SNK Stock">
+    <title>Sainom Kaset - Stock Count</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Prompt', sans-serif; background-color: #F1F5F9; color: #333; -webkit-tap-highlight-color: transparent; }
+        
+        .card { background: white; border-radius: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); border: 1px solid #E2E8F0; overflow: hidden; }
+        
+        input, textarea, select { outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+        input:focus, textarea:focus, select:focus { border-color: #4F46E5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        
+        /* Font Pairing */
+        h1, h2, h3, h4, h5, h6, 
+        button,
+        .kanit-text {
+            font-family: 'Kanit', sans-serif !important;
+            font-weight: 600 !important;
+            letter-spacing: 0.01em;
+        }
+
+        /* SweetAlert2 Customizations */
+        div.swal2-popup {
+            border-radius: 24px !important;
+            padding: 1.2rem 1rem !important;
+            width: 300px !important;
+            font-family: 'Prompt', sans-serif !important;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+        }
+        h2.swal2-title {
+            font-family: 'Kanit', sans-serif !important;
+            font-size: 1.15rem !important;
+            font-weight: 700 !important;
+            padding: 0 1rem !important;
+        }
+        div.swal2-html-container {
+            font-size: 0.95rem !important;
+            margin: 0.5rem 0 1rem !important;
+        }
+        button.swal2-confirm, button.swal2-cancel {
+            border-radius: 12px !important;
+            font-weight: 700 !important;
+            padding: 10px 24px !important;
+            font-size: 0.95rem !important;
+            transition: all 0.2s !important;
+        }
+        button.swal2-confirm:active, button.swal2-cancel:active {
+            transform: scale(0.95) !important;
+        }
+    </style>
+</head>
+<body class="pb-24 pt-4 max-w-md mx-auto relative min-h-screen">
+
+    <!-- Global Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-slate-900/60 z-[9999] flex flex-col items-center justify-center transition-all duration-300 pointer-events-none backdrop-blur-sm opacity-100">
+        <div class="bg-white rounded-2xl p-6 flex flex-col items-center shadow-xl">
+            <svg class="animate-spin h-10 w-10 text-indigo-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p id="loading-text" class="text-slate-800 font-bold text-lg">กำลังโหลดข้อมูล...</p>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <div class="px-4 mb-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800 kanit-text">ระบบนับสต๊อก</h1>
+                <p class="text-xs font-bold text-slate-500">Sainom Kaset - Daily Stock Count</p>
+            </div>
+            <div class="w-10 h-10 rounded-full overflow-hidden shadow-sm border border-slate-200">
+                <img src="logo.jpg" alt="Logo" class="w-full h-full object-cover">
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN VIEW -->
+    <div id="view-main" class="px-4 transition-all">
+        <!-- Station Selection -->
+        <div id="step-station" class="">
+            <h2 class="text-sm font-bold text-slate-600 mb-3 uppercase tracking-wider">เลือก Station</h2>
+            <div class="grid grid-cols-2 gap-3" id="station-buttons">
+                <button id="btn-station-Service" onclick="selectStation('Service')" class="station-btn relative bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-2 hover:border-indigo-300 hover:shadow-md transition-all active:scale-95 text-slate-700">
+                    <div id="badge-Service" class="hidden absolute top-2 right-2 bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">บันทึกแล้ว</div>
+                    <span class="text-2xl">💁🏻‍♀️</span>
+                    <span class="font-bold">Service</span>
+                </button>
+                <button id="btn-station-Bingsu" onclick="selectStation('Bingsu')" class="station-btn relative bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-2 hover:border-indigo-300 hover:shadow-md transition-all active:scale-95 text-slate-700">
+                    <div id="badge-Bingsu" class="hidden absolute top-2 right-2 bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">บันทึกแล้ว</div>
+                    <span class="text-2xl">🍧</span>
+                    <span class="font-bold">Bingsu</span>
+                </button>
+                <button id="btn-station-Bread" onclick="selectStation('Bread')" class="station-btn relative bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-2 hover:border-indigo-300 hover:shadow-md transition-all active:scale-95 text-slate-700">
+                    <div id="badge-Bread" class="hidden absolute top-2 right-2 bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">บันทึกแล้ว</div>
+                    <span class="text-2xl">🍞</span>
+                    <span class="font-bold">Bread</span>
+                </button>
+                <button id="btn-station-Drink" onclick="selectStation('Drink')" class="station-btn relative bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-2 hover:border-indigo-300 hover:shadow-md transition-all active:scale-95 text-slate-700">
+                    <div id="badge-Drink" class="hidden absolute top-2 right-2 bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">บันทึกแล้ว</div>
+                    <span class="text-2xl">🥤</span>
+                    <span class="font-bold">Drink</span>
+                </button>
+                <button id="btn-station-Hotmeal" onclick="selectStation('Hotmeal')" class="station-btn col-span-2 relative bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-2 hover:border-indigo-300 hover:shadow-md transition-all active:scale-95 text-slate-700">
+                    <div id="badge-Hotmeal" class="hidden absolute top-2 right-2 bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">บันทึกแล้ว</div>
+                    <span class="text-2xl">🍛</span>
+                    <span class="font-bold">Hotmeal</span>
+                </button>
+            </div>
+        </div>
+
+
+    </div>
+
+    <!-- COUNTING VIEW -->
+    <div id="view-counting" class="hidden px-4">
+        <div class="flex items-center gap-2 mb-4">
+            <button onclick="goBackToMain()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-600 active:scale-95 shadow-sm">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+            <div>
+                <h2 class="text-lg font-bold text-slate-800" id="counting-station-title">Station: ...</h2>
+                <p class="text-xs font-bold text-slate-500">ผู้ตรวจนับ: <span id="counting-name-title" class="text-indigo-600">...</span></p>
+            </div>
+        </div>
+
+        <div id="items-container" class="space-y-4 mb-6">
+            <!-- Items injected here -->
+        </div>
+
+        <button onclick="submitCount()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-xl shadow-lg active:scale-[0.98] transition-all text-lg mb-8">บันทึกรายการนับสต๊อก</button>
+    </div>
+
+    <!-- SUMMARY VIEW -->
+    <div id="view-summary" class="hidden px-4">
+        <div id="summary-capture-area" class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 mb-5">
+            
+            <div id="success-message" class="flex items-center justify-center gap-3 mb-5">
+                <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <div class="text-left">
+                    <h2 class="text-lg font-bold text-slate-800 leading-tight">บันทึกสำเร็จ!</h2>
+                    <p class="text-[11px] text-slate-500 font-medium mt-0.5">ข้อมูลถูกส่งเข้าระบบเรียบร้อยแล้ว</p>
+                </div>
+            </div>
+            
+            <div id="capture-header" class="hidden mb-4">
+                <div class="flex justify-between items-end border-b border-slate-100 pb-3">
+                    <div class="text-left">
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Station</div>
+                        <h2 class="text-lg font-black text-slate-800 leading-tight" id="capture-station-title"></h2>
+                    </div>
+                    <div class="text-right text-[10px]">
+                        <p class="font-bold text-slate-500 mb-0.5" id="capture-date-title"></p>
+                        <p class="font-bold text-slate-500">ผู้นับ: <span id="capture-name-title" class="text-indigo-600"></span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-amber-50/50 border border-amber-200/60 rounded-xl p-3.5 text-left mb-0">
+                <h3 class="font-bold text-amber-800 mb-3 flex items-center gap-1.5 text-[13px]">
+                    <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    รายการที่ต่ำกว่าควรมี
+                </h3>
+                <div id="low-stock-list" class="flex flex-col gap-2">
+                    <!-- low stock injected here -->
+                </div>
+            </div>
+        </div>
+
+        <div id="summary-buttons">
+            <button onclick="downloadSummaryImage()" class="w-full bg-[#00B900] hover:bg-[#009900] text-white font-bold py-3.5 rounded-xl shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                บันทึกรูปภาพ (ส่งลงกลุ่มไลน์)
+            </button>
+            <button onclick="goBackToHome()" class="w-full mt-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3.5 rounded-xl shadow-sm active:scale-[0.98] transition-all">กลับหน้าแรก</button>
+        </div>
+    </div>
+
+
+    <script>
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyASLtAEuc-culvQZy8tmDMpNfbIAvYT3Lp_LB5iIdtNvSQzdSUINXCMwVJwo20-w/exec';
+        
+        let stockSettings = [];
+        let selectedStation = '';
+        let counterName = '';
+        let currentItems = [];
+        
+        // Draft storage (resets at 3 AM)
+        const nowForDraft = new Date();
+        if (nowForDraft.getHours() < 3) {
+            nowForDraft.setDate(nowForDraft.getDate() - 1);
+        }
+        const todayStr = nowForDraft.toLocaleDateString('en-CA'); // YYYY-MM-DD
+        let savedDrafts = JSON.parse(localStorage.getItem('stock_drafts_' + todayStr)) || {};
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchStockSettings();
+            updateStationButtons();
+        });
+
+        function updateStationButtons() {
+            ['Service', 'Bingsu', 'Bread', 'Drink', 'Hotmeal'].forEach(st => {
+                const badge = document.getElementById(`badge-${st}`);
+                const btn = document.getElementById(`btn-station-${st}`);
+                if (badge && btn) {
+                    if (savedDrafts[st]) {
+                        badge.classList.remove('hidden');
+                        btn.classList.add('border-emerald-300', 'bg-emerald-50/50');
+                    } else {
+                        badge.classList.add('hidden');
+                        btn.classList.remove('border-emerald-300', 'bg-emerald-50/50');
+                    }
+                }
+            });
+        }
+
+
+        function showLoading(text) {
+            document.getElementById('loading-text').innerText = text;
+            const overlay = document.getElementById('loading-overlay');
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+            overlay.classList.add('opacity-100');
+        }
+
+        function hideLoading() {
+            const overlay = document.getElementById('loading-overlay');
+            overlay.classList.remove('opacity-100');
+            overlay.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        function fetchStockSettings() {
+            showLoading("กำลังโหลดข้อมูลสินค้า...");
+            fetch(WEB_APP_URL + "?action=getStockSettings")
+                .then(res => res.json())
+                .then(res => {
+                    if (res.status === "success") {
+                        stockSettings = res.data;
+                        hideLoading();
+                    } else {
+                        throw new Error(res.message || "Unknown error");
+                    }
+                })
+                .catch(err => {
+                    hideLoading();
+                    Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลสินค้าได้: ' + err.message, 'error');
+                });
+        }
+
+        async function selectStation(station) {
+            selectedStation = station;
+            
+            let defaultName = savedDrafts[station] ? savedDrafts[station].counterName : '';
+
+            const { value: nameInput } = await Swal.fire({
+                title: 'ชื่อผู้ตรวจนับ',
+                text: `Station: ${station}`,
+                input: 'text',
+                inputValue: defaultName,
+                inputPlaceholder: 'ระบุชื่อ',
+                showCancelButton: true,
+                confirmButtonText: 'เริ่มนับสต๊อก',
+                cancelButtonText: 'ยกเลิก',
+                inputValidator: (value) => {
+                    if (!value || value.trim() === '') {
+                        return 'กรุณาระบุชื่อผู้ตรวจนับ';
+                    }
+                }
+            });
+
+            if (nameInput) {
+                counterName = nameInput.trim();
+                document.getElementById('counting-station-title').innerText = `Station: ${selectedStation}`;
+                document.getElementById('counting-name-title').innerText = counterName;
+                renderItems();
+                document.getElementById('view-main').classList.add('hidden');
+                document.getElementById('view-counting').classList.remove('hidden');
+                window.scrollTo(0,0);
+            } else {
+                selectedStation = ''; // Reset if cancelled
+            }
+        }
+
+        function goBackToHome() {
+            document.getElementById('view-summary').classList.add('hidden');
+            document.getElementById('view-main').classList.remove('hidden');
+            updateStationButtons();
+            window.scrollTo(0,0);
+        }
+
+        function goBackToMain() {
+            document.getElementById('view-counting').classList.add('hidden');
+            document.getElementById('view-main').classList.remove('hidden');
+        }
+
+        function renderItems() {
+            const container = document.getElementById('items-container');
+            container.innerHTML = '';
+
+            currentItems = stockSettings.filter(item => item.station === selectedStation);
+            
+            if (currentItems.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 text-center text-slate-500 font-bold shadow-sm">
+                        ยังไม่มีรายการสินค้าใน Station นี้<br>
+                        <span class="text-xs font-normal">กรุณาเพิ่มรายการในระบบหลังบ้านก่อน</span>
+                    </div>`;
+                return;
+            }
+
+            currentItems.forEach((item, index) => {
+                let savedItem = null;
+                if (savedDrafts[selectedStation]) {
+                    savedItem = savedDrafts[selectedStation].items.find(i => i.itemName === item.itemName);
+                }
+                
+                let defaultCount = savedItem ? savedItem.count : '';
+                let defaultRemark = savedItem ? (savedItem.remark || '') : '';
+                let defaultZeroStatus = savedItem ? (savedItem.zeroStatus || '') : '';
+                
+                let countValAttr = defaultCount !== '' ? `value="${defaultCount}"` : '';
+                let remarkValAttr = defaultRemark !== '' ? `value="${defaultRemark}"` : '';
+                let radioInContainer = defaultZeroStatus === 'in_container' ? 'checked' : '';
+                let radioEmpty = defaultZeroStatus === 'empty' ? 'checked' : '';
+
+                const html = `
+                    <div class="card p-4">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="font-bold text-slate-800 text-lg">${item.itemName}</div>
+                            <div class="text-xs text-slate-500 font-bold bg-slate-100 px-2 py-1 rounded-lg">ควรมี: <span class="text-indigo-600">${item.parLevel}</span></div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="block text-xs font-bold text-slate-500 mb-1">ยอดนับ (ตัวเลขเท่านั้น)</label>
+                            <input type="number" inputmode="numeric" pattern="[0-9]*" id="count-${index}" ${countValAttr} class="w-full border border-slate-200 rounded-xl px-3 py-2.5 font-bold text-lg text-slate-800" placeholder="0" required>
+                        </div>
+                        
+                        <div id="zero-choice-${index}" class="hidden mb-3 p-3 bg-amber-50 rounded-xl border border-amber-200">
+                            <label class="block text-xs font-bold text-amber-800 mb-2">กรุณาระบุสถานะสินค้า:</label>
+                            <div class="flex gap-4">
+                                <label class="flex items-center gap-2 text-sm text-amber-900 cursor-pointer">
+                                    <input type="radio" name="zero-status-${index}" value="in_container" ${radioInContainer} onchange="checkRemarkRequirement(${index})" class="accent-amber-600"> ยังเหลือในภาชนะ
+                                </label>
+                                <label class="flex items-center gap-2 text-sm text-amber-900 cursor-pointer">
+                                    <input type="radio" name="zero-status-${index}" value="empty" ${radioEmpty} onchange="checkRemarkRequirement(${index})" class="accent-amber-600"> ไม่เหลือเลย
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">หมายเหตุ <span class="text-rose-500" id="req-${index}"></span></label>
+                            <input type="text" id="remark-${index}" ${remarkValAttr} class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-700" placeholder="กรอกหมายเหตุ (ถ้ามี)...">
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', html);
+
+                // Add listener to count input to toggle required star on remark
+                const countInput = document.getElementById(`count-${index}`);
+                countInput.addEventListener('input', () => {
+                    checkRemarkRequirement(index);
+                });
+            });
+
+            // Initialize UI state based on pre-filled values
+            currentItems.forEach((item, index) => {
+                checkRemarkRequirement(index);
+            });
+        }
+
+        function checkRemarkRequirement(index) {
+            const countVal = document.getElementById(`count-${index}`).value;
+            const reqLabel = document.getElementById(`req-${index}`);
+            const remarkInput = document.getElementById(`remark-${index}`);
+            const zeroChoiceDiv = document.getElementById(`zero-choice-${index}`);
+            
+            const radios = document.getElementsByName(`zero-status-${index}`);
+            let selectedRadio = null;
+            radios.forEach(r => { if (r.checked) selectedRadio = r.value; });
+            
+            if (countVal === '0') {
+                zeroChoiceDiv.classList.remove('hidden');
+                
+                if (selectedRadio === 'in_container') {
+                    reqLabel.innerText = '*ระบุว่ามีในภาชนะหรือที่เตรียมไว้เท่าไหร่ หรือพอขายได้กี่เสิร์ฟโดยละเอียด หรือถ่ายรูปแจ้งส่งในกลุ่ม';
+                    remarkInput.classList.add('border-amber-400', 'bg-amber-50/30');
+                    remarkInput.placeholder = 'ระบุรายละเอียดเพิ่มเติม...';
+                } else if (selectedRadio === 'empty') {
+                    reqLabel.innerText = '';
+                    remarkInput.classList.remove('border-amber-400', 'bg-amber-50/30');
+                    remarkInput.placeholder = 'กรอกหมายเหตุ (ถ้ามี)...';
+                } else {
+                    reqLabel.innerText = '';
+                    remarkInput.classList.remove('border-amber-400', 'bg-amber-50/30');
+                    remarkInput.placeholder = 'กรอกหมายเหตุ (ถ้ามี)...';
+                }
+            } else {
+                zeroChoiceDiv.classList.add('hidden');
+                radios.forEach(r => r.checked = false);
+                reqLabel.innerText = '';
+                remarkInput.classList.remove('border-amber-400', 'bg-amber-50/30');
+                remarkInput.placeholder = 'กรอกหมายเหตุ (ถ้ามี)...';
+            }
+        }
+
+        function submitCount() {
+            if (currentItems.length === 0) {
+                Swal.fire('ไม่มีรายการ', 'ไม่มีสินค้าให้บันทึก', 'warning');
+                return;
+            }
+
+            const dataToSave = [];
+            let hasError = false;
+
+            for (let i = 0; i < currentItems.length; i++) {
+                const item = currentItems[i];
+                const countInput = document.getElementById(`count-${i}`).value;
+                const remarkInput = document.getElementById(`remark-${i}`).value.trim();
+
+                if (countInput === '') {
+                    Swal.fire('ข้อมูลไม่ครบ', `กรุณาระบุยอดนับสำหรับ ${item.itemName}`, 'warning');
+                    hasError = true;
+                    break;
+                }
+
+                const countNum = parseInt(countInput);
+                if (countNum === 0) {
+                    const radios = document.getElementsByName(`zero-status-${i}`);
+                    let selectedRadio = null;
+                    radios.forEach(r => { if (r.checked) selectedRadio = r.value; });
+                    
+                    if (!selectedRadio) {
+                        Swal.fire('ข้อมูลไม่ครบ', `กรุณาระบุสถานะสินค้า (เหลือในภาชนะ/ไม่เหลือเลย) สำหรับ ${item.itemName}`, 'warning');
+                        hasError = true;
+                        break;
+                    }
+                    
+                    if (selectedRadio === 'in_container' && remarkInput === '') {
+                        Swal.fire('ข้อมูลไม่ครบ', `กรุณาระบุหมายเหตุสำหรับ ${item.itemName} (ระบุจำนวนที่เหลือ หรือแจ้งว่าถ่ายรูปลงกลุ่ม)`, 'warning');
+                        document.getElementById(`remark-${i}`).focus();
+                        hasError = true;
+                        break;
+                    }
+                    
+                    // If empty, we can just save it with empty remark, or prepend a flag
+                    if (selectedRadio === 'empty' && remarkInput === '') {
+                        // Acceptable, no action needed
+                    }
+                }
+
+                dataToSave.push({
+                    itemName: item.itemName,
+                    parLevel: item.parLevel,
+                    count: countNum,
+                    remark: remarkInput,
+                    zeroStatus: countNum === 0 ? (() => {
+                        const radios = document.getElementsByName(`zero-status-${i}`);
+                        let sr = null;
+                        radios.forEach(r => { if (r.checked) sr = r.value; });
+                        return sr;
+                    })() : null
+                });
+            }
+
+            if (hasError) return;
+
+            Swal.fire({
+                title: 'ยืนยันการบันทึก?',
+                text: "ตรวจสอบข้อมูลให้ถูกต้องก่อนบันทึก",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'ยืนยัน',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    processSubmission(dataToSave);
+                }
+            });
+        }
+
+        function processSubmission(dataToSave) {
+            showLoading('กำลังบันทึกข้อมูล...');
+
+            const payload = {
+                action: 'saveStockCount',
+                timestamp: new Date().toISOString(),
+                station: selectedStation,
+                counterName: counterName,
+                items: dataToSave
+            };
+
+            fetch(WEB_APP_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(res => {
+                hideLoading();
+                if (res.status === 'success') {
+                    // Save to local draft
+                    savedDrafts[selectedStation] = {
+                        counterName: counterName,
+                        items: dataToSave
+                    };
+                    localStorage.setItem('stock_drafts_' + todayStr, JSON.stringify(savedDrafts));
+                    updateStationButtons();
+                    
+                    showSummary(dataToSave);
+                } else {
+                    Swal.fire('เกิดข้อผิดพลาด', res.message, 'error');
+                }
+            })
+            .catch(err => {
+                hideLoading();
+                Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้: ' + err.message, 'error');
+            });
+        }
+
+        function showSummary(dataToSave) {
+            document.getElementById('view-counting').classList.add('hidden');
+            document.getElementById('view-summary').classList.remove('hidden');
+            window.scrollTo(0,0);
+
+            const lowStockItems = dataToSave.filter(item => item.count < item.parLevel);
+            const listContainer = document.getElementById('low-stock-list');
+            
+            // Format date
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' }) + ' ' + now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+            
+            document.getElementById('capture-station-title').innerText = selectedStation;
+            document.getElementById('capture-date-title').innerText = dateStr;
+            document.getElementById('capture-name-title').innerText = counterName;
+
+            if (lowStockItems.length === 0) {
+                listContainer.innerHTML = '<div class="text-slate-500 italic">ไม่มีรายการใดต่ำกว่าที่ควรมี</div>';
+            } else {
+                listContainer.innerHTML = '';
+                lowStockItems.forEach((item, index) => {
+                    const missing = item.parLevel - item.count;
+                    const remarkStr = item.remark ? `
+                        <div class="text-[11px] text-slate-500 mt-2 pt-2 border-t border-slate-50 flex items-start gap-1">
+                            <svg class="w-3.5 h-3.5 shrink-0 text-amber-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <span class="leading-relaxed">${item.remark}</span>
+                        </div>` : '';
+                    
+                    listContainer.innerHTML += `
+                        <div class="bg-white rounded-lg p-3 border border-slate-200 shadow-sm">
+                            <div class="flex justify-between items-center mb-1">
+                                <div class="font-bold text-slate-800 text-[13px] leading-tight">${index+1}. ${item.itemName}</div>
+                                <div class="text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded text-[12px] shrink-0 border border-rose-100 leading-tight">
+                                    เหลือ ${item.count}
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 text-[11px] text-slate-500 font-medium">
+                                <span>ควรมี: ${item.parLevel}</span>
+                                <span class="text-rose-500 font-bold">ขาด: ${missing}</span>
+                            </div>
+                            ${remarkStr}
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        function downloadSummaryImage() {
+            showLoading("กำลังสร้างรูปภาพ...");
+            
+            // Prepare for capture
+            document.getElementById('success-message').classList.add('hidden');
+            document.getElementById('capture-header').classList.remove('hidden');
+
+            const captureArea = document.getElementById('summary-capture-area');
+            captureArea.classList.remove('shadow-sm', 'border-slate-200'); // Clean up borders for image
+            captureArea.classList.add('border-transparent');
+
+            html2canvas(captureArea, { scale: 2, useCORS: true, backgroundColor: '#fdfdfd' }).then(canvas => {
+                // Revert UI
+                document.getElementById('success-message').classList.remove('hidden');
+                document.getElementById('capture-header').classList.add('hidden');
+                captureArea.classList.add('shadow-sm', 'border-slate-200');
+                captureArea.classList.remove('border-transparent');
+
+                // Trigger download
+                const link = document.createElement('a');
+                link.download = `stock-summary-${selectedStation}-${new Date().getTime()}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                hideLoading();
+            }).catch(err => {
+                hideLoading();
+                Swal.fire('ข้อผิดพลาด', 'ไม่สามารถสร้างรูปภาพได้: ' + err.message, 'error');
+            });
+        }
+
+    </script>
+</body>
+</html>
