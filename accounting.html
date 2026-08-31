@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="color-scheme" content="dark light">
+    <title>Sainom Kaset - Accounting</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/accounting.css">
+    <script>
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            alert('Error: ' + msg + '\nLine: ' + lineNo);
+            return false;
+        };
+        window.onunhandledrejection = function(event) {
+            alert('Promise Rejection: ' + (event.reason ? event.reason.message : event.reason));
+        };
+    </script>
+</head>
+<body>
+    <!-- Side Menu -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>Sainom Kaset</h2>
+            <button id="close-sidebar" class="mobile-only">&times;</button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-tab="dashboard">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                Dashboard
+            </a>
+            <a href="#" class="nav-item" data-tab="transactions">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                Transactions
+            </a>
+            <a href="#" class="nav-item" data-tab="settings">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                Settings
+            </a>
+            <div class="spacer"></div>
+            <a href="index.html" class="nav-item">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                Back to Payroll
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="top-header">
+            <button id="open-sidebar" class="mobile-only">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+            <h1 class="page-title" id="page-title-text">Dashboard</h1>
+            <div class="header-actions">
+                <button class="btn btn-primary" id="btn-add-income">+ รายรับ</button>
+                <button class="btn btn-danger" id="btn-add-expense">- รายจ่าย</button>
+            </div>
+        </header>
+
+        <!-- Account Balances -->
+        <section class="balances-container" id="balances-container">
+            <div class="balance-card">
+                <h3>Cash (เงินสด)</h3>
+                <p class="amount" id="bal-cash">฿0.00</p>
+            </div>
+            <div class="balance-card">
+                <h3>Bank 1</h3>
+                <p class="amount" id="bal-bank1">฿0.00</p>
+            </div>
+            <div class="balance-card">
+                <h3>Bank 2</h3>
+                <p class="amount" id="bal-bank2">฿0.00</p>
+            </div>
+            <div class="balance-card total">
+                <h3>Total Balance</h3>
+                <p class="amount" id="bal-total">฿0.00</p>
+            </div>
+        </section>
+
+        <!-- Tab Content: Dashboard -->
+        <div id="tab-dashboard" class="tab-pane active">
+            <!-- Break Even Info -->
+            <div class="info-banner">
+                <div class="info-content">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <div>
+                        <strong>เป้าหมายยอดขายขั้นต่ำ (Daily Break-Even):</strong>
+                        <span id="daily-break-even">฿0.00</span> 
+                        <small class="text-muted">(คำนวณจาก Fixed Cost รายเดือน/30 + ค่าแรงพนักงาน)</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter -->
+            <div class="filter-controls">
+                <select id="timeframe-select" class="form-control">
+                    <option value="daily">วันนี้ (Daily)</option>
+                    <option value="weekly">สัปดาห์นี้ (Weekly)</option>
+                    <option value="monthly" selected>เดือนนี้ (Monthly)</option>
+                </select>
+                <input type="month" id="month-select" class="form-control hidden">
+                <input type="date" id="date-select" class="form-control hidden">
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Summary Card -->
+                <div class="card summary-card">
+                    <h3 class="card-title">สรุปผลกำไร-ขาดทุน (P&L)</h3>
+                    <div class="summary-stats">
+                        <div class="stat">
+                            <span class="label">รายได้รวม</span>
+                            <span class="value text-success" id="summary-income">฿0.00</span>
+                        </div>
+                        <div class="stat">
+                            <span class="label">รายจ่ายรวม</span>
+                            <span class="value text-danger" id="summary-expense">฿0.00</span>
+                        </div>
+                        <div class="stat highlight">
+                            <span class="label">กำไรสุทธิ</span>
+                            <span class="value" id="summary-profit">฿0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Card -->
+                <div class="card chart-card">
+                    <h3 class="card-title">สัดส่วนค่าใช้จ่าย (Cost Breakdown)</h3>
+                    <div class="chart-container">
+                        <canvas id="costChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cost Structure Table -->
+            <div class="card table-card mt-4">
+                <h3 class="card-title">Cost Structure Analysis</h3>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>หมวดหมู่</th>
+                                <th class="text-right">ใช้จ่ายจริง (฿)</th>
+                                <th class="text-right">Actual %</th>
+                                <th class="text-right">Target %</th>
+                                <th class="text-right">ขาด/เกิน (฿)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cost-structure-body">
+                            <!-- Populated by JS -->
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">กำลังโหลดข้อมูล...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Transactions -->
+        <div id="tab-transactions" class="tab-pane">
+            <div class="card table-card">
+                <div class="card-header-flex">
+                    <h3 class="card-title">ประวัติรายการ</h3>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>วันที่/เวลา</th>
+                                <th>ประเภท</th>
+                                <th>หมวดหมู่</th>
+                                <th>บัญชี</th>
+                                <th>รายละเอียด</th>
+                                <th class="text-right">จำนวนเงิน (฿)</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactions-body">
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">ไม่มีรายการ</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Settings -->
+        <div id="tab-settings" class="tab-pane">
+            <div class="settings-container">
+                
+                <!-- Target Categories Settings -->
+                <div class="settings-section">
+                    <div class="settings-section-header">
+                        <div>
+                            <h3 class="card-title mb-0">ตั้งค่าเป้าหมาย Cost Structure (Target %)</h3>
+                            <p class="text-muted" style="margin-top: 0.25rem;">กลุ่มเป้าหมายที่จะนำไปคำนวณในตารางวิเคราะห์สัดส่วนค่าใช้จ่าย (รายได้ = 100%)</p>
+                        </div>
+                        <button class="btn btn-primary" id="btn-add-target-cat">+ เพิ่มกลุ่ม</button>
+                    </div>
+                    <ul class="settings-list" id="target-cats-list">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+
+                <!-- Expense Categories Settings -->
+                <div class="settings-section">
+                    <div class="settings-section-header">
+                        <div>
+                            <h3 class="card-title mb-0">จัดการประเภท "รายจ่าย"</h3>
+                            <p class="text-muted" style="margin-top: 0.25rem;">ตัวเลือกสำหรับบันทึกรายจ่าย และเลือกว่าผูกกับกลุ่มเป้าหมาย (Cost Structure) ใด</p>
+                        </div>
+                        <button class="btn btn-primary" id="btn-add-exp-cat">+ เพิ่มประเภทรายจ่าย</button>
+                    </div>
+                    <ul class="settings-list" id="exp-cats-list">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+
+                <!-- Income Categories Settings -->
+                <div class="settings-section">
+                    <div class="settings-section-header">
+                        <div>
+                            <h3 class="card-title mb-0">จัดการประเภท "รายรับ"</h3>
+                            <p class="text-muted" style="margin-top: 0.25rem;">ตัวเลือกสำหรับบันทึกรายรับ</p>
+                        </div>
+                        <button class="btn btn-primary" id="btn-add-inc-cat">+ เพิ่มประเภทรายรับ</button>
+                    </div>
+                    <ul class="settings-list" id="inc-cats-list">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <!-- Income Modal -->
+    <div id="modal-income" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>เพิ่มรายรับ</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="form-income">
+                <div class="form-group">
+                    <label>จำนวนเงิน (฿)</label>
+                    <input type="number" step="0.01" id="inc-amount" class="form-control" required min="0.01">
+                </div>
+                <div class="form-group">
+                    <label>ประเภทรายรับ</label>
+                    <select id="inc-category" class="form-control" required>
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>บัญชีที่รับเงิน</label>
+                    <select id="inc-account" class="form-control" required>
+                        <option value="cash">เงินสดหน้าร้าน (Cash)</option>
+                        <option value="bank1">บัญชีธนาคาร 1 (Bank 1)</option>
+                        <option value="bank2">บัญชีธนาคาร 2 (Bank 2)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>วันที่</label>
+                    <input type="date" id="inc-date" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>รายละเอียดเพิ่มเติม</label>
+                    <input type="text" id="inc-note" class="form-control" placeholder="เช่น ยอดขายกะเช้า">
+                </div>
+                <div class="form-actions mt-4">
+                    <button type="button" class="btn btn-secondary close-modal-btn">ยกเลิก</button>
+                    <button type="submit" class="btn btn-primary">บันทึกรายรับ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Expense Modal -->
+    <div id="modal-expense" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>เพิ่มรายจ่าย</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="form-expense">
+                <div class="form-group">
+                    <label>จำนวนเงิน (฿)</label>
+                    <input type="number" step="0.01" id="exp-amount" class="form-control" required min="0.01">
+                </div>
+                <div class="form-group">
+                    <label>หมวดหมู่รายจ่าย</label>
+                    <select id="exp-category" class="form-control" required>
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>จ่ายจากบัญชี</label>
+                    <select id="exp-account" class="form-control" required>
+                        <option value="cash">เงินสดหน้าร้าน (Cash)</option>
+                        <option value="bank1">บัญชีธนาคาร 1 (Bank 1)</option>
+                        <option value="bank2">บัญชีธนาคาร 2 (Bank 2)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>วันที่</label>
+                    <input type="date" id="exp-date" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>รายละเอียดเพิ่มเติม</label>
+                    <input type="text" id="exp-note" class="form-control" placeholder="เช่น ค่ากาแฟ, ค่าจ้างน้องA">
+                </div>
+                <div class="form-actions mt-4">
+                    <button type="button" class="btn btn-secondary close-modal-btn">ยกเลิก</button>
+                    <button type="submit" class="btn btn-danger">บันทึกรายจ่าย</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Transaction Modal -->
+    <div id="modal-edit-transaction" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>แก้ไขรายการ</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="form-edit-transaction">
+                <input type="hidden" id="edit-id">
+                <div class="form-group">
+                    <label>ประเภทรายการ</label>
+                    <select id="edit-type" class="form-control" required>
+                        <option value="income">รายรับ</option>
+                        <option value="expense">รายจ่าย</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>จำนวนเงิน (฿)</label>
+                    <input type="number" step="0.01" id="edit-amount" class="form-control" required min="0.01">
+                </div>
+                <div class="form-group">
+                    <label>หมวดหมู่</label>
+                    <select id="edit-category" class="form-control" required>
+                        <!-- Populated dynamically based on type -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>บัญชี</label>
+                    <select id="edit-account" class="form-control" required>
+                        <option value="cash">เงินสดหน้าร้าน (Cash)</option>
+                        <option value="bank1">บัญชีธนาคาร 1 (Bank 1)</option>
+                        <option value="bank2">บัญชีธนาคาร 2 (Bank 2)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>วันที่</label>
+                    <input type="date" id="edit-date" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>รายละเอียดเพิ่มเติม</label>
+                    <input type="text" id="edit-note" class="form-control">
+                </div>
+                <div class="form-actions mt-4">
+                    <button type="button" class="btn btn-secondary close-modal-btn">ยกเลิก</button>
+                    <button type="submit" class="btn btn-primary">บันทึกการแก้ไข</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- App Scripts -->
+    <script src="js/firebase-init.js?v=20260829_002"></script>
+    <script src="js/accounting.js?v=9"></script>
+</body>
+</html>

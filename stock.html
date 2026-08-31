@@ -87,9 +87,90 @@
 
     <!-- MAIN VIEW -->
     <div id="view-main" class="px-4 transition-all">
+        <!-- Round Selection -->
+        <div id="step-round" class="">
+            <h2 class="text-sm font-bold text-slate-600 mb-4 uppercase tracking-wider">เลือกรอบ / ประเภทการรับของ</h2>
+            <div class="flex flex-col gap-3.5" id="round-buttons">
+                <div class="grid grid-cols-2 gap-3.5">
+                    <button onclick="selectRound('เปิดร้าน')" class="w-full bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-2.5 hover:border-amber-300 hover:shadow-md transition-all active:scale-[0.98] text-slate-700 text-center">
+                        <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center shrink-0 border border-amber-100">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                        </div>
+                        <div>
+                            <div class="font-bold text-[16px] text-slate-800 kanit-text tracking-wide leading-none">เปิดร้าน</div>
+                            <div class="text-[11px] text-slate-500 mt-1.5 leading-tight">เช็คก่อนเริ่มขาย</div>
+                        </div>
+                    </button>
+                    
+                    <button onclick="selectRound('ปิดร้าน')" class="w-full bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-2.5 hover:border-indigo-300 hover:shadow-md transition-all active:scale-[0.98] text-slate-700 text-center">
+                        <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-500 flex items-center justify-center shrink-0 border border-indigo-100">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                        </div>
+                        <div>
+                            <div class="font-bold text-[16px] text-slate-800 kanit-text tracking-wide leading-none">ปิดร้าน</div>
+                            <div class="text-[11px] text-slate-500 mt-1.5 leading-tight">สรุปยอดหลังปิด</div>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="my-1.5 flex items-center">
+                    <div class="flex-1 border-t border-slate-200"></div>
+                    <span class="px-3 text-[10px] font-bold text-slate-400 tracking-wider">หรือรับของจากซัพพลายเออร์</span>
+                    <div class="flex-1 border-t border-slate-200"></div>
+                </div>
+
+                <button id="btn-round-Sainom" onclick="selectRound('Sainom')" class="relative w-full bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 hover:border-sky-300 hover:shadow-md transition-all active:scale-[0.98] text-slate-700 text-left">
+                    <div id="badge-today-Sainom" class="hidden absolute -top-2.5 -left-2.5 bg-rose-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm border-2 border-white z-10 animate-pulse">นับวันนี้</div>
+                    <div class="w-12 h-12 rounded-xl bg-sky-50 text-sky-500 flex items-center justify-center shrink-0 border border-sky-100">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-bold text-[16px] text-slate-800 kanit-text tracking-wide">Sainom</div>
+                        <div class="text-[12px] text-slate-500 mt-0.5 leading-tight">นับอาทิตย์ อังคาร</div>
+                    </div>
+                    <div class="text-slate-300 pr-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                    </div>
+                </button>
+
+                <button id="btn-round-Makro" onclick="selectRound('Makro')" class="relative w-full bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 hover:border-emerald-300 hover:shadow-md transition-all active:scale-[0.98] text-slate-700 text-left">
+                    <div id="badge-today-Makro" class="hidden absolute -top-2.5 -left-2.5 bg-rose-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm border-2 border-white z-10 animate-pulse">นับวันนี้</div>
+                    <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0 border border-emerald-100">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-bold text-[16px] text-slate-800 kanit-text tracking-wide">Makro</div>
+                        <div class="text-[12px] text-slate-500 mt-0.5 leading-tight">นับจันทร์ พฤหัส ศุกร์</div>
+                    </div>
+                    <div class="text-slate-300 pr-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                    </div>
+                </button>
+
+                <button id="btn-round-อื่นๆ" onclick="selectRound('ร้านอื่นๆ')" class="relative w-full bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 hover:border-rose-300 hover:shadow-md transition-all active:scale-[0.98] text-slate-700 text-left">
+                    <div id="badge-today-อื่นๆ" class="hidden absolute -top-2.5 -left-2.5 bg-rose-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm border-2 border-white z-10 animate-pulse">นับวันนี้</div>
+                    <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center shrink-0 border border-rose-100">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-bold text-[16px] text-slate-800 kanit-text tracking-wide">ร้านอื่นๆ</div>
+                        <div class="text-[12px] text-slate-500 mt-0.5 leading-tight">พุธ เสาร์</div>
+                    </div>
+                    <div class="text-slate-300 pr-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                    </div>
+                </button>
+            </div>
+        </div>
+
         <!-- Station Selection -->
-        <div id="step-station" class="">
-            <h2 class="text-sm font-bold text-slate-600 mb-3 uppercase tracking-wider">เลือก Station</h2>
+        <div id="step-station" class="hidden mt-4">
+            <div class="flex items-center gap-2 mb-3">
+                <button onclick="goBackToRound()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-600 active:scale-95 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">เลือก Station <span id="selected-round-display" class="text-indigo-600 ml-1"></span></h2>
+            </div>
             <div class="grid grid-cols-2 gap-3" id="station-buttons">
                 <button id="btn-station-Service" onclick="selectStation('Service')" class="station-btn relative bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-2 hover:border-indigo-300 hover:shadow-md transition-all active:scale-95 text-slate-700">
                     <div id="badge-Service" class="hidden absolute top-2 right-2 bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">บันทึกแล้ว</div>
@@ -200,9 +281,10 @@
 
 
     <script>
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzNpSgLt--8oooHyEDf6FuB88DgNAhxXIT0Q-6-R9mmkpNWAdFuil4NFvD_7AM1Lw8/exec';
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzCQ16IQkGrGY5CdgLpXyzOIWxw9nAIZLJG4veL4TePy8HeIpNDiFJEbv1fXfdOjec/exec';
         
         let stockSettings = [];
+        let selectedRound = '';
         let selectedStation = '';
         let counterName = '';
         let currentItems = [];
@@ -218,14 +300,46 @@
         document.addEventListener('DOMContentLoaded', () => {
             fetchStockSettings();
             updateStationButtons();
+            highlightTodayRounds();
         });
 
+        function highlightTodayRounds() {
+            const today = new Date().getDay(); // 0: Sun, 1: Mon, ...
+            let activeRounds = [];
+            
+            // Sainom: Sunday (0), Tuesday (2)
+            if (today === 0 || today === 2) activeRounds.push('Sainom');
+            // Makro: Monday (1), Thursday (4), Friday (5)
+            if (today === 1 || today === 4 || today === 5) activeRounds.push('Makro');
+            // ร้านอื่นๆ: Wednesday (3), Saturday (6)
+            if (today === 3 || today === 6) activeRounds.push('อื่นๆ');
+
+            ['Sainom', 'Makro', 'อื่นๆ'].forEach(round => {
+                const btn = document.getElementById(`btn-round-${round}`);
+                const badge = document.getElementById(`badge-today-${round}`);
+                if (!btn || !badge) return;
+
+                if (activeRounds.includes(round)) {
+                    badge.classList.remove('hidden');
+                    btn.classList.add('ring-2', 'ring-offset-2', 'border-transparent');
+                    
+                    if (round === 'Sainom') btn.classList.add('ring-sky-400', 'bg-sky-50/50');
+                    if (round === 'Makro') btn.classList.add('ring-emerald-400', 'bg-emerald-50/50');
+                    if (round === 'อื่นๆ') btn.classList.add('ring-rose-400', 'bg-rose-50/50');
+                } else {
+                    btn.classList.add('opacity-70', 'grayscale-[0.3]');
+                }
+            });
+        }
+
         function updateStationButtons() {
+            if (!selectedRound) return;
             ['Service', 'Bingsu', 'Bread', 'Drink', 'Hotmeal'].forEach(st => {
                 const badge = document.getElementById(`badge-${st}`);
                 const btn = document.getElementById(`btn-station-${st}`);
+                const draftKey = selectedRound + '_' + st;
                 if (badge && btn) {
-                    if (savedDrafts[st]) {
+                    if (savedDrafts[draftKey]) {
                         badge.classList.remove('hidden');
                         btn.classList.add('border-emerald-300', 'bg-emerald-50/50');
                     } else {
@@ -268,10 +382,24 @@
                 });
         }
 
+        function selectRound(round) {
+            selectedRound = round;
+            document.getElementById('step-round').classList.add('hidden');
+            document.getElementById('step-station').classList.remove('hidden');
+            document.getElementById('selected-round-display').innerText = `(${round})`;
+            updateStationButtons();
+        }
+
+        function goBackToRound() {
+            document.getElementById('step-station').classList.add('hidden');
+            document.getElementById('step-round').classList.remove('hidden');
+        }
+
         async function selectStation(station) {
             selectedStation = station;
+            const draftKey = selectedRound + '_' + station;
             
-            let defaultName = savedDrafts[station] ? savedDrafts[station].counterName : '';
+            let defaultName = savedDrafts[draftKey] ? savedDrafts[draftKey].counterName : '';
 
             const { value: nameInput } = await Swal.fire({
                 title: 'ชื่อผู้ตรวจนับ',
@@ -291,7 +419,7 @@
 
             if (nameInput) {
                 counterName = nameInput.trim();
-                document.getElementById('counting-station-title').innerText = `Station: ${selectedStation}`;
+                document.getElementById('counting-station-title').innerText = `${selectedRound} - ${selectedStation}`;
                 document.getElementById('counting-name-title').innerText = counterName;
                 renderItems();
                 document.getElementById('view-main').classList.add('hidden');
@@ -330,9 +458,10 @@
             }
 
             currentItems.forEach((item, index) => {
+                const draftKey = selectedRound + '_' + selectedStation;
                 let savedItem = null;
-                if (savedDrafts[selectedStation]) {
-                    savedItem = savedDrafts[selectedStation].items.find(i => i.itemName === item.itemName);
+                if (savedDrafts[draftKey]) {
+                    savedItem = savedDrafts[draftKey].items.find(i => i.itemName === item.itemName);
                 }
                 
                 let defaultCount = savedItem ? savedItem.count : '';
@@ -592,6 +721,7 @@
             const payload = {
                 action: 'saveStockCount',
                 timestamp: new Date().toISOString(),
+                round: selectedRound,
                 station: selectedStation,
                 counterName: counterName,
                 items: dataToSave
@@ -607,7 +737,8 @@
                 hideLoading();
                 if (res.status === 'success') {
                     // Save to local draft
-                    savedDrafts[selectedStation] = {
+                    const draftKey = selectedRound + '_' + selectedStation;
+                    savedDrafts[draftKey] = {
                         counterName: counterName,
                         items: dataToSave
                     };
@@ -644,7 +775,7 @@
             const now = new Date();
             const dateStr = now.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' }) + ' ' + now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
             
-            document.getElementById('capture-station-title').innerText = selectedStation;
+            document.getElementById('capture-station-title').innerText = `${selectedRound} - ${selectedStation}`;
             document.getElementById('capture-date-title').innerText = dateStr;
             document.getElementById('capture-name-title').innerText = counterName;
 

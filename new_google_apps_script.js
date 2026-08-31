@@ -74,7 +74,8 @@ function doGet(e) {
   if (action == "getLeaves") return createJsonResponse({ status: "success", data: getLeavesData() });
   if (action == "getScheduleData") return createJsonResponse({ status: "success", data: handleGetScheduleData() });
   if (action == "getInitPayrollData") return createJsonResponse(handleGetInitPayrollData());
-
+  if (action == "getStockSettings") return createJsonResponse({ status: "success", data: handleGetStockSettings() });
+  if (action == "getStockHistory") return createJsonResponse({ status: "success", data: handleGetStockHistory() });
   if (action == "testLine") {
     var errMessage = sendLineNotify("🔥 ทดสอบการเชื่อมต่อ LINE จาก Google Apps Script สำเร็จ!");
     if (errMessage) {
@@ -112,6 +113,8 @@ function doPost(e) {
     else if (action === "saveSchedules") { res = handleSaveSchedules(p.data); }
     else if (action === "saveScheduleSettings") { res = handleSaveScheduleSettings(p.data); }
     else if (action === "saveChecklist") { res = handleSaveChecklist(p); }
+    else if (action === "saveStockCount") { res = handleSaveStockCount(p); }
+    else if (action === "updateParLevel") { res = handleUpdateParLevel(p.station, p.itemName, p.parLevel); }
     else { res = { status: "error", message: "Unknown action" }; }
 
     // Auto-sync to Firebase if the action modifies data
@@ -1507,6 +1510,131 @@ function handleSaveChecklist(p) {
     
     lock.releaseLock();
     return { status: "success", message: "Checklist saved successfully" };
+  } catch (error) {
+    return { status: "error", message: error.toString() };
+  }
+}
+
+// ----------------------------------------------------
+// Stock Management
+// ----------------------------------------------------
+
+function handleGetStockSettings() {
+  var sheet = getSheetByNameOrCreateNew("Stock:Daily");
+  var data = sheet.getDataRange().getValues();
+  if (data.length <= 1) {
+    if (data.length === 0) {
+      sheet.appendRow(["", "", "Station", "ItemName", "Unit", "ParLevel"]);
+    }
+    return [];
+  }
+  
+  var settings = [];
+  for (var i = 1; i < data.length; i++) {
+    settings.push({
+      station: data[i][2] || "",
+      itemName: data[i][3] || "",
+      unit: data[i][4] || "",
+      parLevel: parseFloat(data[i][5]) || 0
+    });
+  }
+  return settings;
+}
+
+function handleGetStockHistory() {
+  var sheet = getSheetByNameOrCreateNew("StockHistory");
+  var data = sheet.getDataRange().getValues();
+  if (data.length <= 1) {
+    if (data.length === 0) {
+      sheet.appendRow(["Timestamp", "Station", "CounterName", "Data", "Round"]);
+    }
+    return [];
+  }
+  
+  var history = [];
+  for (var i = 1; i < data.length; i++) {
+    var timestampStr = "";
+    if (data[i][0]) {
+       if (data[i][0] instanceof Date) {
+           timestampStr = Utilities.formatDate(data[i][0], "Asia/Bangkok", "yyyy-MM-dd HH:mm:ss");
+       } else {
+           timestampStr = data[i][0];
+       }
+    }
+    
+    var jsonData = [];
+    try {
+      jsonData = JSON.parse(data[i][3]);
+    } catch(e) {}
+
+    history.push({
+      timestamp: timestampStr,
+      station: data[i][1] || "",
+      counterName: data[i][2] || "",
+      data: jsonData,
+      round: data[i][4] || ""
+    });
+  }
+  // Return latest first
+  return history.reverse();
+}
+
+function handleSaveStockCount(p) {
+  try {
+    var lock = LockService.getScriptLock();
+    lock.waitLock(10000);
+    
+    var sheet = getSheetByNameOrCreateNew("StockHistory");
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow(["Timestamp", "Station", "CounterName", "Data", "Round"]);
+    }
+    
+    var itemsJson = JSON.stringify(p.items || []);
+    sheet.appendRow([
+      p.timestamp,
+      p.station,
+      p.counterName,
+      itemsJson,
+      p.round || ""
+    ]);
+    
+    lock.releaseLock();
+    return { status: "success", message: "Stock count saved successfully" };
+  } catch (error) {
+    return { status: "error", message: error.toString() };
+  }
+}
+
+function handleUpdateParLevel(station, itemName, newParLevel) {
+  try {
+    var lock = LockService.getScriptLock();
+    lock.waitLock(10000);
+    
+    var sheet = getSheetByNameOrCreateNew("Stock:Daily");
+    var data = sheet.getDataRange().getValues();
+    
+    if (data.length === 0) {
+      sheet.appendRow(["", "", "Station", "ItemName", "Unit", "ParLevel"]);
+      data = sheet.getDataRange().getValues();
+    }
+    
+    var found = false;
+    for (var i = 1; i < data.length; i++) {
+      if (data[i][2] == station && data[i][3] == itemName) {
+        sheet.getRange(i + 1, 6).setValue(newParLevel);
+        found = true;
+        break;
+      }
+    }
+    
+    if (!found) {
+      // If not found, we could append it, but usually admin manages existing list.
+      // We will append it just in case.
+      sheet.appendRow(["", "", station, itemName, "", newParLevel]);
+    }
+    
+    lock.releaseLock();
+    return { status: "success", message: "Par level updated successfully" };
   } catch (error) {
     return { status: "error", message: error.toString() };
   }

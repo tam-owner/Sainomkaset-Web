@@ -6,13 +6,9 @@ for f in glob.glob('*.html'):
         c = file.read()
     
     # Bump app.js
-    c = re.sub(r'app\.js\?v=\d+_\d+', 'app.js?v=20260806_165', c)
+    c = re.sub(r'app\.js\?v=[\w]+', 'app.js?v=20260829_002', c)
     # Bump firebase-init.js
-    c = re.sub(r'firebase-init\.js\?v=\d+_\d+', 'firebase-init.js?v=20260806_165', c)
-    # Bump version display
-    c = re.sub(r'v2\.2\.\d+ \(Firebase\)', 'v2.2.165 (Firebase)', c)
-    # Bump APP_VERSION
-    c = re.sub(r'APP_VERSION = "\d+_\d+"', 'APP_VERSION = "20260806_165"', c)
+    c = re.sub(r'firebase-init\.js\?v=[\w]+', 'firebase-init.js?v=20260829_002', c)
     
     with open(f, 'w') as file:
         file.write(c)
