@@ -1589,12 +1589,14 @@ function handleSaveStockCount(p) {
     
     var round = p.round || "";
     var isDaily = (round === "เปิดร้าน" || round === "รอบเย็น");
-    var sheetName = isDaily ? "Stock:ResponseDaily" : "StockHistory";
+    var isAll = (round === "รายการทั้งหมด");
+    var isMatrix = (isDaily || isAll);
+    var sheetName = isDaily ? "Stock:ResponseDaily" : (isAll ? "Stock:ResponseAll" : "StockHistory");
     
     var sheet = getSheetByNameOrCreateNew(sheetName);
     var items = p.items || [];
     
-    if (isDaily) {
+    if (isMatrix) {
       var lastRow = sheet.getLastRow();
       var lastCol = sheet.getLastColumn();
       
@@ -1617,7 +1619,7 @@ function handleSaveStockCount(p) {
       }
       
       var targetCol = -1;
-      for (var c = 4; c < headerRow.length; c += 2) {
+      for (var c = 4; c < headerRow.length; c += 3) {
         if (headerRow[c] === colHeader) {
           targetCol = c + 1; 
           break;
@@ -1629,11 +1631,12 @@ function handleSaveStockCount(p) {
         if (targetCol < 5) targetCol = 5;
         
         sheet.getRange(1, targetCol).setValue(colHeader).setBackground("#60a5fa").setFontColor("white").setFontWeight("bold").setHorizontalAlignment("center");
-        sheet.getRange(1, targetCol, 1, 2).merge();
+        sheet.getRange(1, targetCol, 1, 3).merge();
         sheet.getRange(2, targetCol).setValue("เหลือ").setBackground("#f3f4f6").setFontWeight("bold").setHorizontalAlignment("center");
         sheet.getRange(2, targetCol + 1).setValue("ขาด").setBackground("#f3f4f6").setFontWeight("bold").setHorizontalAlignment("center");
+        sheet.getRange(2, targetCol + 2).setValue("หมายเหตุ").setBackground("#f3f4f6").setFontWeight("bold").setHorizontalAlignment("center");
         
-        sheet.getRange(1, targetCol, sheet.getMaxRows(), 2).setBorder(null, null, null, true, null, null, "gray", SpreadsheetApp.BorderStyle.SOLID);
+        sheet.getRange(1, targetCol, sheet.getMaxRows(), 3).setBorder(null, null, null, true, null, null, "gray", SpreadsheetApp.BorderStyle.SOLID);
       }
       
       var existingData = [];
@@ -1664,10 +1667,6 @@ function handleSaveStockCount(p) {
           deficit = calc > 0 ? calc : 0;
         }
         
-        if (item.remark) {
-           remainingText += " [" + item.remark + "]";
-        }
-        
         var rowIdx = -1;
         for (var r = 0; r < existingData.length; r++) {
           if (String(existingData[r][0]) === String(p.station) && String(existingData[r][1]) === String(item.itemName)) {
@@ -1685,6 +1684,7 @@ function handleSaveStockCount(p) {
         
         sheet.getRange(rowIdx, targetCol).setValue(remainingText).setHorizontalAlignment("center");
         sheet.getRange(rowIdx, targetCol + 1).setValue(deficit).setHorizontalAlignment("center");
+        sheet.getRange(rowIdx, targetCol + 2).setValue(item.remark || "");
       }
       
     } else {
