@@ -490,6 +490,9 @@
                         include = true;
                         displayPar = item.parRnd;
                     }
+                } else if (selectedRound === 'รายการทั้งหมด') {
+                    include = true;
+                    displayPar = item.parRnd || item.parDay || 0;
                 }
 
                 if (include) {
@@ -498,6 +501,19 @@
                 
                 return acc;
             }, []);
+            
+            if (selectedRound === 'รายการทั้งหมด') {
+                currentItems.sort((a, b) => {
+                    const getGroup = (supplier) => {
+                        if (!supplier) return 4;
+                        if (supplier.includes('Sainom')) return 1;
+                        if (supplier.includes('Makro')) return 2;
+                        if (supplier.includes('Other')) return 3;
+                        return 4;
+                    };
+                    return getGroup(a.supplierMode) - getGroup(b.supplierMode);
+                });
+            }
             
             if (currentItems.length === 0) {
                 container.innerHTML = `
@@ -508,7 +524,27 @@
                 return;
             }
 
+            let currentGroup = '';
             currentItems.forEach((item, index) => {
+                if (selectedRound === 'รายการทั้งหมด') {
+                    let group = 'รายการทั่วไป';
+                    if (item.supplierMode && item.supplierMode.includes('Sainom')) group = 'Sainom';
+                    else if (item.supplierMode && item.supplierMode.includes('Makro')) group = 'Makro';
+                    else if (item.supplierMode && item.supplierMode.includes('Other')) group = 'ร้านอื่นๆ';
+
+                    if (group !== currentGroup) {
+                        currentGroup = group;
+                        const headerHtml = `
+                            <div class="mt-2 mb-4 flex items-center">
+                                <div class="flex-1 border-t-2 border-indigo-100"></div>
+                                <span class="px-4 text-[14px] font-bold text-indigo-500 tracking-wider">📦 ${group}</span>
+                                <div class="flex-1 border-t-2 border-indigo-100"></div>
+                            </div>
+                        `;
+                        container.insertAdjacentHTML('beforeend', headerHtml);
+                    }
+                }
+
                 const draftKey = selectedRound + '_' + selectedStation;
                 let savedItem = null;
                 if (savedDrafts[draftKey]) {
