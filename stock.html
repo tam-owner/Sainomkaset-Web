@@ -73,7 +73,7 @@
     </div>
 
     <!-- Header -->
-    <div class="px-4 mb-3">
+    <div class="px-4 mb-1">
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-2xl font-bold text-slate-800 kanit-text">ระบบนับสต๊อก</h1>
@@ -101,13 +101,13 @@
                         </div>
                     </button>
                     
-                    <button onclick="selectRound('ปิดร้าน')" class="w-full bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-2.5 hover:border-indigo-300 hover:shadow-md transition-all active:scale-[0.98] text-slate-700 text-center">
+                    <button onclick="selectRound('รอบเย็น')" class="w-full bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-2.5 hover:border-indigo-300 hover:shadow-md transition-all active:scale-[0.98] text-slate-700 text-center">
                         <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-500 flex items-center justify-center shrink-0 border border-indigo-100">
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
                         </div>
                         <div>
-                            <div class="font-bold text-[16px] text-slate-800 kanit-text tracking-wide leading-none">ปิดร้าน</div>
-                            <div class="text-[11px] text-slate-500 mt-1.5 leading-tight">สรุปยอดหลังปิด</div>
+                            <div class="font-bold text-[16px] text-slate-800 kanit-text tracking-wide leading-none">รอบเย็น</div>
+                            <div class="text-[11px] text-slate-500 mt-1.5 leading-tight">นับส่งช่วง 18.00-20.00</div>
                         </div>
                     </button>
                 </div>
@@ -280,7 +280,7 @@
 
 
     <script>
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzCQ16IQkGrGY5CdgLpXyzOIWxw9nAIZLJG4veL4TePy8HeIpNDiFJEbv1fXfdOjec/exec';
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyxu_VhZXs6FSfFCBn0vMp582pdwBVBy386msmu08_TVYb6jYk8XFQQOi1HU61mNbU/exec';
         
         let stockSettings = [];
         let selectedRound = '';
@@ -445,7 +445,40 @@
             const container = document.getElementById('items-container');
             container.innerHTML = '';
 
-            currentItems = stockSettings.filter(item => item.station === selectedStation);
+            currentItems = stockSettings.reduce((acc, item) => {
+                if (item.station !== selectedStation) return acc;
+                
+                let include = false;
+                let displayPar = 0;
+                
+                if (selectedRound === 'เปิดร้าน' || selectedRound === 'รอบเย็น') {
+                    if (item.dailyMode === 'Daily') {
+                        include = true;
+                        displayPar = item.parDay;
+                    }
+                } else if (selectedRound === 'Sainom') {
+                    if (item.supplierMode && item.supplierMode.includes('Sainom')) {
+                        include = true;
+                        displayPar = item.parRnd;
+                    }
+                } else if (selectedRound === 'Makro') {
+                    if (item.supplierMode && item.supplierMode.includes('Makro')) {
+                        include = true;
+                        displayPar = item.parRnd;
+                    }
+                } else if (selectedRound === 'ร้านอื่นๆ') {
+                    if (item.supplierMode && item.supplierMode.includes('Other')) {
+                        include = true;
+                        displayPar = item.parRnd;
+                    }
+                }
+
+                if (include) {
+                    acc.push({ ...item, parLevel: displayPar });
+                }
+                
+                return acc;
+            }, []);
             
             if (currentItems.length === 0) {
                 container.innerHTML = `

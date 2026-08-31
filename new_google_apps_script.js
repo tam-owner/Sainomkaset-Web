@@ -1520,7 +1520,7 @@ function handleSaveChecklist(p) {
 // ----------------------------------------------------
 
 function handleGetStockSettings() {
-  var sheet = getSheetByNameOrCreateNew("Stock:Daily");
+  var sheet = getSheetByNameOrCreateNew("Master Stock");
   var data = sheet.getDataRange().getValues();
   if (data.length <= 1) {
     if (data.length === 0) {
@@ -1535,7 +1535,10 @@ function handleGetStockSettings() {
       station: data[i][2] || "",
       itemName: data[i][3] || "",
       unit: data[i][4] || "",
-      parLevel: parseFloat(data[i][5]) || 0
+      dailyMode: String(data[i][5] || "").trim(),
+      parDay: parseFloat(data[i][6]) || 0,
+      supplierMode: String(data[i][7] || "").trim(),
+      parRnd: parseFloat(data[i][8]) || 0
     });
   }
   return settings;
@@ -1610,7 +1613,7 @@ function handleUpdateParLevel(station, itemName, newParLevel) {
     var lock = LockService.getScriptLock();
     lock.waitLock(10000);
     
-    var sheet = getSheetByNameOrCreateNew("Stock:Daily");
+    var sheet = getSheetByNameOrCreateNew("Master Stock");
     var data = sheet.getDataRange().getValues();
     
     if (data.length === 0) {
