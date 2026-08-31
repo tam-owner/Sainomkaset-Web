@@ -898,13 +898,41 @@
                 document.getElementById('capture-header').classList.add('hidden');
                 captureArea.classList.add('shadow-sm', 'border-slate-200');
                 captureArea.classList.remove('border-transparent');
-
-                // Trigger download
-                const link = document.createElement('a');
-                link.download = `stock-summary-${selectedStation}-${new Date().getTime()}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
                 hideLoading();
+
+                const imgData = canvas.toDataURL('image/png');
+                
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+                const isLine = /Line/.test(navigator.userAgent);
+                
+                if (isIOS || isLine) {
+                    Swal.fire({
+                        title: 'แตะค้างที่รูปภาพเพื่อบันทึก',
+                        text: 'จากนั้นเลือก "บันทึกรูปภาพ" (Save Image) เพื่อนำไปส่งในไลน์',
+                        imageUrl: imgData,
+                        imageWidth: '100%',
+                        imageAlt: 'Stock Summary',
+                        confirmButtonText: 'ปิด',
+                        confirmButtonColor: '#3085d6',
+                        customClass: {
+                            image: 'rounded-md shadow-sm border border-slate-200'
+                        }
+                    });
+                } else {
+                    // Trigger download for Android / Desktop
+                    const link = document.createElement('a');
+                    link.download = `stock-summary-${selectedStation}-${new Date().getTime()}.png`;
+                    link.href = imgData;
+                    link.click();
+                    
+                    Swal.fire({
+                        title: 'ดาวน์โหลดสำเร็จ',
+                        text: 'รูปภาพถูกบันทึกลงเครื่องของคุณแล้ว',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
             }).catch(err => {
                 hideLoading();
                 Swal.fire('ข้อผิดพลาด', 'ไม่สามารถสร้างรูปภาพได้: ' + err.message, 'error');
