@@ -1587,19 +1587,116 @@ function handleSaveStockCount(p) {
     var lock = LockService.getScriptLock();
     lock.waitLock(10000);
     
-    var sheet = getSheetByNameOrCreateNew("StockHistory");
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow(["Timestamp", "Station", "CounterName", "Data", "Round"]);
-    }
+    var round = p.round || "";
+    var isDaily = (round === "เปิดร้าน" || round === "รอบเย็น");
+    var sheetName = isDaily ? "Stock:ResponseDaily" : "StockHistory";
     
-    var itemsJson = JSON.stringify(p.items || []);
-    sheet.appendRow([
-      p.timestamp,
-      p.station,
-      p.counterName,
-      itemsJson,
-      p.round || ""
-    ]);
+    var sheet = getSheetByNameOrCreateNew(sheetName);
+    var items = p.items || [];
+    
+    if (isDaily) {
+      var lastRow = sheet.getLastRow();
+      var lastCol = sheet.getLastColumn();
+      
+      if (lastRow < 2) {
+        sheet.getRange(2, 1, 1, 4).setValues([["Station", "รายการ", "หน่วย", "ควรมี"]]);
+        sheet.getRange(2, 1, 1, 4).setBackground("#f3f4f6").setFontWeight("bold").setHorizontalAlignment("center");
+        sheet.setFrozenRows(2);
+        sheet.setFrozenColumns(4);
+        lastRow = 2;
+        lastCol = 4;
+      }
+      
+      var d = p.timestamp ? new Date(p.timestamp) : new Date();
+      var dateStr = Utilities.formatDate(d, "Asia/Bangkok", "d/M/yy");
+      var colHeader = dateStr + " - " + round;
+      
+      var headerRow = [];
+      if (lastCol >= 5) {
+        headerRow = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+      }
+      
+      var targetCol = -1;
+      for (var c = 4; c < headerRow.length; c += 2) {
+        if (headerRow[c] === colHeader) {
+          targetCol = c + 1; 
+          break;
+        }
+      }
+      
+      if (targetCol === -1) {
+        targetCol = lastCol + 1;
+        if (targetCol < 5) targetCol = 5;
+        
+        sheet.getRange(1, targetCol).setValue(colHeader).setBackground("#60a5fa").setFontColor("white").setFontWeight("bold").setHorizontalAlignment("center");
+        sheet.getRange(1, targetCol, 1, 2).merge();
+        sheet.getRange(2, targetCol).setValue("เหลือ").setBackground("#f3f4f6").setFontWeight("bold").setHorizontalAlignment("center");
+        sheet.getRange(2, targetCol + 1).setValue("ขาด").setBackground("#f3f4f6").setFontWeight("bold").setHorizontalAlignment("center");
+        
+        sheet.getRange(1, targetCol, sheet.getMaxRows(), 2).setBorder(null, null, null, true, null, null, "gray", SpreadsheetApp.BorderStyle.SOLID);
+      }
+      
+      var existingData = [];
+      if (lastRow >= 3) {
+        existingData = sheet.getRange(3, 1, lastRow - 2, 4).getValues(); 
+      }
+      
+      for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        
+        var par = parseFloat(item.parLevel) || 0;
+        var remaining = 0;
+        var remainingText = "";
+        var deficit = "";
+        
+        if (item.zeroStatus === "empty") {
+          remaining = 0;
+          remainingText = "0";
+          var calc = par - remaining;
+          deficit = calc > 0 ? calc : 0;
+        } else if (item.zeroStatus === "in_container") {
+          remainingText = "มีอยู่ในตู้/ถัง";
+          deficit = "-";
+        } else {
+          remaining = parseFloat(item.count) || 0;
+          remainingText = remaining.toString();
+          var calc = par - remaining;
+          deficit = calc > 0 ? calc : 0;
+        }
+        
+        if (item.remark) {
+           remainingText += " [" + item.remark + "]";
+        }
+        
+        var rowIdx = -1;
+        for (var r = 0; r < existingData.length; r++) {
+          if (String(existingData[r][0]) === String(p.station) && String(existingData[r][1]) === String(item.itemName)) {
+            rowIdx = r + 3;
+            break;
+          }
+        }
+        
+        if (rowIdx === -1) {
+          lastRow++;
+          rowIdx = lastRow;
+          sheet.getRange(rowIdx, 1, 1, 4).setValues([[p.station, item.itemName, item.unit, item.parLevel]]);
+          existingData.push([p.station, item.itemName, item.unit, item.parLevel]);
+        }
+        
+        sheet.getRange(rowIdx, targetCol).setValue(remainingText).setHorizontalAlignment("center");
+        sheet.getRange(rowIdx, targetCol + 1).setValue(deficit).setHorizontalAlignment("center");
+      }
+      
+    } else {
+      var itemsJson = JSON.stringify(items);
+      sheet.appendRow([
+        p.timestamp,
+        p.station,
+        p.counterName,
+        itemsJson,
+        round
+      ]);
+    }
     
     lock.releaseLock();
     return { status: "success", message: "Stock count saved successfully" };
