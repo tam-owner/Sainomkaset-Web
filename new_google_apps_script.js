@@ -10,6 +10,7 @@ function onOpen() {
     .addItem('⚡️ เปิดระบบซิงค์อัตโนมัติ (ทำครั้งเดียว)', 'setupAutoSyncTrigger')
     .addSeparator()
     .addItem('🛠 จัดเรียงและรวมคอลัมน์สต๊อกที่ซ้ำซ้อน', 'fixMatrixSheetsOrderAndDuplicates')
+    .addItem('🎨 ไฮไลท์ช่องของขาดให้เป็นสีแดง', 'highlightDeficitCells')
     .addToUi();
 }
 
@@ -1698,7 +1699,15 @@ function handleSaveStockCount(p) {
         }
 
         sheet.getRange(rowIdx, targetCol).setValue(remainingText).setHorizontalAlignment("center");
-        sheet.getRange(rowIdx, targetCol + 1).setValue(deficit).setHorizontalAlignment("center");
+        
+        var deficitCell = sheet.getRange(rowIdx, targetCol + 1);
+        deficitCell.setValue(deficit).setHorizontalAlignment("center");
+        if (deficit > 0 && deficit !== "-") {
+          deficitCell.setBackground("#b91c1c").setFontColor("white").setFontWeight("bold");
+        } else {
+          deficitCell.setBackground(null).setFontColor("black").setFontWeight("normal");
+        }
+        
         sheet.getRange(rowIdx, targetCol + 2).setValue(item.remark || "");
       }
 
@@ -1853,4 +1862,48 @@ function fixMatrixSheetsOrderAndDuplicates() {
     }
   });
   SpreadsheetApp.getUi().alert("✅ จัดเรียงและรวมข้อมูลซ้ำเสร็จสิ้น!");
+}
+
+function highlightDeficitCells() {
+  var sheetNames = ["Stock:ResponseDaily", "Stock:ResponseAll", "Stock:Sainom", "Stock:Makro", "Stock:Other"];
+  sheetNames.forEach(function(name) {
+    var sheet = getSheetByNameOrCreateNew(name);
+    var lastRow = sheet.getLastRow();
+    var lastCol = sheet.getLastColumn();
+    if (lastRow < 3 || lastCol < 5) return;
+    
+    var headerRow = sheet.getRange(2, 1, 1, lastCol).getValues()[0];
+    var dataRange = sheet.getRange(3, 1, lastRow - 2, lastCol);
+    var data = dataRange.getValues();
+    var backgrounds = dataRange.getBackgrounds();
+    var fontColors = dataRange.getFontColors();
+    var fontWeights = dataRange.getFontWeights();
+    
+    var changed = false;
+    for (var c = 4; c < lastCol; c++) {
+      if (String(headerRow[c]).trim() === "ขาด") {
+        for (var r = 0; r < data.length; r++) {
+          var val = parseFloat(data[r][c]);
+          if (!isNaN(val) && val > 0) {
+            backgrounds[r][c] = "#b91c1c";
+            fontColors[r][c] = "#ffffff";
+            fontWeights[r][c] = "bold";
+            changed = true;
+          } else {
+            backgrounds[r][c] = null;
+            fontColors[r][c] = "#000000";
+            fontWeights[r][c] = "normal";
+            changed = true;
+          }
+        }
+      }
+    }
+    
+    if (changed) {
+      dataRange.setBackgrounds(backgrounds);
+      dataRange.setFontColors(fontColors);
+      dataRange.setFontWeights(fontWeights);
+    }
+  });
+  SpreadsheetApp.getUi().alert('✅ ไฮไลท์ช่องของขาดให้เป็นสีแดงเรียบร้อยแล้วครับ');
 }
