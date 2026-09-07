@@ -8,6 +8,8 @@ function onOpen() {
   ui.createMenu('Sainom Kaset')
     .addItem('🔄 ซิงค์ข้อมูลไปที่เว็บไซต์ (Firebase)', 'syncToFirebaseManually')
     .addItem('⚡️ เปิดระบบซิงค์อัตโนมัติ (ทำครั้งเดียว)', 'setupAutoSyncTrigger')
+    .addSeparator()
+    .addItem('🛠 จัดเรียงและรวมคอลัมน์สต๊อกที่ซ้ำซ้อน', 'fixMatrixSheetsOrderAndDuplicates')
     .addToUi();
 }
 
@@ -226,7 +228,7 @@ function getSheetByNameOrCreateNew(name) {
       sheet.appendRow(["Key", "Value"]);
     } else if (name === "Checklist_Settings") {
       sheet.appendRow(["Category", "Period", "ItemName"]);
-      
+
       // Default initial data
       var defaults = [
         ["Service", "เปิดร้าน", "เปิดระบบ POS"],
@@ -239,7 +241,7 @@ function getSheetByNameOrCreateNew(name) {
         ["Service", "ปิดร้าน", "ล้างเครื่องชงกาแฟ"],
         ["Service", "ปิดร้าน", "เก็บกวาดพื้นและเช็ดโต๊ะ"],
         ["Service", "ปิดร้าน", "ปิดไฟและแอร์"],
-        
+
         ["Bread", "เปิดร้าน", "อุ่นเตาอบ"],
         ["Bread", "เปิดร้าน", "เช็คสต็อกขนมปัง"],
         ["Bread", "เปิดร้าน", "จัดเรียงขนมปังในตู้โชว์"],
@@ -248,7 +250,7 @@ function getSheetByNameOrCreateNew(name) {
         ["Bread", "ปิดร้าน", "ทำความสะอาดเตาอบ"],
         ["Bread", "ปิดร้าน", "เก็บกวาดเศษขนมปัง"],
         ["Bread", "ปิดร้าน", "จัดเก็บอุปกรณ์"],
-        
+
         ["Drink", "เปิดร้าน", "เช็คสต็อกแก้วและหลอด"],
         ["Drink", "เปิดร้าน", "เตรียมน้ำแข็ง"],
         ["Drink", "เปิดร้าน", "เช็ควัตถุดิบชงดื่ม"],
@@ -257,14 +259,14 @@ function getSheetByNameOrCreateNew(name) {
         ["Drink", "ปิดร้าน", "เคลียร์ขยะ"],
         ["Drink", "ปิดร้าน", "เช็ดทำความสะอาดบาร์น้ำ"],
         ["Drink", "ปิดร้าน", "ตรวจสอบตู้แช่ก่อนปิด"],
-        
+
         ["Lava", "เปิดร้าน", "เตรียมไส้ลาวา"],
         ["Lava", "เปิดร้าน", "เปิดเครื่องอุ่น"],
         ["Lava", "เปิดร้าน", "เช็คสต็อกวัตถุดิบลาวา"],
         ["Lava", "ปิดร้าน", "เก็บไส้ลาวาเข้าตู้เย็น"],
         ["Lava", "ปิดร้าน", "ล้างเครื่องอุ่น"],
         ["Lava", "ปิดร้าน", "เช็ดทำความสะอาดบริเวณลาวา"],
-        
+
         ["Hot meal", "เปิดร้าน", "เปิดเตาทำอาหาร"],
         ["Hot meal", "เปิดร้าน", "เตรียมวัตถุดิบอาหารคาว"],
         ["Hot meal", "เปิดร้าน", "เช็คสต็อกจานชาม"],
@@ -339,17 +341,17 @@ function getMergedAttendanceData() {
       for (var i = 1; i < dataNew.length; i++) {
         var rawRow = dataNew[i];
         if (!rawRow[0]) continue;
-        
-        var ts = rawRow[0] instanceof Date 
-                 ? Utilities.formatDate(rawRow[0], "Asia/Bangkok", "dd/MM/yyyy HH:mm:ss") 
-                 : String(rawRow[0]);
+
+        var ts = rawRow[0] instanceof Date
+          ? Utilities.formatDate(rawRow[0], "Asia/Bangkok", "dd/MM/yyyy HH:mm:ss")
+          : String(rawRow[0]);
         var name = String(rawRow[1]);
         var type = String(rawRow[2]);
-        var sched = rawRow[3] instanceof Date 
-                    ? Utilities.formatDate(rawRow[3], "Asia/Bangkok", "HH:mm") 
-                    : String(rawRow[3]);
+        var sched = rawRow[3] instanceof Date
+          ? Utilities.formatDate(rawRow[3], "Asia/Bangkok", "HH:mm")
+          : String(rawRow[3]);
         var note = String(rawRow[4] || "");
-        
+
         addRow([ts, name, type, sched, note]);
       }
     }
@@ -757,7 +759,7 @@ function getChecklistSettingsData() {
       var per = String(row[1]).trim();
       var item = String(row[2]).trim();
       if (!cat || !per || !item) continue;
-      
+
       if (!result[cat]) result[cat] = {};
       if (!result[cat][per]) result[cat][per] = [];
       result[cat][per].push(item);
@@ -773,7 +775,7 @@ function handleSaveChecklistSettings(payload) {
     var dataObj = payload.data || {};
     var sheet = getSheetByNameOrCreateNew("Checklist_Settings");
     sheet.clearContents();
-    
+
     var rows = [["Category", "Period", "ItemName"]];
     for (var cat in dataObj) {
       for (var per in dataObj[cat]) {
@@ -783,7 +785,7 @@ function handleSaveChecklistSettings(payload) {
         }
       }
     }
-    
+
     if (rows.length > 0) {
       sheet.getRange(1, 1, rows.length, 3).setValues(rows);
     }
@@ -1199,7 +1201,7 @@ function handleSaveScheduleSettings(data) {
 
 function handleGetInitPayrollData() {
   // syncAttendanceToNewSheet(); // Removed to improve load performance
-  
+
   var t0 = new Date().getTime();
   var attendance = getMergedAttendanceData();
   var t1 = new Date().getTime();
@@ -1218,7 +1220,7 @@ function handleGetInitPayrollData() {
   var checklistSettings = getChecklistSettingsData();
   var t8 = new Date().getTime();
 
-  console.log("Times: att=" + (t1-t0) + ", emp=" + (t2-t1) + ", ded=" + (t3-t2) + ", leave=" + (t4-t3) + ", req=" + (t5-t4) + ", set=" + (t6-t5) + ", logs=" + (t7-t6) + ", chk=" + (t8-t7));
+  console.log("Times: att=" + (t1 - t0) + ", emp=" + (t2 - t1) + ", ded=" + (t3 - t2) + ", leave=" + (t4 - t3) + ", req=" + (t5 - t4) + ", set=" + (t6 - t5) + ", logs=" + (t7 - t6) + ", chk=" + (t8 - t7));
 
   return {
     status: "success",
@@ -1231,7 +1233,7 @@ function handleGetInitPayrollData() {
       settings: settings,
       logs: logs,
       checklistSettings: checklistSettings,
-      times: "att=" + (t1-t0) + ", emp=" + (t2-t1) + ", ded=" + (t3-t2) + ", leave=" + (t4-t3) + ", req=" + (t5-t4) + ", set=" + (t6-t5) + ", logs=" + (t7-t6) + ", chk=" + (t8-t7)
+      times: "att=" + (t1 - t0) + ", emp=" + (t2 - t1) + ", ded=" + (t3 - t2) + ", leave=" + (t4 - t3) + ", req=" + (t5 - t4) + ", set=" + (t6 - t5) + ", logs=" + (t7 - t6) + ", chk=" + (t8 - t7)
     }
   };
 }
@@ -1490,7 +1492,7 @@ function handleSaveChecklist(p) {
 
     var items = p.items || [];
     var dataRows = [];
-    
+
     for (var i = 0; i < items.length; i++) {
       var item = items[i];
       dataRows.push([
@@ -1503,11 +1505,11 @@ function handleSaveChecklist(p) {
         item.reason || ""
       ]);
     }
-    
+
     if (dataRows.length > 0) {
       sheet.getRange(sheet.getLastRow() + 1, 1, dataRows.length, dataRows[0].length).setValues(dataRows);
     }
-    
+
     lock.releaseLock();
     return { status: "success", message: "Checklist saved successfully" };
   } catch (error) {
@@ -1528,7 +1530,7 @@ function handleGetStockSettings() {
     }
     return [];
   }
-  
+
   var settings = [];
   for (var i = 1; i < data.length; i++) {
     settings.push({
@@ -1553,22 +1555,22 @@ function handleGetStockHistory() {
     }
     return [];
   }
-  
+
   var history = [];
   for (var i = 1; i < data.length; i++) {
     var timestampStr = "";
     if (data[i][0]) {
-       if (data[i][0] instanceof Date) {
-           timestampStr = Utilities.formatDate(data[i][0], "Asia/Bangkok", "yyyy-MM-dd HH:mm:ss");
-       } else {
-           timestampStr = data[i][0];
-       }
+      if (data[i][0] instanceof Date) {
+        timestampStr = Utilities.formatDate(data[i][0], "Asia/Bangkok", "yyyy-MM-dd HH:mm:ss");
+      } else {
+        timestampStr = data[i][0];
+      }
     }
-    
+
     var jsonData = [];
     try {
       jsonData = JSON.parse(data[i][3]);
-    } catch(e) {}
+    } catch (e) { }
 
     history.push({
       timestamp: timestampStr,
@@ -1586,20 +1588,30 @@ function handleSaveStockCount(p) {
   try {
     var lock = LockService.getScriptLock();
     lock.waitLock(10000);
-    
+
     var round = p.round || "";
     var isDaily = (round === "เปิดร้าน" || round === "รอบเย็น");
     var isAll = (round === "รายการทั้งหมด");
-    var isMatrix = (isDaily || isAll);
-    var sheetName = isDaily ? "Stock:ResponseDaily" : (isAll ? "Stock:ResponseAll" : "StockHistory");
-    
+    var isSainom = (round === "Sainom");
+    var isMakro = (round === "Makro");
+    var isOther = (round === "ร้านอื่นๆ" || round === "Other");
+
+    var isMatrix = (isDaily || isAll || isSainom || isMakro || isOther);
+
+    var sheetName = "StockHistory";
+    if (isDaily) sheetName = "Stock:ResponseDaily";
+    else if (isAll) sheetName = "Stock:ResponseAll";
+    else if (isSainom) sheetName = "Stock:Sainom";
+    else if (isMakro) sheetName = "Stock:Makro";
+    else if (isOther) sheetName = "Stock:Other";
+
     var sheet = getSheetByNameOrCreateNew(sheetName);
     var items = p.items || [];
-    
+
     if (isMatrix) {
       var lastRow = sheet.getLastRow();
       var lastCol = sheet.getLastColumn();
-      
+
       if (lastRow < 2) {
         sheet.getRange(2, 1, 1, 4).setValues([["Station", "รายการ", "หน่วย", "ควรมี"]]);
         sheet.getRange(2, 1, 1, 4).setBackground("#f3f4f6").setFontWeight("bold").setHorizontalAlignment("center");
@@ -1608,50 +1620,53 @@ function handleSaveStockCount(p) {
         lastRow = 2;
         lastCol = 4;
       }
-      
+
       var d = p.timestamp ? new Date(p.timestamp) : new Date();
       var dateStr = Utilities.formatDate(d, "Asia/Bangkok", "d/M/yy");
       var colHeader = dateStr + " - " + round;
-      
+
       var headerRow = [];
       if (lastCol >= 5) {
         headerRow = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
       }
-      
+
       var targetCol = -1;
-      for (var c = 4; c < headerRow.length; c += 3) {
-        if (headerRow[c] === colHeader) {
-          targetCol = c + 1; 
+      var searchHeader = String(colHeader).trim();
+      for (var c = 4; c < headerRow.length; c++) {
+        if (String(headerRow[c]).trim() === searchHeader) {
+          targetCol = c + 1;
           break;
         }
       }
-      
+
       if (targetCol === -1) {
-        targetCol = lastCol + 1;
-        if (targetCol < 5) targetCol = 5;
-        
+        if (lastCol >= 5) {
+          sheet.insertColumnsBefore(5, 3);
+        }
+        targetCol = 5;
+
         sheet.getRange(1, targetCol).setValue(colHeader).setBackground("#60a5fa").setFontColor("white").setFontWeight("bold").setHorizontalAlignment("center");
         sheet.getRange(1, targetCol, 1, 3).merge();
         sheet.getRange(2, targetCol).setValue("เหลือ").setBackground("#f3f4f6").setFontWeight("bold").setHorizontalAlignment("center");
         sheet.getRange(2, targetCol + 1).setValue("ขาด").setBackground("#f3f4f6").setFontWeight("bold").setHorizontalAlignment("center");
         sheet.getRange(2, targetCol + 2).setValue("หมายเหตุ").setBackground("#f3f4f6").setFontWeight("bold").setHorizontalAlignment("center");
-        
+
         sheet.getRange(1, targetCol, sheet.getMaxRows(), 3).setBorder(null, null, null, true, null, null, "gray", SpreadsheetApp.BorderStyle.SOLID);
       }
-      
+
       var existingData = [];
       if (lastRow >= 3) {
-        existingData = sheet.getRange(3, 1, lastRow - 2, 4).getValues(); 
+        existingData = sheet.getRange(3, 1, lastRow - 2, 4).getValues();
       }
-      
+
       for (var i = 0; i < items.length; i++) {
         var item = items[i];
-        
+
         var par = parseFloat(item.parLevel) || 0;
         var remaining = 0;
         var remainingText = "";
         var deficit = "";
-        
+
         if (item.zeroStatus === "empty") {
           remaining = 0;
           remainingText = "0";
@@ -1666,7 +1681,7 @@ function handleSaveStockCount(p) {
           var calc = par - remaining;
           deficit = calc > 0 ? calc : 0;
         }
-        
+
         var rowIdx = -1;
         for (var r = 0; r < existingData.length; r++) {
           if (String(existingData[r][0]) === String(p.station) && String(existingData[r][1]) === String(item.itemName)) {
@@ -1674,19 +1689,19 @@ function handleSaveStockCount(p) {
             break;
           }
         }
-        
+
         if (rowIdx === -1) {
           lastRow++;
           rowIdx = lastRow;
           sheet.getRange(rowIdx, 1, 1, 4).setValues([[p.station, item.itemName, item.unit, item.parLevel]]);
           existingData.push([p.station, item.itemName, item.unit, item.parLevel]);
         }
-        
+
         sheet.getRange(rowIdx, targetCol).setValue(remainingText).setHorizontalAlignment("center");
         sheet.getRange(rowIdx, targetCol + 1).setValue(deficit).setHorizontalAlignment("center");
         sheet.getRange(rowIdx, targetCol + 2).setValue(item.remark || "");
       }
-      
+
     } else {
       var itemsJson = JSON.stringify(items);
       sheet.appendRow([
@@ -1697,7 +1712,8 @@ function handleSaveStockCount(p) {
         round
       ]);
     }
-    
+
+    SpreadsheetApp.flush();
     lock.releaseLock();
     return { status: "success", message: "Stock count saved successfully" };
   } catch (error) {
@@ -1709,15 +1725,15 @@ function handleUpdateParLevel(station, itemName, newParLevel) {
   try {
     var lock = LockService.getScriptLock();
     lock.waitLock(10000);
-    
+
     var sheet = getSheetByNameOrCreateNew("Master Stock");
     var data = sheet.getDataRange().getValues();
-    
+
     if (data.length === 0) {
       sheet.appendRow(["", "", "Station", "ItemName", "Unit", "ParLevel"]);
       data = sheet.getDataRange().getValues();
     }
-    
+
     var found = false;
     for (var i = 1; i < data.length; i++) {
       if (data[i][2] == station && data[i][3] == itemName) {
@@ -1726,16 +1742,115 @@ function handleUpdateParLevel(station, itemName, newParLevel) {
         break;
       }
     }
-    
+
     if (!found) {
       // If not found, we could append it, but usually admin manages existing list.
       // We will append it just in case.
       sheet.appendRow(["", "", station, itemName, "", newParLevel]);
     }
-    
+
     lock.releaseLock();
     return { status: "success", message: "Par level updated successfully" };
   } catch (error) {
     return { status: "error", message: error.toString() };
   }
+}
+function fixMatrixSheetsOrderAndDuplicates() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheetNames = ["Stock:ResponseDaily", "Stock:ResponseAll", "Stock:Sainom", "Stock:Makro", "Stock:Other"];
+  
+  sheetNames.forEach(function(sName) {
+    var sheet = ss.getSheetByName(sName);
+    if (!sheet) return;
+    
+    var lastRow = sheet.getLastRow();
+    var lastCol = sheet.getLastColumn();
+    if (lastRow < 3 || lastCol < 5) return;
+    
+    var itemRange = sheet.getRange(3, 1, lastRow - 2, 4);
+    var itemData = itemRange.getValues();
+    
+    var headers = sheet.getRange(1, 5, 1, lastCol - 4).getValues()[0];
+    var bodyData = sheet.getRange(3, 5, lastRow - 2, lastCol - 4).getValues();
+    
+    var rounds = {};
+    for (var c = 0; c < headers.length; c++) {
+      var h = String(headers[c]).trim();
+      if (h !== "") {
+        if (!rounds[h]) rounds[h] = [];
+        rounds[h].push(c);
+      }
+    }
+    
+    var consolidatedRounds = [];
+    var roundKeys = Object.keys(rounds);
+    
+    for (var i = 0; i < roundKeys.length; i++) {
+      var rk = roundKeys[i];
+      var cols = rounds[rk];
+      
+      var roundData = [];
+      for (var r = 0; r < itemData.length; r++) {
+        var remain = "", deficit = "", remark = "";
+        for (var idx = 0; idx < cols.length; idx++) {
+          var colStart = cols[idx];
+          var val1 = String(bodyData[r][colStart] || "").trim();
+          var val2 = String(bodyData[r][colStart + 1] || "").trim();
+          var val3 = String(bodyData[r][colStart + 2] || "").trim();
+          
+          if (val1 !== "") remain = val1;
+          if (val2 !== "") deficit = val2;
+          if (val3 !== "") remark = val3;
+        }
+        roundData.push([remain, deficit, remark]);
+      }
+      
+      var dtStr = rk.split(" - ")[0];
+      var parts = dtStr.split("/");
+      var sortDate = 0;
+      if (parts.length === 3) {
+        var day = parseInt(parts[0], 10);
+        var month = parseInt(parts[1], 10);
+        var year = parseInt(parts[2], 10);
+        if (year < 100) year += 2000;
+        sortDate = new Date(year, month - 1, day).getTime();
+      }
+      
+      consolidatedRounds.push({
+        header: rk,
+        date: sortDate,
+        originalIdx: Math.max.apply(null, cols),
+        data: roundData
+      });
+    }
+    
+    consolidatedRounds.sort(function(a, b) {
+      if (b.date !== a.date) return b.date - a.date;
+      return b.originalIdx - a.originalIdx;
+    });
+    
+    sheet.getRange(1, 5, sheet.getMaxRows(), sheet.getMaxColumns() - 4).clear();
+    
+    for (var i = 0; i < consolidatedRounds.length; i++) {
+      var targetCol = 5 + (i * 3);
+      var rObj = consolidatedRounds[i];
+      
+      sheet.getRange(1, targetCol).setValue(rObj.header)
+           .setBackground("#60a5fa").setFontColor("white")
+           .setFontWeight("bold").setHorizontalAlignment("center");
+      sheet.getRange(1, targetCol, 1, 3).merge();
+      
+      sheet.getRange(2, targetCol).setValue("เหลือ").setBackground("#f3f4f6").setFontWeight("bold").setHorizontalAlignment("center");
+      sheet.getRange(2, targetCol + 1).setValue("ขาด").setBackground("#f3f4f6").setFontWeight("bold").setHorizontalAlignment("center");
+      sheet.getRange(2, targetCol + 2).setValue("หมายเหตุ").setBackground("#f3f4f6").setFontWeight("bold").setHorizontalAlignment("center");
+      
+      sheet.getRange(3, targetCol, rObj.data.length, 3).setValues(rObj.data).setHorizontalAlignment("center");
+      
+      var maxRows = sheet.getMaxRows();
+      if(maxRows >= 1) {
+          sheet.getRange(1, targetCol, maxRows, 3).setBorder(null, null, null, true, null, null, "gray", SpreadsheetApp.BorderStyle.SOLID);
+      }
+    }
+  });
+  SpreadsheetApp.getUi().alert("✅ จัดเรียงและรวมข้อมูลซ้ำเสร็จสิ้น!");
 }
