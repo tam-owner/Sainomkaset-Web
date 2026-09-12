@@ -1933,12 +1933,6 @@ function migrateStockOther() {
     return;
   }
   
-  var firstHeader = String(sheet.getRange(2, 1).getValue()).trim();
-  if (firstHeader === "แหล่งซื้อ") {
-    ui.alert("✅ ชีตนี้ถูกอัปเดตไปแล้วครับ ไม่ต้องทำซ้ำ");
-    return;
-  }
-  
   // 1. Build mapping from Master Stock
   var masterSheet = getSheetByNameOrCreateNew("Master Stock");
   var masterData = masterSheet.getDataRange().getValues();
@@ -1952,15 +1946,20 @@ function migrateStockOther() {
     }
   }
   
-  // 2. Insert Column A
-  sheet.insertColumnBefore(1);
-  sheet.setFrozenColumns(5);
+  var firstHeader = String(sheet.getRange(2, 1).getValue()).trim();
+  var isAlreadyInserted = (firstHeader === "แหล่งซื้อ");
   
-  // 3. Set Header
-  sheet.getRange(2, 1).setValue("แหล่งซื้อ")
-       .setBackground("#f3f4f6")
-       .setFontWeight("bold")
-       .setHorizontalAlignment("center");
+  if (!isAlreadyInserted) {
+    // 2. Insert Column A
+    sheet.insertColumnBefore(1);
+    sheet.setFrozenColumns(5);
+    
+    // 3. Set Header
+    sheet.getRange(2, 1).setValue("แหล่งซื้อ")
+         .setBackground("#f3f4f6")
+         .setFontWeight("bold")
+         .setHorizontalAlignment("center");
+  }
        
   // 4. Fill Data
   if (lastRow >= 3) {
@@ -1981,5 +1980,5 @@ function migrateStockOther() {
     sheet.getRange(3, 1, lastRow - 2, sheet.getLastColumn()).sort(1);
   }
   
-  ui.alert("🎉 อัปเดตชีต Stock:Other และแทรกแหล่งซื้อเรียบร้อยแล้วครับ!");
+  ui.alert("🎉 อัปเดตข้อมูลแหล่งซื้อสำเร็จแล้วครับ! (ดึงจากคอลัมน์ B เรียบร้อย)");
 }
