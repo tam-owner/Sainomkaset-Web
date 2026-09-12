@@ -597,8 +597,8 @@
                                     <input type="text" id="custom-name-${index}" value="${item.itemName}" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-indigo-900 font-bold" placeholder="เช่น น้ำตาลทราย" required>
                                 </div>
                                 <div class="w-1/3">
-                                    <label class="block text-xs font-bold text-slate-500 mb-1">หน่วย</label>
-                                    <input type="text" id="custom-unit-${index}" value="${item.unit}" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-indigo-900 font-bold" placeholder="เช่น กก.">
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">หน่วย <span class="text-rose-500">*</span></label>
+                                    <input type="text" id="custom-unit-${index}" value="${item.unit}" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-indigo-900 font-bold" placeholder="เช่น กก." required>
                                 </div>
                             </div>
                             
@@ -703,8 +703,8 @@
                             <input type="text" id="custom-name-${index}" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-indigo-900 font-bold" placeholder="เช่น น้ำตาลทราย..." required>
                         </div>
                         <div class="w-1/3">
-                            <label class="block text-xs font-bold text-slate-500 mb-1">หน่วย</label>
-                            <input type="text" id="custom-unit-${index}" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-indigo-900 font-bold" placeholder="เช่น กก.">
+                            <label class="block text-xs font-bold text-slate-500 mb-1">หน่วย <span class="text-rose-500">*</span></label>
+                            <input type="text" id="custom-unit-${index}" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-indigo-900 font-bold" placeholder="เช่น กก." required>
                         </div>
                     </div>
                     
@@ -808,8 +808,13 @@
                         hasError = true;
                         break;
                     }
+                    if (!customUnitEl || !customUnitEl.value.trim()) {
+                        Swal.fire('ข้อมูลไม่ครบ', `กรุณาระบุหน่วยของรายการ ${customNameEl.value.trim()}`, 'warning');
+                        hasError = true;
+                        break;
+                    }
                     itemName = customNameEl.value.trim() + " (เพิ่มนอกรายการ)";
-                    item.unit = customUnitEl ? customUnitEl.value.trim() : '';
+                    item.unit = customUnitEl.value.trim();
                 }
 
                 const countInput = document.getElementById(`count-${i}`).value;
