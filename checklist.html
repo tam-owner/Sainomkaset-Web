@@ -52,25 +52,9 @@
     <!-- VIEW: Init / Setup -->
     <div id="view-init" class="max-w-3xl mx-auto px-4 py-6">
         
-        <!-- Step 1: Name -->
-        <div id="step-name" class="card p-6 border-t-4 border-t-emerald-500">
-            <h2 class="text-xl font-bold text-gray-800 mb-2 kanit-text">ยินดีต้อนรับ</h2>
-            <p class="text-sm text-gray-500 mb-6">กรุณาระบุชื่อก่อนเริ่มทำ Checklist</p>
-            
-            <label class="block text-sm font-medium text-gray-700 mb-2">ชื่อผู้ทำรายการ</label>
-            <input type="text" id="counter-name" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-gray-800 focus:bg-white transition-all text-base" placeholder="ระบุชื่อหรือชื่อเล่น" autocomplete="off">
-            
-            <button id="btn-next-name" onclick="proceedToRound()" class="w-full mt-6 bg-emerald-500 text-white py-3.5 rounded-xl transition-all shadow-md active:scale-95 font-medium hidden kanit-text">
-                ถัดไป
-            </button>
-        </div>
-
         <!-- Step 2: Round Selection -->
-        <div id="step-round" class="hidden mt-4">
-            <div class="flex items-center gap-2 mb-4">
-                <button onclick="goBackToName()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-600 active:scale-95 shadow-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                </button>
+        <div id="step-round" class="mt-4">
+            <div class="mb-4">
                 <h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">เลือกรอบ Checklist</h2>
             </div>
             
@@ -210,23 +194,6 @@
             checkConnection();
             setInterval(checkConnection, 30000); // Check every 30s
             fetchChecklistSettings();
-            
-            // Name input listener
-            document.getElementById('counter-name').addEventListener('input', (e) => {
-                const btn = document.getElementById('btn-next-name');
-                if (e.target.value.trim().length > 0) {
-                    btn.classList.remove('hidden');
-                } else {
-                    btn.classList.add('hidden');
-                }
-            });
-            
-            // Auto-fill counter name from localStorage
-            const savedName = localStorage.getItem('snk_last_counter');
-            if (savedName) {
-                document.getElementById('counter-name').value = savedName;
-                document.getElementById('btn-next-name').classList.remove('hidden');
-            }
         };
 
         function showLoading(text) {
@@ -274,33 +241,21 @@
         }
 
         // Navigation flow
-        function proceedToRound() {
-            counterName = document.getElementById('counter-name').value.trim();
-            localStorage.setItem('snk_last_counter', counterName);
-            document.getElementById('step-name').classList.add('hidden');
-            document.getElementById('step-round').classList.remove('hidden');
-            document.getElementById('global-back-btn').classList.add('hidden');
-        }
-
-        function goBackToName() {
-            document.getElementById('step-round').classList.add('hidden');
-            document.getElementById('step-name').classList.remove('hidden');
-            document.getElementById('global-back-btn').classList.remove('hidden');
-        }
-
         function selectRound(round) {
             selectedRound = round;
             document.getElementById('selected-round-display').innerText = `(${round})`;
             document.getElementById('step-round').classList.add('hidden');
             document.getElementById('step-station').classList.remove('hidden');
+            document.getElementById('global-back-btn').classList.add('hidden');
         }
 
         function goBackToRound() {
             document.getElementById('step-station').classList.add('hidden');
             document.getElementById('step-round').classList.remove('hidden');
+            document.getElementById('global-back-btn').classList.remove('hidden');
         }
 
-        function selectStation(station) {
+        async function selectStation(station) {
             selectedStation = station;
             
             // Filter tasks
@@ -311,14 +266,39 @@
                 return;
             }
 
-            document.getElementById('view-init').classList.add('hidden');
-            document.getElementById('main-title').innerText = `Station: ${selectedStation}`;
-            document.getElementById('main-counter-name').innerText = counterName;
-            document.getElementById('main-subtitle').innerText = selectedRound;
-            
-            renderTasks();
-            document.getElementById('view-main').classList.remove('hidden');
-            window.scrollTo(0,0);
+            const savedName = localStorage.getItem('snk_last_counter') || '';
+
+            const { value: nameInput } = await Swal.fire({
+                title: 'ชื่อผู้ทำรายการ',
+                text: `Station: ${station}`,
+                input: 'text',
+                inputValue: savedName,
+                inputPlaceholder: 'ระบุชื่อ',
+                showCancelButton: true,
+                confirmButtonText: 'เริ่มทำ Checklist',
+                cancelButtonText: 'ยกเลิก',
+                inputValidator: (value) => {
+                    if (!value || value.trim() === '') {
+                        return 'กรุณาระบุชื่อผู้ทำรายการ';
+                    }
+                }
+            });
+
+            if (nameInput) {
+                counterName = nameInput.trim();
+                localStorage.setItem('snk_last_counter', counterName);
+
+                document.getElementById('view-init').classList.add('hidden');
+                document.getElementById('main-title').innerText = `Station: ${selectedStation}`;
+                document.getElementById('main-counter-name').innerText = counterName;
+                document.getElementById('main-subtitle').innerText = selectedRound;
+                
+                renderTasks();
+                document.getElementById('view-main').classList.remove('hidden');
+                window.scrollTo(0,0);
+            } else {
+                selectedStation = ''; // Reset if cancelled
+            }
         }
 
         function goBackToStation() {
