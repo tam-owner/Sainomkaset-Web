@@ -1536,6 +1536,7 @@ function handleGetStockSettings() {
   var settings = [];
   for (var i = 1; i < data.length; i++) {
     settings.push({
+      supplierName: String(data[i][1] || "").trim(),
       station: data[i][2] || "",
       itemName: data[i][3] || "",
       unit: data[i][4] || "",
@@ -1945,7 +1946,7 @@ function migrateStockOther() {
   for (var i = 1; i < masterData.length; i++) {
     var station = String(masterData[i][2] || "").trim();
     var item = String(masterData[i][3] || "").trim();
-    var supplier = String(masterData[i][7] || "").trim();
+    var supplier = String(masterData[i][1] || "").trim();
     if (station && item) {
       mapping[station + "|" + item] = supplier;
     }
