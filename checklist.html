@@ -425,7 +425,7 @@
             showLoading('กำลังบันทึกข้อมูล...');
             
             // Build summary text
-            let summaryMsg = `Checklist ${selectedRound} (Station: ${selectedStation})\n`;
+            let summaryMsg = `${selectedRound} (${selectedStation})\n`;
             let notDoneItems = dataToSave.filter(t => t.status === 'not_done');
             if (notDoneItems.length === 0) {
                 summaryMsg += `✅ เสร็จครบทุกรายการครับ`;
@@ -435,7 +435,6 @@
                     summaryMsg += `${idx + 1}. ${item.task} (เหตุผล: ${item.reason})\n`;
                 });
             }
-            summaryMsg += `\nผู้ทำรายการ: ${counterName}`;
 
             const payload = {
                 action: 'saveChecklist',
