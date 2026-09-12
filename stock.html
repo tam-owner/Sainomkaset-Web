@@ -355,21 +355,36 @@
         }
 
         function fetchStockSettings() {
-            showLoading("กำลังโหลดข้อมูลสินค้า...");
-            fetch(WEB_APP_URL + "?action=getStockSettings")
-                .then(res => res.json())
-                .then(res => {
-                    if (res.status === "success") {
-                        stockSettings = res.data;
+            const cached = localStorage.getItem('cachedStockSettings');
+            if (cached) {
+                stockSettings = JSON.parse(cached);
+                // Fetch in background silently
+                fetch(WEB_APP_URL + "?action=getStockSettings")
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.status === "success") {
+                            stockSettings = res.data;
+                            localStorage.setItem('cachedStockSettings', JSON.stringify(res.data));
+                        }
+                    }).catch(e => console.error("Background fetch failed", e));
+            } else {
+                showLoading("กำลังโหลดข้อมูลสินค้า...");
+                fetch(WEB_APP_URL + "?action=getStockSettings")
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.status === "success") {
+                            stockSettings = res.data;
+                            localStorage.setItem('cachedStockSettings', JSON.stringify(res.data));
+                            hideLoading();
+                        } else {
+                            throw new Error(res.message || "Unknown error");
+                        }
+                    })
+                    .catch(err => {
                         hideLoading();
-                    } else {
-                        throw new Error(res.message || "Unknown error");
-                    }
-                })
-                .catch(err => {
-                    hideLoading();
-                    Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลสินค้าได้: ' + err.message, 'error');
-                });
+                        Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลสินค้าได้: ' + err.message, 'error');
+                    });
+            }
         }
 
         function selectRound(round) {
