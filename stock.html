@@ -885,7 +885,7 @@
                 
                 let cleanItemName = item.itemName.replace(' (เพิ่มนอกรายการ)', '');
                 if (item.count === 0 && item.zeroStatus === 'empty') {
-                    cleanItemName += ' ❌';
+                    cleanItemName = '❌ ' + cleanItemName;
                 }
                 let line = `${index + 1}. ${cleanItemName}: ${countText}`;
                 
