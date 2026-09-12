@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#10B981">
+    <title>Sainom Kaset - Checklist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Prompt', sans-serif; background-color: #F1F5F9; color: #333; -webkit-tap-highlight-color: transparent; }
+        .card { background: white; border-radius: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); border: 1px solid #E2E8F0; overflow: hidden; }
+        input, textarea, select { outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+        input:focus, textarea:focus, select:focus { border-color: #4F46E5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        h1, h2, h3, h4, h5, h6, button, .kanit-text { font-family: 'Kanit', sans-serif !important; font-weight: 600 !important; }
+        
+        div.swal2-popup { border-radius: 24px !important; padding: 1.2rem 1rem !important; width: 300px !important; font-family: 'Prompt', sans-serif !important; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1) !important; }
+        h2.swal2-title { font-family: 'Kanit', sans-serif !important; font-size: 1.15rem !important; font-weight: 700 !important; }
+        div.swal2-html-container { font-size: 0.95rem !important; }
+        button.swal2-confirm, button.swal2-cancel { border-radius: 12px !important; font-family: 'Kanit', sans-serif !important; font-weight: 600 !important; padding: 10px 20px !important; }
+        
+        .radio-custom:checked + div { border-color: currentColor; background-color: currentColor; }
+        .radio-custom:checked + div svg { opacity: 1; transform: scale(1); }
+        
+        /* Spinner */
+        .spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid white; width: 24px; height: 24px; -webkit-animation: spin 1s linear infinite; animation: spin 1s linear infinite; margin: 0 auto; }
+        @-webkit-keyframes spin { 0% { -webkit-transform: rotate(0deg); } 100% { -webkit-transform: rotate(360deg); } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="pb-24 sm:pb-8">
+    
+    <!-- Navbar -->
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="maintemp.html" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+                <h1 class="text-lg text-emerald-600 kanit-text tracking-wide flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                    Checklist
+                </h1>
+            </div>
+            <div id="connection-status" class="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+        </div>
+    </nav>
+
+    <!-- Global Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-white/90 backdrop-blur-sm z-50 flex flex-col items-center justify-center hidden">
+        <div class="w-16 h-16 border-4 border-emerald-100 border-t-emerald-500 rounded-full animate-spin mb-4"></div>
+        <p id="loading-text" class="text-emerald-700 font-medium kanit-text">กำลังโหลด...</p>
+    </div>
+
+    <!-- VIEW: Init / Setup -->
+    <div id="view-init" class="max-w-3xl mx-auto px-4 py-6">
+        <div class="card p-6 border-t-4 border-t-emerald-500">
+            <h2 class="text-xl text-gray-800 mb-6 text-center">ระบุข้อมูล Checklist</h2>
+            
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1.5 ml-1">ชื่อผู้ทำรายการ</label>
+                    <input type="text" id="counter-name" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800 text-sm" placeholder="ระบุชื่อหรือชื่อเล่น" autocomplete="off">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1.5 ml-1">รอบที่ทำ Checklist</label>
+                    <div class="grid grid-cols-1 gap-3" id="round-options">
+                        <label class="relative block cursor-pointer">
+                            <input type="radio" name="round" value="เปิดร้าน" class="peer sr-only">
+                            <div class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-700 text-sm font-medium text-center transition-all peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:text-emerald-700 hover:bg-gray-50">
+                                เปิดร้าน
+                            </div>
+                        </label>
+                        <label class="relative block cursor-pointer">
+                            <input type="radio" name="round" value="รอบเย็น" class="peer sr-only">
+                            <div class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-700 text-sm font-medium text-center transition-all peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:text-emerald-700 hover:bg-gray-50">
+                                รอบเย็น
+                            </div>
+                        </label>
+                        <label class="relative block cursor-pointer">
+                            <input type="radio" name="round" value="ปิดร้าน" class="peer sr-only">
+                            <div class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-700 text-sm font-medium text-center transition-all peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:text-emerald-700 hover:bg-gray-50">
+                                ปิดร้าน
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="station-group" class="hidden">
+                    <label class="block text-sm font-medium text-gray-600 mb-1.5 ml-1">เลือก Station</label>
+                    <div class="grid grid-cols-2 gap-3" id="station-options">
+                        <!-- Rendered dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <button id="btn-start" class="w-full mt-8 bg-gray-200 text-gray-500 py-3.5 rounded-xl transition-all cursor-not-allowed hidden" disabled>
+                เริ่มทำ Checklist
+            </button>
+        </div>
+    </div>
+
+    <!-- VIEW: Main Checklist -->
+    <div id="view-main" class="hidden max-w-3xl mx-auto px-4 py-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl text-gray-800" id="main-title">Checklist</h2>
+            <span id="main-subtitle" class="text-sm font-medium text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full"></span>
+        </div>
+
+        <div id="tasks-container" class="space-y-4 mb-6">
+            <!-- Tasks rendered here -->
+        </div>
+
+        <button id="btn-submit" class="w-full bg-emerald-600 text-white py-4 rounded-xl shadow-lg shadow-emerald-200 hover:bg-emerald-700 active:bg-emerald-800 transition-all text-lg mb-8" onclick="submitChecklist()">
+            บันทึก Checklist
+        </button>
+    </div>
+
+    <!-- VIEW: Summary -->
+    <div id="view-summary" class="hidden max-w-3xl mx-auto px-4 py-6 text-center">
+        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+        </div>
+        <h2 class="text-2xl text-gray-800 mb-2">บันทึกสำเร็จ!</h2>
+        <p class="text-gray-500 mb-8 text-sm">ข้อมูล Checklist ถูกบันทึกเรียบร้อยแล้ว</p>
+        
+        <button onclick="window.location.reload()" class="w-full bg-white border-2 border-emerald-500 text-emerald-600 py-3.5 rounded-xl font-medium active:bg-emerald-50 transition-colors">
+            ทำรายการอื่นต่อ
+        </button>
+    </div>
+
+    <script>
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwE0t_AJwQwcokYcsAkgwmBWY6l84dCRWcSCXcRzB3YoiIIRwgl_GdFiBRnRr2PKwc/exec';
+        
+        let checklistSettings = [];
+        let currentTasks = [];
+        let selectedRound = '';
+        let selectedStation = '';
+        let counterName = '';
+        const stations = ['Drink', 'Bingsu', 'Bread', 'Service', 'Hotmeal'];
+
+        // Initial Load
+        window.onload = () => {
+            checkConnection();
+            setInterval(checkConnection, 30000); // Check every 30s
+            fetchChecklistSettings();
+            setupInitListeners();
+        };
+
+        function showLoading(text) {
+            document.getElementById('loading-text').innerText = text || 'กำลังโหลด...';
+            document.getElementById('loading-overlay').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-overlay').classList.add('hidden');
+        }
+
+        function checkConnection() {
+            const status = document.getElementById('connection-status');
+            if (navigator.onLine) {
+                status.className = 'w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]';
+            } else {
+                status.className = 'w-3 h-3 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]';
+            }
+        }
+
+        function fetchChecklistSettings() {
+            showLoading('กำลังโหลดข้อมูล Checklist...');
+            
+            const cached = localStorage.getItem('snk_checklist_settings');
+            if (cached) {
+                try {
+                    checklistSettings = JSON.parse(cached);
+                    hideLoading();
+                } catch(e) {}
+            }
+
+            fetch(WEB_APP_URL + '?action=getChecklistSettings')
+                .then(res => res.json())
+                .then(res => {
+                    if (res.status === 'success') {
+                        checklistSettings = res.data;
+                        localStorage.setItem('snk_checklist_settings', JSON.stringify(checklistSettings));
+                        hideLoading();
+                    } else {
+                        throw new Error(res.message);
+                    }
+                })
+                .catch(err => {
+                    if (!cached) {
+                        hideLoading();
+                        Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูล Checklist ได้', 'error');
+                    }
+                });
+        }
+
+        function setupInitListeners() {
+            // Render stations
+            const stationContainer = document.getElementById('station-options');
+            stations.forEach(st => {
+                stationContainer.innerHTML += `
+                    <label class="relative block cursor-pointer">
+                        <input type="radio" name="station" value="${st}" class="peer sr-only">
+                        <div class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-700 text-sm font-medium text-center transition-all peer-checked:bg-blue-50 peer-checked:border-blue-500 peer-checked:text-blue-700 hover:bg-gray-50">
+                            ${st}
+                        </div>
+                    </label>
+                `;
+            });
+
+            // Listeners
+            document.getElementById('counter-name').addEventListener('input', checkInitValid);
+            
+            document.querySelectorAll('input[name="round"]').forEach(r => {
+                r.addEventListener('change', (e) => {
+                    selectedRound = e.target.value;
+                    document.getElementById('station-group').classList.remove('hidden');
+                    checkInitValid();
+                });
+            });
+
+            document.querySelectorAll('input[name="station"]').forEach(r => {
+                r.addEventListener('change', (e) => {
+                    selectedStation = e.target.value;
+                    checkInitValid();
+                });
+            });
+            
+            // Auto-fill counter name from localStorage
+            const savedName = localStorage.getItem('snk_last_counter');
+            if (savedName) {
+                document.getElementById('counter-name').value = savedName;
+            }
+        }
+
+        function checkInitValid() {
+            counterName = document.getElementById('counter-name').value.trim();
+            const btn = document.getElementById('btn-start');
+            
+            if (counterName && selectedRound && selectedStation) {
+                btn.classList.remove('hidden', 'bg-gray-200', 'text-gray-500', 'cursor-not-allowed');
+                btn.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700', 'shadow-lg', 'shadow-blue-200');
+                btn.disabled = false;
+                btn.onclick = startChecklist;
+            } else {
+                btn.classList.add('hidden', 'bg-gray-200', 'text-gray-500', 'cursor-not-allowed');
+                btn.classList.remove('bg-blue-600', 'text-white', 'hover:bg-blue-700', 'shadow-lg', 'shadow-blue-200');
+                btn.disabled = true;
+            }
+        }
+
+        function startChecklist() {
+            localStorage.setItem('snk_last_counter', counterName);
+            
+            // Filter tasks
+            currentTasks = checklistSettings.filter(item => item.round === selectedRound && item.station === selectedStation);
+            
+            if (currentTasks.length === 0) {
+                Swal.fire('ไม่มีข้อมูล', `ไม่พบ Checklist สำหรับรอบ ${selectedRound} (${selectedStation})`, 'info');
+                return;
+            }
+
+            document.getElementById('view-init').classList.add('hidden');
+            document.getElementById('main-subtitle').innerText = `${selectedStation} - ${selectedRound}`;
+            renderTasks();
+            document.getElementById('view-main').classList.remove('hidden');
+        }
+
+        function renderTasks() {
+            const container = document.getElementById('tasks-container');
+            container.innerHTML = '';
+
+            currentTasks.forEach((task, index) => {
+                container.innerHTML += `
+                    <div class="card p-5" id="task-card-${index}">
+                        <h3 class="text-base text-gray-800 font-medium mb-4">${index + 1}. ${task.task}</h3>
+                        
+                        <div class="grid grid-cols-2 gap-3 mb-3">
+                            <label class="relative block cursor-pointer">
+                                <input type="radio" name="status-${index}" value="done" class="peer sr-only" onchange="toggleReason(${index})">
+                                <div class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-700 text-sm font-medium text-center transition-all peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:text-emerald-700 flex items-center justify-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 hidden peer-checked:block" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                                    เสร็จ
+                                </div>
+                            </label>
+                            
+                            <label class="relative block cursor-pointer">
+                                <input type="radio" name="status-${index}" value="not_done" class="peer sr-only" onchange="toggleReason(${index})">
+                                <div class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-700 text-sm font-medium text-center transition-all peer-checked:bg-red-50 peer-checked:border-red-500 peer-checked:text-red-700 flex items-center justify-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 hidden peer-checked:block" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                                    ไม่เสร็จ
+                                </div>
+                            </label>
+                        </div>
+                        
+                        <div id="reason-container-${index}" class="hidden mt-3">
+                            <input type="text" id="reason-${index}" class="w-full bg-red-50/50 border border-red-200 rounded-xl px-4 py-2 text-sm text-gray-800 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-all" placeholder="โปรดระบุเหตุผลที่ทำไม่เสร็จ...">
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        window.toggleReason = function(index) {
+            const radios = document.getElementsByName(`status-${index}`);
+            const reasonContainer = document.getElementById(`reason-container-${index}`);
+            const reasonInput = document.getElementById(`reason-${index}`);
+            
+            let status = null;
+            radios.forEach(r => { if (r.checked) status = r.value; });
+            
+            const card = document.getElementById(`task-card-${index}`);
+            
+            if (status === 'not_done') {
+                reasonContainer.classList.remove('hidden');
+                reasonInput.focus();
+                card.classList.add('border-l-4', 'border-l-red-500');
+                card.classList.remove('border-l-emerald-500');
+            } else {
+                reasonContainer.classList.add('hidden');
+                reasonInput.value = '';
+                card.classList.add('border-l-4', 'border-l-emerald-500');
+                card.classList.remove('border-l-red-500');
+            }
+        };
+
+        function submitChecklist() {
+            const dataToSave = [];
+            let hasError = false;
+
+            for (let i = 0; i < currentTasks.length; i++) {
+                const task = currentTasks[i];
+                const radios = document.getElementsByName(`status-${i}`);
+                let status = null;
+                radios.forEach(r => { if (r.checked) status = r.value; });
+
+                if (!status) {
+                    Swal.fire('ข้อมูลไม่ครบ', `กรุณาเลือกว่า ${task.task} เสร็จหรือไม่เสร็จ`, 'warning');
+                    document.getElementById(`task-card-${i}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    hasError = true;
+                    break;
+                }
+
+                let reason = '';
+                if (status === 'not_done') {
+                    reason = document.getElementById(`reason-${i}`).value.trim();
+                    if (!reason) {
+                        Swal.fire('ต้องการเหตุผล', `กรุณาระบุเหตุผลสำหรับ ${task.task}`, 'warning');
+                        document.getElementById(`reason-${i}`).focus();
+                        hasError = true;
+                        break;
+                    }
+                }
+
+                dataToSave.push({
+                    task: task.task,
+                    status: status, // "done" or "not_done"
+                    reason: reason
+                });
+            }
+
+            if (hasError) return;
+
+            showLoading('กำลังบันทึกข้อมูล...');
+
+            const payload = {
+                action: 'saveChecklist',
+                timestamp: new Date().toISOString(),
+                round: selectedRound,
+                station: selectedStation,
+                counterName: counterName,
+                tasks: dataToSave
+            };
+
+            fetch(WEB_APP_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(res => {
+                hideLoading();
+                if (res.status === 'success') {
+                    document.getElementById('view-main').classList.add('hidden');
+                    document.getElementById('view-summary').classList.remove('hidden');
+                } else {
+                    throw new Error(res.message);
+                }
+            })
+            .catch(err => {
+                hideLoading();
+                Swal.fire('ข้อผิดพลาด', 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่', 'error');
+            });
+        }
+    </script>
+</body>
+</html>

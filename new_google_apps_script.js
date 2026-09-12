@@ -80,6 +80,7 @@ function doGet(e) {
   if (action == "getInitPayrollData") return createJsonResponse(handleGetInitPayrollData());
   if (action == "getStockSettings") return createJsonResponse({ status: "success", data: handleGetStockSettings() });
   if (action == "getStockHistory") return createJsonResponse({ status: "success", data: handleGetStockHistory() });
+  if (action == "getChecklistSettings") return createJsonResponse({ status: "success", data: handleGetChecklistSettings() });
   if (action == "testLine") {
     var errMessage = sendLineNotify("🔥 ทดสอบการเชื่อมต่อ LINE จาก Google Apps Script สำเร็จ!");
     if (errMessage) {

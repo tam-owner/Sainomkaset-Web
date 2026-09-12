@@ -1,13 +1,27 @@
-const CACHE_NAME = 'snk-cache-v240';
+const CACHE_NAME = 'snk-cache-v241';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/css/styles.css',
-  '/js/app.js',
-  '/logo.jpg',
+  '/maintemp.html',
+  '/checklist.html',
+  '/stock.html',
+  '/admin.html',
+  '/accounting.html',
   '/schedule.html',
-  '/css/schedule.css',
-  '/js/schedule.js'
+  '/attendance.html',
+  '/logo.jpg',
+  '/logo-admin.jpg',
+  '/manifest.json',
+  '/manifest-admin.json',
+  '/js/app.js',
+  '/js/admin.js',
+  '/js/accounting.js',
+  '/js/schedule.js',
+  '/css/styles.css',
+  'https://cdn.tailwindcss.com',
+  'https://cdn.jsdelivr.net/npm/chart.js',
+  'https://cdn.jsdelivr.net/npm/sweetalert2@11',
+  'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'
 ];
 
 self.addEventListener('install', event => {
