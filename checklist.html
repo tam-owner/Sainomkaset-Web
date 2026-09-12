@@ -19,14 +19,6 @@
         h2.swal2-title { font-family: 'Kanit', sans-serif !important; font-size: 1.15rem !important; font-weight: 700 !important; }
         div.swal2-html-container { font-size: 0.95rem !important; }
         button.swal2-confirm, button.swal2-cancel { border-radius: 12px !important; font-family: 'Kanit', sans-serif !important; font-weight: 600 !important; padding: 10px 20px !important; }
-        
-        .radio-custom:checked + div { border-color: currentColor; background-color: currentColor; }
-        .radio-custom:checked + div svg { opacity: 1; transform: scale(1); }
-        
-        /* Spinner */
-        .spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid white; width: 24px; height: 24px; -webkit-animation: spin 1s linear infinite; animation: spin 1s linear infinite; margin: 0 auto; }
-        @-webkit-keyframes spin { 0% { -webkit-transform: rotate(0deg); } 100% { -webkit-transform: rotate(360deg); } }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="pb-24 sm:pb-8">
@@ -59,80 +51,136 @@
 
     <!-- VIEW: Init / Setup -->
     <div id="view-init" class="max-w-3xl mx-auto px-4 py-6">
-        <div class="card p-6 border-t-4 border-t-emerald-500">
-            <h2 class="text-xl text-gray-800 mb-6 text-center">ระบุข้อมูล Checklist</h2>
+        
+        <!-- Step 1: Name -->
+        <div id="step-name" class="card p-6 border-t-4 border-t-emerald-500">
+            <h2 class="text-xl font-bold text-gray-800 mb-2 kanit-text">ยินดีต้อนรับ</h2>
+            <p class="text-sm text-gray-500 mb-6">กรุณาระบุชื่อก่อนเริ่มทำ Checklist</p>
             
-            <div class="space-y-5">
-                <div>
-                    <label class="block text-sm font-medium text-gray-600 mb-1.5 ml-1">ชื่อผู้ทำรายการ</label>
-                    <input type="text" id="counter-name" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800 text-sm" placeholder="ระบุชื่อหรือชื่อเล่น" autocomplete="off">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-600 mb-1.5 ml-1">รอบที่ทำ Checklist</label>
-                    <div class="grid grid-cols-1 gap-3" id="round-options">
-                        <label class="relative block cursor-pointer">
-                            <input type="radio" name="round" value="เปิดร้าน" class="peer sr-only">
-                            <div class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-700 text-sm font-medium text-center transition-all peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:text-emerald-700 hover:bg-gray-50">
-                                เปิดร้าน
-                            </div>
-                        </label>
-                        <label class="relative block cursor-pointer">
-                            <input type="radio" name="round" value="รอบเย็น" class="peer sr-only">
-                            <div class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-700 text-sm font-medium text-center transition-all peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:text-emerald-700 hover:bg-gray-50">
-                                รอบเย็น
-                            </div>
-                        </label>
-                        <label class="relative block cursor-pointer">
-                            <input type="radio" name="round" value="ปิดร้าน" class="peer sr-only">
-                            <div class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-700 text-sm font-medium text-center transition-all peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:text-emerald-700 hover:bg-gray-50">
-                                ปิดร้าน
-                            </div>
-                        </label>
-                    </div>
-                </div>
-
-                <div id="station-group" class="hidden">
-                    <label class="block text-sm font-medium text-gray-600 mb-1.5 ml-1">เลือก Station</label>
-                    <div class="grid grid-cols-2 gap-3" id="station-options">
-                        <!-- Rendered dynamically -->
-                    </div>
-                </div>
-            </div>
-
-            <button id="btn-start" class="w-full mt-8 bg-gray-200 text-gray-500 py-3.5 rounded-xl transition-all cursor-not-allowed hidden" disabled>
-                เริ่มทำ Checklist
+            <label class="block text-sm font-medium text-gray-700 mb-2">ชื่อผู้ทำรายการ</label>
+            <input type="text" id="counter-name" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-gray-800 focus:bg-white transition-all text-base" placeholder="ระบุชื่อหรือชื่อเล่น" autocomplete="off">
+            
+            <button id="btn-next-name" onclick="proceedToRound()" class="w-full mt-6 bg-emerald-500 text-white py-3.5 rounded-xl transition-all shadow-md active:scale-95 font-medium hidden kanit-text">
+                ถัดไป
             </button>
+        </div>
+
+        <!-- Step 2: Round Selection -->
+        <div id="step-round" class="hidden mt-4">
+            <div class="flex items-center gap-2 mb-4">
+                <button onclick="goBackToName()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-600 active:scale-95 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">เลือกรอบ Checklist</h2>
+            </div>
+            
+            <div class="space-y-3">
+                <button onclick="selectRound('เปิดร้าน')" class="w-full bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 hover:border-emerald-300 transition-all active:scale-[0.98] text-slate-700 text-left">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0 border border-emerald-100">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-bold text-[16px] text-slate-800 kanit-text tracking-wide">เปิดร้าน</div>
+                        <div class="text-[12px] text-slate-500 mt-0.5 leading-tight">Checklist รอบเช้า</div>
+                    </div>
+                    <div class="text-slate-300 pr-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                    </div>
+                </button>
+
+                <button onclick="selectRound('รอบเย็น')" class="w-full bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 hover:border-blue-300 transition-all active:scale-[0.98] text-slate-700 text-left">
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center shrink-0 border border-blue-100">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-bold text-[16px] text-slate-800 kanit-text tracking-wide">รอบเย็น</div>
+                        <div class="text-[12px] text-slate-500 mt-0.5 leading-tight">Checklist รอบบ่าย-เย็น</div>
+                    </div>
+                    <div class="text-slate-300 pr-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                    </div>
+                </button>
+
+                <button onclick="selectRound('ปิดร้าน')" class="w-full bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 hover:border-indigo-300 transition-all active:scale-[0.98] text-slate-700 text-left">
+                    <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-500 flex items-center justify-center shrink-0 border border-indigo-100">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-bold text-[16px] text-slate-800 kanit-text tracking-wide">ปิดร้าน</div>
+                        <div class="text-[12px] text-slate-500 mt-0.5 leading-tight">Checklist รอบดึกก่อนกลับ</div>
+                    </div>
+                    <div class="text-slate-300 pr-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 3: Station Selection -->
+        <div id="step-station" class="hidden mt-4">
+            <div class="flex items-center gap-2 mb-3">
+                <button onclick="goBackToRound()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-600 active:scale-95 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">เลือก Station <span id="selected-round-display" class="text-indigo-600 ml-1"></span></h2>
+            </div>
+            <div class="grid grid-cols-2 gap-3" id="station-buttons">
+                <button onclick="selectStation('Service')" class="station-btn relative bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-2 hover:border-indigo-300 hover:shadow-md transition-all active:scale-95 text-slate-700">
+                    <span class="text-2xl">💁🏻‍♀️</span>
+                    <span class="font-bold">Service</span>
+                </button>
+                <button onclick="selectStation('Bingsu')" class="station-btn relative bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-2 hover:border-indigo-300 hover:shadow-md transition-all active:scale-95 text-slate-700">
+                    <span class="text-2xl">🍧</span>
+                    <span class="font-bold">Bingsu</span>
+                </button>
+                <button onclick="selectStation('Bread')" class="station-btn relative bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-2 hover:border-indigo-300 hover:shadow-md transition-all active:scale-95 text-slate-700">
+                    <span class="text-2xl">🍞</span>
+                    <span class="font-bold">Bread</span>
+                </button>
+                <button onclick="selectStation('Drink')" class="station-btn relative bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-2 hover:border-indigo-300 hover:shadow-md transition-all active:scale-95 text-slate-700">
+                    <span class="text-2xl">🥤</span>
+                    <span class="font-bold">Drink</span>
+                </button>
+                <button onclick="selectStation('Hotmeal')" class="station-btn col-span-2 relative bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-2 hover:border-indigo-300 hover:shadow-md transition-all active:scale-95 text-slate-700">
+                    <span class="text-2xl">🍛</span>
+                    <span class="font-bold">Hotmeal</span>
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- VIEW: Main Checklist -->
     <div id="view-main" class="hidden max-w-3xl mx-auto px-4 py-6">
-        <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl text-gray-800" id="main-title">Checklist</h2>
-            <span id="main-subtitle" class="text-sm font-medium text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full"></span>
+        <div class="flex items-center gap-2 mb-4">
+            <button onclick="goBackToStation()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-600 active:scale-95 shadow-sm shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+            <div>
+                <h2 class="text-lg font-bold text-slate-800 kanit-text" id="main-title">Station: ...</h2>
+                <p class="text-xs font-bold text-slate-500">พนักงาน: <span id="main-counter-name" class="text-indigo-600">...</span> | รอบ: <span id="main-subtitle" class="text-emerald-600">...</span></p>
+            </div>
         </div>
 
         <div id="tasks-container" class="space-y-4 mb-6">
             <!-- Tasks rendered here -->
         </div>
 
-        <button id="btn-submit" class="w-full bg-emerald-600 text-white py-4 rounded-xl shadow-lg shadow-emerald-200 hover:bg-emerald-700 active:bg-emerald-800 transition-all text-lg mb-8" onclick="submitChecklist()">
+        <button id="btn-submit" class="w-full bg-emerald-600 text-white py-4 rounded-xl shadow-lg shadow-emerald-200 hover:bg-emerald-700 active:bg-emerald-800 transition-all text-lg mb-8 kanit-text" onclick="submitChecklist()">
             บันทึก Checklist
         </button>
     </div>
 
     <!-- VIEW: Summary -->
     <div id="view-summary" class="hidden max-w-3xl mx-auto px-4 py-6 text-center">
-        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-500">
+        <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-500">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
             </svg>
         </div>
-        <h2 class="text-2xl text-gray-800 mb-2">บันทึกสำเร็จ!</h2>
+        <h2 class="text-2xl text-gray-800 mb-2 font-bold kanit-text">บันทึกสำเร็จ!</h2>
         <p class="text-gray-500 mb-8 text-sm">ข้อมูล Checklist ถูกบันทึกเรียบร้อยแล้ว</p>
         
-        <button onclick="window.location.reload()" class="w-full bg-white border-2 border-emerald-500 text-emerald-600 py-3.5 rounded-xl font-medium active:bg-emerald-50 transition-colors">
+        <button onclick="window.location.reload()" class="w-full bg-white border-2 border-emerald-500 text-emerald-600 py-3.5 rounded-xl font-medium active:bg-emerald-50 transition-colors kanit-text">
             ทำรายการอื่นต่อ
         </button>
     </div>
@@ -145,14 +193,29 @@
         let selectedRound = '';
         let selectedStation = '';
         let counterName = '';
-        const stations = ['Drink', 'Bingsu', 'Bread', 'Service', 'Hotmeal'];
 
         // Initial Load
         window.onload = () => {
             checkConnection();
             setInterval(checkConnection, 30000); // Check every 30s
             fetchChecklistSettings();
-            setupInitListeners();
+            
+            // Name input listener
+            document.getElementById('counter-name').addEventListener('input', (e) => {
+                const btn = document.getElementById('btn-next-name');
+                if (e.target.value.trim().length > 0) {
+                    btn.classList.remove('hidden');
+                } else {
+                    btn.classList.add('hidden');
+                }
+            });
+            
+            // Auto-fill counter name from localStorage
+            const savedName = localStorage.getItem('snk_last_counter');
+            if (savedName) {
+                document.getElementById('counter-name').value = savedName;
+                document.getElementById('btn-next-name').classList.remove('hidden');
+            }
         };
 
         function showLoading(text) {
@@ -174,14 +237,13 @@
         }
 
         function fetchChecklistSettings() {
-            showLoading('กำลังโหลดข้อมูล Checklist...');
-            
             const cached = localStorage.getItem('snk_checklist_settings');
             if (cached) {
                 try {
                     checklistSettings = JSON.parse(cached);
-                    hideLoading();
                 } catch(e) {}
+            } else {
+                showLoading('กำลังโหลดข้อมูล Checklist...');
             }
 
             fetch(WEB_APP_URL + '?action=getChecklistSettings')
@@ -190,89 +252,66 @@
                     if (res.status === 'success') {
                         checklistSettings = res.data;
                         localStorage.setItem('snk_checklist_settings', JSON.stringify(checklistSettings));
-                        hideLoading();
-                    } else {
-                        throw new Error(res.message);
                     }
                 })
                 .catch(err => {
-                    if (!cached) {
-                        hideLoading();
-                        Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูล Checklist ได้', 'error');
-                    }
+                    console.error(err);
+                })
+                .finally(() => {
+                    hideLoading();
                 });
         }
 
-        function setupInitListeners() {
-            // Render stations
-            const stationContainer = document.getElementById('station-options');
-            stations.forEach(st => {
-                stationContainer.innerHTML += `
-                    <label class="relative block cursor-pointer">
-                        <input type="radio" name="station" value="${st}" class="peer sr-only">
-                        <div class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-700 text-sm font-medium text-center transition-all peer-checked:bg-blue-50 peer-checked:border-blue-500 peer-checked:text-blue-700 hover:bg-gray-50">
-                            ${st}
-                        </div>
-                    </label>
-                `;
-            });
-
-            // Listeners
-            document.getElementById('counter-name').addEventListener('input', checkInitValid);
-            
-            document.querySelectorAll('input[name="round"]').forEach(r => {
-                r.addEventListener('change', (e) => {
-                    selectedRound = e.target.value;
-                    document.getElementById('station-group').classList.remove('hidden');
-                    checkInitValid();
-                });
-            });
-
-            document.querySelectorAll('input[name="station"]').forEach(r => {
-                r.addEventListener('change', (e) => {
-                    selectedStation = e.target.value;
-                    checkInitValid();
-                });
-            });
-            
-            // Auto-fill counter name from localStorage
-            const savedName = localStorage.getItem('snk_last_counter');
-            if (savedName) {
-                document.getElementById('counter-name').value = savedName;
-            }
-        }
-
-        function checkInitValid() {
+        // Navigation flow
+        function proceedToRound() {
             counterName = document.getElementById('counter-name').value.trim();
-            const btn = document.getElementById('btn-start');
-            
-            if (counterName && selectedRound && selectedStation) {
-                btn.classList.remove('hidden', 'bg-gray-200', 'text-gray-500', 'cursor-not-allowed');
-                btn.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700', 'shadow-lg', 'shadow-blue-200');
-                btn.disabled = false;
-                btn.onclick = startChecklist;
-            } else {
-                btn.classList.add('hidden', 'bg-gray-200', 'text-gray-500', 'cursor-not-allowed');
-                btn.classList.remove('bg-blue-600', 'text-white', 'hover:bg-blue-700', 'shadow-lg', 'shadow-blue-200');
-                btn.disabled = true;
-            }
+            localStorage.setItem('snk_last_counter', counterName);
+            document.getElementById('step-name').classList.add('hidden');
+            document.getElementById('step-round').classList.remove('hidden');
         }
 
-        function startChecklist() {
-            localStorage.setItem('snk_last_counter', counterName);
+        function goBackToName() {
+            document.getElementById('step-round').classList.add('hidden');
+            document.getElementById('step-name').classList.remove('hidden');
+        }
+
+        function selectRound(round) {
+            selectedRound = round;
+            document.getElementById('selected-round-display').innerText = `(${round})`;
+            document.getElementById('step-round').classList.add('hidden');
+            document.getElementById('step-station').classList.remove('hidden');
+        }
+
+        function goBackToRound() {
+            document.getElementById('step-station').classList.add('hidden');
+            document.getElementById('step-round').classList.remove('hidden');
+        }
+
+        function selectStation(station) {
+            selectedStation = station;
             
             // Filter tasks
             currentTasks = checklistSettings.filter(item => item.round === selectedRound && item.station === selectedStation);
             
             if (currentTasks.length === 0) {
-                Swal.fire('ไม่มีข้อมูล', `ไม่พบ Checklist สำหรับรอบ ${selectedRound} (${selectedStation})`, 'info');
+                Swal.fire('ไม่มีข้อมูล', `ไม่พบ Checklist สำหรับ ${selectedStation} (${selectedRound})`, 'info');
                 return;
             }
 
             document.getElementById('view-init').classList.add('hidden');
-            document.getElementById('main-subtitle').innerText = `${selectedStation} - ${selectedRound}`;
+            document.getElementById('main-title').innerText = `Station: ${selectedStation}`;
+            document.getElementById('main-counter-name').innerText = counterName;
+            document.getElementById('main-subtitle').innerText = selectedRound;
+            
             renderTasks();
             document.getElementById('view-main').classList.remove('hidden');
+            window.scrollTo(0,0);
+        }
+
+        function goBackToStation() {
+            document.getElementById('view-main').classList.add('hidden');
+            document.getElementById('view-init').classList.remove('hidden');
+            document.getElementById('step-station').classList.remove('hidden');
         }
 
         function renderTasks() {
@@ -287,7 +326,7 @@
                         <div class="grid grid-cols-2 gap-3 mb-3">
                             <label class="relative block cursor-pointer">
                                 <input type="radio" name="status-${index}" value="done" class="peer sr-only" onchange="toggleReason(${index})">
-                                <div class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-700 text-sm font-medium text-center transition-all peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:text-emerald-700 flex items-center justify-center gap-2">
+                                <div class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-700 text-sm font-medium text-center transition-all peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:text-emerald-700 flex items-center justify-center gap-2 shadow-sm">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 hidden peer-checked:block" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
                                     เสร็จ
                                 </div>
@@ -295,7 +334,7 @@
                             
                             <label class="relative block cursor-pointer">
                                 <input type="radio" name="status-${index}" value="not_done" class="peer sr-only" onchange="toggleReason(${index})">
-                                <div class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-700 text-sm font-medium text-center transition-all peer-checked:bg-red-50 peer-checked:border-red-500 peer-checked:text-red-700 flex items-center justify-center gap-2">
+                                <div class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-700 text-sm font-medium text-center transition-all peer-checked:bg-rose-50 peer-checked:border-rose-500 peer-checked:text-rose-700 flex items-center justify-center gap-2 shadow-sm">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 hidden peer-checked:block" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
                                     ไม่เสร็จ
                                 </div>
@@ -303,7 +342,7 @@
                         </div>
                         
                         <div id="reason-container-${index}" class="hidden mt-3">
-                            <input type="text" id="reason-${index}" class="w-full bg-red-50/50 border border-red-200 rounded-xl px-4 py-2 text-sm text-gray-800 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-all" placeholder="โปรดระบุเหตุผลที่ทำไม่เสร็จ...">
+                            <input type="text" id="reason-${index}" class="w-full bg-rose-50/50 border border-rose-200 rounded-xl px-4 py-2.5 text-sm text-gray-800 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none transition-all placeholder:text-rose-300" placeholder="โปรดระบุเหตุผล...">
                         </div>
                     </div>
                 `;
@@ -323,13 +362,13 @@
             if (status === 'not_done') {
                 reasonContainer.classList.remove('hidden');
                 reasonInput.focus();
-                card.classList.add('border-l-4', 'border-l-red-500');
+                card.classList.add('border-l-4', 'border-l-rose-500');
                 card.classList.remove('border-l-emerald-500');
             } else {
                 reasonContainer.classList.add('hidden');
                 reasonInput.value = '';
                 card.classList.add('border-l-4', 'border-l-emerald-500');
-                card.classList.remove('border-l-red-500');
+                card.classList.remove('border-l-rose-500');
             }
         };
 
@@ -392,6 +431,7 @@
                 if (res.status === 'success') {
                     document.getElementById('view-main').classList.add('hidden');
                     document.getElementById('view-summary').classList.remove('hidden');
+                    window.scrollTo(0,0);
                 } else {
                     throw new Error(res.message);
                 }
