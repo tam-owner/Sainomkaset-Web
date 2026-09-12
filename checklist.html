@@ -81,7 +81,7 @@
                     </div>
                     <div class="flex-1">
                         <div class="font-bold text-[16px] text-slate-800 kanit-text tracking-wide">เปิดร้าน</div>
-                        <div class="text-[12px] text-slate-500 mt-0.5 leading-tight">Checklist รอบเช้า</div>
+                        <div class="text-[12px] text-slate-500 mt-0.5 leading-tight">Checklist ก่อนเปิดร้าน</div>
                     </div>
                     <div class="text-slate-300 pr-1">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
@@ -94,7 +94,7 @@
                     </div>
                     <div class="flex-1">
                         <div class="font-bold text-[16px] text-slate-800 kanit-text tracking-wide">รอบเย็น</div>
-                        <div class="text-[12px] text-slate-500 mt-0.5 leading-tight">Checklist รอบบ่าย-เย็น</div>
+                        <div class="text-[12px] text-slate-500 mt-0.5 leading-tight">Checklist ส่งช่วง 18.00-20.00</div>
                     </div>
                     <div class="text-slate-300 pr-1">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
@@ -107,7 +107,7 @@
                     </div>
                     <div class="flex-1">
                         <div class="font-bold text-[16px] text-slate-800 kanit-text tracking-wide">ปิดร้าน</div>
-                        <div class="text-[12px] text-slate-500 mt-0.5 leading-tight">Checklist รอบดึกก่อนกลับ</div>
+                        <div class="text-[12px] text-slate-500 mt-0.5 leading-tight">Checklist ก่อนปิดร้าน</div>
                     </div>
                     <div class="text-slate-300 pr-1">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
@@ -172,15 +172,26 @@
 
     <!-- VIEW: Summary -->
     <div id="view-summary" class="hidden max-w-3xl mx-auto px-4 py-6 text-center">
-        <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-500">
+        <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-500 shadow-sm border border-emerald-200">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
             </svg>
         </div>
-        <h2 class="text-2xl text-gray-800 mb-2 font-bold kanit-text">บันทึกสำเร็จ!</h2>
-        <p class="text-gray-500 mb-8 text-sm">ข้อมูล Checklist ถูกบันทึกเรียบร้อยแล้ว</p>
+        <h2 class="text-xl text-gray-800 mb-1 font-bold kanit-text">บันทึกสำเร็จ!</h2>
+        <p class="text-gray-500 mb-5 text-sm">ข้อมูล Checklist ถูกบันทึกเรียบร้อยแล้ว</p>
         
-        <button onclick="window.location.reload()" class="w-full bg-white border-2 border-emerald-500 text-emerald-600 py-3.5 rounded-xl font-medium active:bg-emerald-50 transition-colors kanit-text">
+        <div class="bg-gray-50 border border-gray-200 rounded-2xl p-4 text-left mb-5 shadow-inner">
+            <h3 class="text-sm font-bold text-gray-700 mb-2 kanit-text border-b border-gray-200 pb-2">สรุปรายการ</h3>
+            <div id="summary-text-container" class="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed font-mono bg-white p-3 rounded-xl border border-gray-100">
+                <!-- Summary injected here -->
+            </div>
+            <button onclick="copySummary()" class="mt-3 w-full bg-white border border-emerald-500 text-emerald-600 py-2.5 rounded-xl text-sm font-bold active:bg-emerald-50 transition-colors flex items-center justify-center gap-2 kanit-text shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
+                คัดลอกข้อความเพื่อส่งไลน์
+            </button>
+        </div>
+        
+        <button onclick="window.location.reload()" class="w-full bg-emerald-600 text-white py-3.5 rounded-xl font-bold active:bg-emerald-700 transition-colors shadow-lg kanit-text text-lg">
             ทำรายการอื่นต่อ
         </button>
     </div>
@@ -412,6 +423,19 @@
             if (hasError) return;
 
             showLoading('กำลังบันทึกข้อมูล...');
+            
+            // Build summary text
+            let summaryMsg = `Checklist ${selectedRound} (Station: ${selectedStation})\n`;
+            let notDoneItems = dataToSave.filter(t => t.status === 'not_done');
+            if (notDoneItems.length === 0) {
+                summaryMsg += `✅ เสร็จครบทุกรายการครับ`;
+            } else {
+                summaryMsg += `❌ รายการที่ไม่เสร็จ:\n`;
+                notDoneItems.forEach((item, idx) => {
+                    summaryMsg += `${idx + 1}. ${item.task} (เหตุผล: ${item.reason})\n`;
+                });
+            }
+            summaryMsg += `\nผู้ทำรายการ: ${counterName}`;
 
             const payload = {
                 action: 'saveChecklist',
@@ -431,6 +455,7 @@
             .then(res => {
                 hideLoading();
                 if (res.status === 'success') {
+                    document.getElementById('summary-text-container').innerText = summaryMsg;
                     document.getElementById('view-main').classList.add('hidden');
                     document.getElementById('view-summary').classList.remove('hidden');
                     window.scrollTo(0,0);
@@ -442,6 +467,47 @@
                 hideLoading();
                 Swal.fire('ข้อผิดพลาด', 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่', 'error');
             });
+        }
+        
+        function copySummary() {
+            const text = document.getElementById('summary-text-container').innerText;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'คัดลอกสำเร็จ',
+                        text: 'สามารถนำไปวางในกลุ่มไลน์ได้เลยครับ',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }).catch(err => {
+                    copyToClipboardFallback(text);
+                });
+            } else {
+                copyToClipboardFallback(text);
+            }
+        }
+        
+        function copyToClipboardFallback(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'คัดลอกสำเร็จ',
+                    text: 'สามารถนำไปวางในกลุ่มไลน์ได้เลยครับ',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } catch (err) {
+                Swal.fire('ข้อผิดพลาด', 'ไม่สามารถคัดลอกข้อความได้อัตโนมัติ กรุณาคัดลอกด้วยตนเอง', 'error');
+            }
+            document.body.removeChild(textArea);
         }
     </script>
 </body>
