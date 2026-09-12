@@ -1,5 +1,5 @@
 const FIREBASE_URL = 'https://sainom-kaset-2c5e7-default-rtdb.asia-southeast1.firebasedatabase.app/sainom.json';
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwE0t_AJwQwcokYcsAkgwmBWY6l84dCRWcSCXcRzB3YoiIIRwgl_GdFiBRnRr2PKwc/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwyzwcabtJFW7n8f8juM-XLMRdnQlV5y6vZRQLXFUxLXT_ABRHmGBQo5vz-zinuNGw/exec';
 
 window.onerror = function(msg, url, line, col, error) {
     alert("Error: " + msg + "\nLine: " + line + "\nCol: " + col);
