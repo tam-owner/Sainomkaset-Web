@@ -887,7 +887,7 @@
                 if (item.count === 0 && item.zeroStatus === 'empty') {
                     cleanItemName += ' ❌';
                 }
-                let line = `${index + 1}. *${cleanItemName}*: ${countText}`;
+                let line = `${index + 1}. ${cleanItemName}: ${countText}`;
                 
                 if (item.remark && item.remark.trim() !== '') {
                     line += ` // [${item.remark.trim()}]`;
