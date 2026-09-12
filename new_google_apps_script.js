@@ -11,6 +11,7 @@ function onOpen() {
     .addSeparator()
     .addItem('🛠 จัดเรียงและรวมคอลัมน์สต๊อกที่ซ้ำซ้อน', 'fixMatrixSheetsOrderAndDuplicates')
     .addItem('🎨 ไฮไลท์ช่องของขาดให้เป็นสีแดง', 'highlightDeficitCells')
+    .addItem('🛠 อัปเดตชีต ร้านอื่นๆ (แทรกแหล่งซื้อ)', 'migrateStockOther')
     .addToUi();
 }
 
@@ -1613,13 +1614,17 @@ function handleSaveStockCount(p) {
       var lastRow = sheet.getLastRow();
       var lastCol = sheet.getLastColumn();
 
+      var numFrozenCols = isOther ? 5 : 4;
+      var dataStartCol = numFrozenCols + 1;
+      var initialHeaders = isOther ? ["แหล่งซื้อ", "Station", "รายการ", "หน่วย", "ควรมี"] : ["Station", "รายการ", "หน่วย", "ควรมี"];
+
       if (lastRow < 2) {
-        sheet.getRange(2, 1, 1, 4).setValues([["Station", "รายการ", "หน่วย", "ควรมี"]]);
-        sheet.getRange(2, 1, 1, 4).setBackground("#f3f4f6").setFontWeight("bold").setHorizontalAlignment("center");
+        sheet.getRange(2, 1, 1, numFrozenCols).setValues([initialHeaders]);
+        sheet.getRange(2, 1, 1, numFrozenCols).setBackground("#f3f4f6").setFontWeight("bold").setHorizontalAlignment("center");
         sheet.setFrozenRows(2);
-        sheet.setFrozenColumns(4);
+        sheet.setFrozenColumns(numFrozenCols);
         lastRow = 2;
-        lastCol = 4;
+        lastCol = numFrozenCols;
       }
 
       var d = p.timestamp ? new Date(p.timestamp) : new Date();
@@ -1627,13 +1632,13 @@ function handleSaveStockCount(p) {
       var colHeader = dateStr + " - " + round;
 
       var headerRow = [];
-      if (lastCol >= 5) {
+      if (lastCol >= dataStartCol) {
         headerRow = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
       }
 
       var targetCol = -1;
       var searchHeader = String(colHeader).trim();
-      for (var c = 4; c < headerRow.length; c++) {
+      for (var c = numFrozenCols; c < headerRow.length; c++) {
         if (String(headerRow[c]).trim() === searchHeader) {
           targetCol = c + 1;
           break;
@@ -1641,10 +1646,10 @@ function handleSaveStockCount(p) {
       }
 
       if (targetCol === -1) {
-        if (lastCol >= 5) {
-          sheet.insertColumnsBefore(5, 3);
+        if (lastCol >= dataStartCol) {
+          sheet.insertColumnsBefore(dataStartCol, 3);
         }
-        targetCol = 5;
+        targetCol = dataStartCol;
 
         sheet.getRange(1, targetCol).setValue(colHeader).setBackground("#60a5fa").setFontColor("white").setFontWeight("bold").setHorizontalAlignment("center");
         sheet.getRange(1, targetCol, 1, 3).merge();
@@ -1657,7 +1662,7 @@ function handleSaveStockCount(p) {
 
       var existingData = [];
       if (lastRow >= 3) {
-        existingData = sheet.getRange(3, 1, lastRow - 2, 4).getValues();
+        existingData = sheet.getRange(3, 1, lastRow - 2, numFrozenCols).getValues();
       }
 
       for (var i = 0; i < items.length; i++) {
@@ -1685,7 +1690,9 @@ function handleSaveStockCount(p) {
 
         var rowIdx = -1;
         for (var r = 0; r < existingData.length; r++) {
-          if (String(existingData[r][0]) === String(p.station) && String(existingData[r][1]) === String(item.itemName)) {
+          var checkStation = isOther ? existingData[r][1] : existingData[r][0];
+          var checkItem = isOther ? existingData[r][2] : existingData[r][1];
+          if (String(checkStation) === String(p.station) && String(checkItem) === String(item.itemName)) {
             rowIdx = r + 3;
             break;
           }
@@ -1694,8 +1701,12 @@ function handleSaveStockCount(p) {
         if (rowIdx === -1) {
           lastRow++;
           rowIdx = lastRow;
-          sheet.getRange(rowIdx, 1, 1, 4).setValues([[p.station, item.itemName, item.unit, item.parLevel]]);
-          existingData.push([p.station, item.itemName, item.unit, item.parLevel]);
+          var newRowData = isOther 
+            ? [item.supplier || "", p.station, item.itemName, item.unit, item.parLevel] 
+            : [p.station, item.itemName, item.unit, item.parLevel];
+            
+          sheet.getRange(rowIdx, 1, 1, numFrozenCols).setValues([newRowData]);
+          existingData.push(newRowData);
         }
 
         sheet.getRange(rowIdx, targetCol).setValue(remainingText).setHorizontalAlignment("center");
@@ -1711,6 +1722,9 @@ function handleSaveStockCount(p) {
         sheet.getRange(rowIdx, targetCol + 2).setValue(item.remark || "");
       }
 
+      if (isOther && lastRow >= 3) {
+        sheet.getRange(3, 1, lastRow - 2, sheet.getLastColumn()).sort(1);
+      }
     } else {
       var itemsJson = JSON.stringify(items);
       sheet.appendRow([
@@ -1906,4 +1920,65 @@ function highlightDeficitCells() {
     }
   });
   SpreadsheetApp.getUi().alert('✅ ไฮไลท์ช่องของขาดให้เป็นสีแดงเรียบร้อยแล้วครับ');
+}
+
+function migrateStockOther() {
+  var ui = SpreadsheetApp.getUi();
+  var sheet = getSheetByNameOrCreateNew("Stock:Other");
+  var lastRow = sheet.getLastRow();
+  
+  if (lastRow < 2) {
+    ui.alert("⚠️ ไม่พบข้อมูลในชีต Stock:Other");
+    return;
+  }
+  
+  var firstHeader = String(sheet.getRange(2, 1).getValue()).trim();
+  if (firstHeader === "แหล่งซื้อ") {
+    ui.alert("✅ ชีตนี้ถูกอัปเดตไปแล้วครับ ไม่ต้องทำซ้ำ");
+    return;
+  }
+  
+  // 1. Build mapping from Master Stock
+  var masterSheet = getSheetByNameOrCreateNew("Master Stock");
+  var masterData = masterSheet.getDataRange().getValues();
+  var mapping = {};
+  for (var i = 1; i < masterData.length; i++) {
+    var station = String(masterData[i][2] || "").trim();
+    var item = String(masterData[i][3] || "").trim();
+    var supplier = String(masterData[i][7] || "").trim();
+    if (station && item) {
+      mapping[station + "|" + item] = supplier;
+    }
+  }
+  
+  // 2. Insert Column A
+  sheet.insertColumnBefore(1);
+  sheet.setFrozenColumns(5);
+  
+  // 3. Set Header
+  sheet.getRange(2, 1).setValue("แหล่งซื้อ")
+       .setBackground("#f3f4f6")
+       .setFontWeight("bold")
+       .setHorizontalAlignment("center");
+       
+  // 4. Fill Data
+  if (lastRow >= 3) {
+    var dataRange = sheet.getRange(3, 2, lastRow - 2, 2); // Station is now col 2, Item is col 3
+    var data = dataRange.getValues();
+    var supplierValues = [];
+    
+    for (var r = 0; r < data.length; r++) {
+      var station = String(data[r][0]).trim();
+      var item = String(data[r][1]).trim();
+      var supplier = mapping[station + "|" + item] || "";
+      supplierValues.push([supplier]);
+    }
+    
+    sheet.getRange(3, 1, lastRow - 2, 1).setValues(supplierValues);
+    
+    // 5. Sort by Supplier (Col 1)
+    sheet.getRange(3, 1, lastRow - 2, sheet.getLastColumn()).sort(1);
+  }
+  
+  ui.alert("🎉 อัปเดตชีต Stock:Other และแทรกแหล่งซื้อเรียบร้อยแล้วครับ!");
 }
