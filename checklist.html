@@ -408,7 +408,7 @@
             let summaryMsg = `${selectedRound} (${selectedStation})\n`;
             let notDoneItems = dataToSave.filter(t => t.status === 'not_done');
             if (notDoneItems.length === 0) {
-                summaryMsg += `✅ เสร็จครบทุกรายการครับ`;
+                summaryMsg += `✅ เสร็จครบทุกรายการ`;
             } else {
                 summaryMsg += `❌ รายการที่ไม่เสร็จ:\n`;
                 notDoneItems.forEach((item, idx) => {
