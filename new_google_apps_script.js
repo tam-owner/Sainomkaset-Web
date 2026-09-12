@@ -1482,41 +1482,89 @@ function handleUpdateEditRequestStatus(id, newStatus) {
 // ----------------------------------------------------
 // Checklist Handlers
 // ----------------------------------------------------
+function handleGetChecklistSettings() {
+  var sheet = getSheetByNameOrCreateNew("Checklist: Manage");
+  var data = sheet.getDataRange().getValues();
+  
+  if (data.length <= 1) {
+    if (data.length === 0) {
+      sheet.appendRow(["รอบ", "Station", "Task"]);
+    }
+    // Add example data
+    var exampleData = [
+      ["เปิดร้าน", "Service", "เปิดแอร์และไฟหน้าร้าน"],
+      ["เปิดร้าน", "Service", "เช็ดโต๊ะเก้าอี้และจัดโซนที่นั่ง"],
+      ["เปิดร้าน", "Service", "เตรียมเครื่องPOSและเงินทอน"],
+      ["เปิดร้าน", "Drink", "เช็คสต็อกวัตถุดิบเครื่องดื่ม"],
+      ["เปิดร้าน", "Drink", "เปิดเครื่องชงกาแฟและเตรียมน้ำแข็ง"],
+      ["เปิดร้าน", "Bread", "อุ่นเตาปิ้งขนมปังและเตรียมเนย/นม"],
+      ["เปิดร้าน", "Bingsu", "เตรียมน้ำแข็งไสบิงซูและท็อปปิ้ง"],
+      ["รอบเย็น", "Service", "เก็บขยะรอบแรกและเช็ดโต๊ะ"],
+      ["ปิดร้าน", "Service", "ปิดแอร์ ไฟ และเก็บกวาดพื้น"],
+      ["ปิดร้าน", "Drink", "ล้างเครื่องชงกาแฟและเก็บวัตถุดิบ"],
+      ["ปิดร้าน", "Bread", "ทำความสะอาดเตาปิ้งขนมปัง"],
+      ["ปิดร้าน", "Hotmeal", "ล้างภาชนะและทำความสะอาดครัว"]
+    ];
+    sheet.getRange(2, 1, exampleData.length, 3).setValues(exampleData);
+    
+    // Re-fetch data
+    data = sheet.getDataRange().getValues();
+  }
+
+  var settings = [];
+  for (var i = 1; i < data.length; i++) {
+    var round = String(data[i][0] || "").trim();
+    var station = String(data[i][1] || "").trim();
+    var task = String(data[i][2] || "").trim();
+    if (round && station && task) {
+      settings.push({
+        round: round,
+        station: station,
+        task: task
+      });
+    }
+  }
+  return settings;
+}
+
 function handleSaveChecklist(p) {
   try {
     var lock = LockService.getScriptLock();
     lock.waitLock(10000);
 
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Checklist_Logs");
-    if (!sheet) {
-      sheet = SpreadsheetApp.getActiveSpreadsheet().insertSheet("Checklist_Logs");
-      sheet.appendRow(["Timestamp", "EmployeeName", "Category", "Period", "Task", "Status", "Reason"]);
+    var sheet = getSheetByNameOrCreateNew("Checklist: Response");
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow(["Timestamp", "ชื่อผู้ทำรายการ", "รอบ", "Station", "งาน", "สถานะ", "เหตุผล"]);
+      sheet.getRange(1, 1, 1, 7).setBackground("#f3f4f6").setFontWeight("bold");
+      sheet.setFrozenRows(1);
     }
 
-    var items = p.items || [];
+    var tasks = p.tasks || [];
     var dataRows = [];
 
-    for (var i = 0; i < items.length; i++) {
-      var item = items[i];
+    for (var i = 0; i < tasks.length; i++) {
+      var task = tasks[i];
+      var statusTH = task.status === 'done' ? 'เสร็จ' : 'ไม่เสร็จ';
       dataRows.push([
         p.timestamp,
-        p.employeeName,
-        p.category,
-        p.period,
-        item.task,
-        item.status,
-        item.reason || ""
+        p.counterName,
+        p.round,
+        p.station,
+        task.task,
+        statusTH,
+        task.reason || "-"
       ]);
     }
 
     if (dataRows.length > 0) {
-      sheet.getRange(sheet.getLastRow() + 1, 1, dataRows.length, dataRows[0].length).setValues(dataRows);
+      var startRow = sheet.getLastRow() === 0 ? 1 : sheet.getLastRow() + 1;
+      sheet.getRange(startRow, 1, dataRows.length, dataRows[0].length).setValues(dataRows);
     }
 
     lock.releaseLock();
-    return { status: "success", message: "Checklist saved successfully" };
-  } catch (error) {
-    return { status: "error", message: error.toString() };
+    return { status: "success", message: "Saved successfully" };
+  } catch (e) {
+    return { status: "error", message: e.toString() };
   }
 }
 
