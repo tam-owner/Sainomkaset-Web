@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sainom-v249';
+const CACHE_NAME = 'sainom-v250';
 const urlsToCache = [
   '/',
   '/index.html',
