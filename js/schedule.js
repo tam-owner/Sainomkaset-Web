@@ -2,7 +2,7 @@
 // API Layer: Handles communication with Google Apps Script
 // ==========================================
 
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwggevJQtkimKSpIqdbCFGkWrk5-J1qzimZRvDwPrfc_6L_vlCcROdQ2mPjc2QdXmc/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwE0t_AJwQwcokYcsAkgwmBWY6l84dCRWcSCXcRzB3YoiIIRwgl_GdFiBRnRr2PKwc/exec";
 
 function getEmployeeColor(name) {
     const PASTEL_COLORS = [
