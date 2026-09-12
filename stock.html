@@ -358,6 +358,7 @@
             const cached = localStorage.getItem('cachedStockSettings');
             if (cached) {
                 stockSettings = JSON.parse(cached);
+                hideLoading(); // <-- FIX: Hide loading if cached
                 // Fetch in background silently
                 fetch(WEB_APP_URL + "?action=getStockSettings")
                     .then(res => res.json())
