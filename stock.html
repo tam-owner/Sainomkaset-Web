@@ -530,6 +530,22 @@
                 return;
             }
 
+            const draftKey = selectedRound + '_' + selectedStation;
+            if (savedDrafts[draftKey]) {
+                const savedItems = savedDrafts[draftKey].items;
+                savedItems.forEach(savedItem => {
+                    if (savedItem.itemName && savedItem.itemName.includes('(เพิ่มนอกรายการ)')) {
+                        currentItems.push({
+                            itemName: savedItem.itemName.replace(' (เพิ่มนอกรายการ)', ''),
+                            unit: savedItem.unit || '',
+                            parLevel: 0,
+                            isCustom: true,
+                            station: selectedStation
+                        });
+                    }
+                });
+            }
+
             let currentGroup = '';
             currentItems.forEach((item, index) => {
                 if (selectedRound === 'รายการทั้งหมด') {
@@ -554,7 +570,8 @@
                 const draftKey = selectedRound + '_' + selectedStation;
                 let savedItem = null;
                 if (savedDrafts[draftKey]) {
-                    savedItem = savedDrafts[draftKey].items.find(i => i.itemName === item.itemName);
+                    let lookupName = item.isCustom ? item.itemName + ' (เพิ่มนอกรายการ)' : item.itemName;
+                    savedItem = savedDrafts[draftKey].items.find(i => i.itemName === lookupName);
                 }
                 
                 let defaultCount = savedItem ? savedItem.count : '';
@@ -565,37 +582,81 @@
                 let remarkValAttr = defaultRemark !== '' ? `value="${defaultRemark}"` : '';
                 let radioInContainer = defaultZeroStatus === 'in_container' ? 'checked' : '';
                 let radioEmpty = defaultZeroStatus === 'empty' ? 'checked' : '';
+                let zeroChoiceClass = defaultCount === 0 ? '' : 'hidden';
 
-                const html = `
-                    <div class="card p-4">
-                        <div class="flex justify-between items-start mb-3">
-                            <div class="font-bold text-indigo-900 text-lg">${item.itemName}${item.unit ? ` <span class="text-slate-500 font-medium text-sm whitespace-nowrap">(${item.unit})</span>` : ''}</div>
-                            <div class="text-xs text-slate-500 font-bold bg-slate-100 px-2 py-1 rounded-lg">ควรมี: <span class="text-indigo-600">${item.parLevel}</span></div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <input type="number" inputmode="decimal" step="any" id="count-${index}" ${countValAttr} class="w-full border border-slate-200 rounded-xl px-3 py-2.5 font-bold text-lg text-slate-800 placeholder:text-slate-300 placeholder:font-normal" placeholder="ยอดนับ">
-                        </div>
-                        
-                        <div id="zero-choice-${index}" class="hidden mb-3 p-3 bg-amber-50 rounded-xl border border-amber-200">
-                            <label class="block text-xs font-bold text-amber-800 mb-2">กรุณาระบุสถานะสินค้า:</label>
-                            <div class="flex gap-4">
-                                <label class="flex items-center gap-2 text-sm text-amber-900 cursor-pointer">
-                                    <input type="radio" name="zero-status-${index}" value="in_container" ${radioInContainer} onchange="checkRemarkRequirement(${index})" class="accent-amber-600"> ยังเหลือในภาชนะ
-                                </label>
-                                <label class="flex items-center gap-2 text-sm text-amber-900 cursor-pointer">
-                                    <input type="radio" name="zero-status-${index}" value="empty" ${radioEmpty} onchange="checkRemarkRequirement(${index})" class="accent-amber-600"> ไม่เหลือเลย
-                                </label>
+                if (item.isCustom) {
+                    const html = `
+                        <div class="card p-4 mb-4 border-dashed border-2 border-slate-300 bg-slate-50/50 relative" id="custom-card-${index}">
+                            <button onclick="removeCustomItem(${index})" class="absolute top-3 right-3 text-slate-400 hover:text-rose-500 transition-colors bg-white rounded-full p-1 shadow-sm border border-slate-200">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
+
+                            <div class="mb-3 pr-8 flex gap-2">
+                                <div class="flex-1">
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">ชื่อรายการ <span class="text-rose-500">*</span></label>
+                                    <input type="text" id="custom-name-${index}" value="${item.itemName}" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-indigo-900 font-bold" placeholder="เช่น น้ำตาลทราย" required>
+                                </div>
+                                <div class="w-1/3">
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">หน่วย</label>
+                                    <input type="text" id="custom-unit-${index}" value="${item.unit}" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-indigo-900 font-bold" placeholder="เช่น กก.">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <input type="number" inputmode="decimal" step="any" id="count-${index}" ${countValAttr} class="w-full border border-slate-200 rounded-xl px-3 py-2.5 font-bold text-lg text-slate-800 placeholder:text-slate-300 placeholder:font-normal" placeholder="ยอดนับ" required>
+                            </div>
+                            
+                            <div id="zero-choice-${index}" class="${zeroChoiceClass} mb-3 p-3 bg-amber-50 rounded-xl border border-amber-200">
+                                <label class="block text-xs font-bold text-amber-800 mb-2">กรุณาระบุสถานะสินค้า:</label>
+                                <div class="flex gap-4">
+                                    <label class="flex items-center gap-2 text-sm text-amber-900 cursor-pointer">
+                                        <input type="radio" name="zero-status-${index}" value="in_container" ${radioInContainer} onchange="checkRemarkRequirement(${index})" class="accent-amber-600"> ยังเหลือในภาชนะ
+                                    </label>
+                                    <label class="flex items-center gap-2 text-sm text-amber-900 cursor-pointer">
+                                        <input type="radio" name="zero-status-${index}" value="empty" ${radioEmpty} onchange="checkRemarkRequirement(${index})" class="accent-amber-600"> ไม่เหลือเลย
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">หมายเหตุ <span class="text-rose-500" id="req-${index}"></span></label>
+                                <input type="text" id="remark-${index}" ${remarkValAttr} class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-700 placeholder:text-slate-300 placeholder:font-normal" placeholder="กรอกหากมี">
                             </div>
                         </div>
+                    `;
+                    container.insertAdjacentHTML('beforeend', html);
+                } else {
+                    const html = `
+                        <div class="card p-4 mb-4">
+                            <div class="flex justify-between items-start mb-3">
+                                <div class="font-bold text-indigo-900 text-lg">${item.itemName}${item.unit ? ` <span class="text-slate-500 font-medium text-sm whitespace-nowrap">(${item.unit})</span>` : ''}</div>
+                                <div class="text-xs text-slate-500 font-bold bg-slate-100 px-2 py-1 rounded-lg">ควรมี: <span class="text-indigo-600">${item.parLevel}</span></div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <input type="number" inputmode="decimal" step="any" id="count-${index}" ${countValAttr} class="w-full border border-slate-200 rounded-xl px-3 py-2.5 font-bold text-lg text-slate-800 placeholder:text-slate-300 placeholder:font-normal" placeholder="ยอดนับ">
+                            </div>
+                            
+                            <div id="zero-choice-${index}" class="${zeroChoiceClass} mb-3 p-3 bg-amber-50 rounded-xl border border-amber-200">
+                                <label class="block text-xs font-bold text-amber-800 mb-2">กรุณาระบุสถานะสินค้า:</label>
+                                <div class="flex gap-4">
+                                    <label class="flex items-center gap-2 text-sm text-amber-900 cursor-pointer">
+                                        <input type="radio" name="zero-status-${index}" value="in_container" ${radioInContainer} onchange="checkRemarkRequirement(${index})" class="accent-amber-600"> ยังเหลือในภาชนะ
+                                    </label>
+                                    <label class="flex items-center gap-2 text-sm text-amber-900 cursor-pointer">
+                                        <input type="radio" name="zero-status-${index}" value="empty" ${radioEmpty} onchange="checkRemarkRequirement(${index})" class="accent-amber-600"> ไม่เหลือเลย
+                                    </label>
+                                </div>
+                            </div>
 
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1">หมายเหตุ <span class="text-rose-500" id="req-${index}"></span></label>
-                            <input type="text" id="remark-${index}" ${remarkValAttr} class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-700 placeholder:text-slate-300 placeholder:font-normal" placeholder="กรอกหากมี">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">หมายเหตุ <span class="text-rose-500" id="req-${index}"></span></label>
+                                <input type="text" id="remark-${index}" ${remarkValAttr} class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-700 placeholder:text-slate-300 placeholder:font-normal" placeholder="กรอกหากมี">
+                            </div>
                         </div>
-                    </div>
-                `;
-                container.insertAdjacentHTML('beforeend', html);
+                    `;
+                    container.insertAdjacentHTML('beforeend', html);
+                }
 
                 // Add listener to count input to toggle required star on remark
                 const countInput = document.getElementById(`count-${index}`);
@@ -636,9 +697,15 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                     </button>
 
-                    <div class="mb-3 pr-8">
-                        <label class="block text-xs font-bold text-slate-500 mb-1">ชื่อรายการ <span class="text-rose-500">*</span></label>
-                        <input type="text" id="custom-name-${index}" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-indigo-900 font-bold" placeholder="เช่น น้ำตาลทราย..." required>
+                    <div class="mb-3 pr-8 flex gap-2">
+                        <div class="flex-1">
+                            <label class="block text-xs font-bold text-slate-500 mb-1">ชื่อรายการ <span class="text-rose-500">*</span></label>
+                            <input type="text" id="custom-name-${index}" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-indigo-900 font-bold" placeholder="เช่น น้ำตาลทราย..." required>
+                        </div>
+                        <div class="w-1/3">
+                            <label class="block text-xs font-bold text-slate-500 mb-1">หน่วย</label>
+                            <input type="text" id="custom-unit-${index}" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-indigo-900 font-bold" placeholder="เช่น กก.">
+                        </div>
                     </div>
                     
                     <div class="mb-3">
@@ -735,12 +802,14 @@
 
                 if (item.isCustom) {
                     const customNameEl = document.getElementById(`custom-name-${i}`);
+                    const customUnitEl = document.getElementById(`custom-unit-${i}`);
                     if (!customNameEl || !customNameEl.value.trim()) {
                         Swal.fire('ข้อมูลไม่ครบ', `กรุณาระบุชื่อรายการที่เพิ่มเข้ามาใหม่`, 'warning');
                         hasError = true;
                         break;
                     }
                     itemName = customNameEl.value.trim() + " (เพิ่มนอกรายการ)";
+                    item.unit = customUnitEl ? customUnitEl.value.trim() : '';
                 }
 
                 const countInput = document.getElementById(`count-${i}`).value;
